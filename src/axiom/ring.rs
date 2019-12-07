@@ -2,9 +2,9 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Ring: AbelianGroup<Addition> + Semigroup<Multiplication>
+pub trait Ring<Add, Mul>: AbelianGroup<Add> + Semigroup<Mul> + Distributivity<Add, Mul>
 where
-    Addition: BinaryOperator<Self>,
-    Multiplication: BinaryOperator<Self>,
+    Add: BinaryOperator<Self>,
+    Mul: BinaryOperator<Self>,
 {
 }

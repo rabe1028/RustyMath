@@ -45,3 +45,16 @@ where
         T::operate(x, y) == T::operate(y, x)
     }
 }
+
+pub trait Distributivity<Add, Mul>
+where
+    Self: Sized + PartialEq + Copy,
+    Mul: BinaryOperator<Self>,
+    Add: BinaryOperator<Self>,
+{
+    fn check_commutativity(x: Self, y: Self, z: Self) -> bool {
+        Mul::operate(x, Add::operate(y, z)) == Add::operate(Mul::operate(x, y), Mul::operate(x, z))
+            && Mul::operate(Add::operate(x, y), z)
+                == Add::operate(Mul::operate(x, z), Mul::operate(y, z))
+    }
+}

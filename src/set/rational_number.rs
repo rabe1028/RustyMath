@@ -76,4 +76,13 @@ impl BinaryOperator<RationalNumber> for Multiplication {
     }
 }
 
-impl Ring for RationalNumber {}
+impl Totality<Multiplication> for RationalNumber {}
+impl Associativity<Multiplication> for RationalNumber {}
+
+impl Magma<Multiplication> for RationalNumber {}
+
+impl Semigroup<Multiplication> for RationalNumber {}
+
+impl Distributivity<Addition, Multiplication> for RationalNumber {}
+
+impl Ring<Addition, Multiplication> for RationalNumber {}

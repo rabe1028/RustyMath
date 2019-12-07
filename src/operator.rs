@@ -1,5 +1,3 @@
-//use std::marker::PhantomData;
-
 pub trait BinaryOperator<T>: Sized {
     fn operate(lhs: T, rhs: T) -> T;
 }
