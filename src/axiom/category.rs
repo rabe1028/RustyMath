@@ -7,3 +7,10 @@ where
     T: BinaryOperator<Self>,
 {
 }
+
+impl<Op, T> Category<Op> for T
+where
+    T: Semigroupoid<Op> + Identity<Op>,
+    Op: BinaryOperator<T>,
+{
+}

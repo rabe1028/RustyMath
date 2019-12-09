@@ -7,3 +7,10 @@ where
     T: BinaryOperator<Self>,
 {
 }
+
+impl<Op, T> Monoid<Op> for T
+where
+    T: Semigroup<Op> + Category<Op> + UnitalMagma<Op>,
+    Op: BinaryOperator<T>,
+{
+}

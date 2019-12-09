@@ -7,3 +7,10 @@ where
     T: BinaryOperator<Self>,
 {
 }
+
+impl<Op, T> Groupoid<Op> for T
+where
+    T: Category<Op> + Invertivility<Op>,
+    Op: BinaryOperator<T>,
+{
+}

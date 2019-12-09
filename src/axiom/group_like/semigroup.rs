@@ -7,3 +7,10 @@ where
     T: BinaryOperator<Self>,
 {
 }
+
+impl<Op, T> Semigroup<Op> for T
+where
+    T: Magma<Op> + Associativity<Op>,
+    Op: BinaryOperator<T>,
+{
+}

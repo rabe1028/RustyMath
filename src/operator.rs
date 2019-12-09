@@ -1,4 +1,5 @@
 pub trait BinaryOperator<T>: Sized {
+    #[inline(always)]
     fn operate(lhs: T, rhs: T) -> T;
 }
 

@@ -7,3 +7,10 @@ where
     T: BinaryOperator<Self>,
 {
 }
+
+impl<Op, T> InverseSemigroup<Op> for T
+where
+    T: Semigroup<Op> + QuasiGroup<Op>,
+    Op: BinaryOperator<T>,
+{
+}

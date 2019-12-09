@@ -7,3 +7,10 @@ where
     T: BinaryOperator<Self>,
 {
 }
+
+impl<Op, T> Group<Op> for T
+where
+    T: Loop<Op> + Monoid<Op> + InverseSemigroup<Op> + Groupoid<Op>,
+    Op: BinaryOperator<T>,
+{
+}

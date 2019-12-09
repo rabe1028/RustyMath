@@ -2,15 +2,15 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait AbelianGroup<T>: Group<T> + Commutativity<T>
+pub trait CommutativeMonoid<T>: Monoid<T> + Commutativity<T>
 where
     T: BinaryOperator<Self>,
 {
 }
 
-impl<Op, T> AbelianGroup<Op> for T
+impl<Op, T> CommutativeMonoid<Op> for T
 where
-    T: Group<Op> + Commutativity<Op>,
+    T: Monoid<Op> + Commutativity<Op>,
     Op: BinaryOperator<T>,
 {
 }

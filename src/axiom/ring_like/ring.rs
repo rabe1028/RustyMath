@@ -8,3 +8,11 @@ where
     Mul: BinaryOperator<Self>,
 {
 }
+
+impl<Add, Mul, T> Ring<Add, Mul> for T
+where
+    T: AbelianGroup<Add> + Semigroup<Mul> + Distributivity<Add, Mul>,
+    Add: BinaryOperator<T>,
+    Mul: BinaryOperator<T>,
+{
+}

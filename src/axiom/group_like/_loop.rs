@@ -7,3 +7,10 @@ where
     T: BinaryOperator<Self>,
 {
 }
+
+impl<Op, T> Loop<Op> for T
+where
+    T: QuasiGroup<Op> + Identity<Op>,
+    Op: BinaryOperator<T>,
+{
+}

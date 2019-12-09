@@ -11,12 +11,11 @@ where
     }
 }
 
-//pub trait Magma<T> = Totality<T> where T : binaryOperator;
-
-/*
-impl Magma<Addition> for isize {
-    fn operate(lhs: Self, rhs: Self) -> Self {
-        lhs + rhs
-    }
+impl<Op, T> Magma<Op> for T
+where
+    T: Totality<Op>,
+    Op: BinaryOperator<T>,
+{
 }
-*/
+
+//pub trait Magma<T> = Totality<T> where T : binaryOperator;

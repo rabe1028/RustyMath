@@ -49,23 +49,6 @@ impl Invertivility<Addition> for RationalNumber {
 
 impl Commutativity<Addition> for RationalNumber {}
 
-impl Magma<Addition> for RationalNumber {}
-impl Semigroupoid<Addition> for RationalNumber {}
-
-impl QuasiGroup<Addition> for RationalNumber {}
-impl Semigroup<Addition> for RationalNumber {}
-impl UnitalMagma<Addition> for RationalNumber {}
-impl Category<Addition> for RationalNumber {}
-
-impl Loop<Addition> for RationalNumber {}
-impl InverseSemigroup<Addition> for RationalNumber {}
-impl Monoid<Addition> for RationalNumber {}
-impl Groupoid<Addition> for RationalNumber {}
-
-impl Group<Addition> for RationalNumber {}
-
-impl AbelianGroup<Addition> for RationalNumber {}
-
 impl BinaryOperator<RationalNumber> for Multiplication {
     #[inline(always)]
     fn operate(lhs: RationalNumber, rhs: RationalNumber) -> RationalNumber {
@@ -79,10 +62,11 @@ impl BinaryOperator<RationalNumber> for Multiplication {
 impl Totality<Multiplication> for RationalNumber {}
 impl Associativity<Multiplication> for RationalNumber {}
 
-impl Magma<Multiplication> for RationalNumber {}
+impl RightDistributivity<Addition, Multiplication> for RationalNumber {}
+impl LeftDistributivity<Addition, Multiplication> for RationalNumber {}
+//impl Distributivity<Addition, Multiplication> for RationalNumber {}
 
-impl Semigroup<Multiplication> for RationalNumber {}
 
-impl Distributivity<Addition, Multiplication> for RationalNumber {}
+impl Commutativity<Multiplication> for RationalNumber {}
+impl Invertivility<Multiplication> for RationalNumber {}
 
-impl Ring<Addition, Multiplication> for RationalNumber {}
