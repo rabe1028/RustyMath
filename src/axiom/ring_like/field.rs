@@ -8,7 +8,7 @@ where
     Mul: BinaryOperator<Self>,
 {
     fn reciprocal(&self) -> Option<Self> {
-        if ( self.is_zero() ) {
+        if (self.is_zero()) {
             None
         } else {
             Some(<Self as Invertivility<Mul>>::inverse(self))

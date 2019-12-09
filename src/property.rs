@@ -93,3 +93,61 @@ where
     Mul: BinaryOperator<T>,
 {
 }
+
+pub trait Absorbency<Add, Mul>
+where
+    Self: Sized + PartialEq + Copy,
+    Add: BinaryOperator<Self>,
+    Mul: BinaryOperator<Self>,
+{
+    #[inline(always)]
+    fn check_absorbency(x: Self, y: Self) -> bool {
+        Mul::operate(x, Add::operate(x, y)) == x && Add::operate(x, Mul::operate(x, y)) == x
+    }
+}
+
+pub trait Divisibility<Add, Mul>
+where
+    Self: Sized + PartialEq + Copy,
+    Add: BinaryOperator<Self>,
+    Mul: BinaryOperator<Self>,
+{
+}
+
+pub trait LeftCancellative<T>
+where
+    Self: Sized,
+    T: BinaryOperator<Self>,
+{
+}
+pub trait RightCancellative<T>
+where
+    Self: Sized,
+    T: BinaryOperator<Self>,
+{
+}
+pub trait Cancellative<T>: LeftCancellative<T> + RightCancellative<T>
+where
+    Self: Sized,
+    T: BinaryOperator<Self>,
+{
+}
+
+impl<Op, T> Cancellative<Op> for T
+where
+    T: LeftCancellative<Op> + RightCancellative<Op>,
+    Op: BinaryOperator<T>,
+{
+}
+
+pub trait Mediality<T>
+where
+    Self: Sized + PartialEq + Copy,
+    T: BinaryOperator<Self>,
+{
+    #[inline(always)]
+    fn check_mediality(a: Self, b: Self, c: Self, d: Self) -> bool {
+        T::operate(T::operate(a, b), T::operate(c, d))
+            == T::operate(T::operate(a, c), T::operate(b, d))
+    }
+}
