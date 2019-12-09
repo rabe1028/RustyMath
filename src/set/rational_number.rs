@@ -2,14 +2,14 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy)]
 struct RationalNumber {
     p: isize,
     q: isize,
 }
 
 impl RationalNumber {
-    fn new(p: isize, q: isize) -> Option<Self> {
+    pub fn new(p: isize, q: isize) -> Option<Self> {
         if q == 0 {
             None
         } else {
@@ -18,12 +18,18 @@ impl RationalNumber {
     }
 }
 
+impl PartialEq for RationalNumber {
+    fn eq(&self, other: &Self) -> bool {
+        self.p * other.q == self.q * other.p
+    }
+}
+
 impl BinaryOperator<RationalNumber> for Addition {
     #[inline(always)]
     fn operate(lhs: RationalNumber, rhs: RationalNumber) -> RationalNumber {
         RationalNumber {
-            p: lhs.p + rhs.p,
-            q: lhs.q + rhs.q,
+            p: lhs.p * rhs.q + rhs.p * lhs.q,
+            q: lhs.q * rhs.q,
         }
     }
 }
@@ -53,8 +59,8 @@ impl BinaryOperator<RationalNumber> for Multiplication {
     #[inline(always)]
     fn operate(lhs: RationalNumber, rhs: RationalNumber) -> RationalNumber {
         RationalNumber {
-            p: lhs.p + rhs.p,
-            q: lhs.q + rhs.q,
+            p: lhs.p * rhs.p,
+            q: lhs.q * rhs.q,
         }
     }
 }
@@ -66,7 +72,20 @@ impl RightDistributivity<Addition, Multiplication> for RationalNumber {}
 impl LeftDistributivity<Addition, Multiplication> for RationalNumber {}
 //impl Distributivity<Addition, Multiplication> for RationalNumber {}
 
-
 impl Commutativity<Multiplication> for RationalNumber {}
-impl Invertivility<Multiplication> for RationalNumber {}
+impl Invertivility<Multiplication> for RationalNumber {
+    #[inline(always)]
+    fn inverse(&self) -> Self {
+        RationalNumber {
+            p: self.q,
+            q: self.p,
+        }
+    }
+}
 
+impl Identity<Multiplication> for RationalNumber {
+    #[inline(always)]
+    fn identity() -> Self {
+        RationalNumber { p: 1, q: 1 }
+    }
+}
