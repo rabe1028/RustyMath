@@ -4,13 +4,13 @@ use crate::property::*;
 
 pub trait Monoid<T>: Semigroup<T> + Category<T> + UnitalMagma<T>
 where
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
 
 impl<Op, T> Monoid<Op> for T
 where
     T: Semigroup<Op> + Category<Op> + UnitalMagma<Op>,
-    Op: BinaryOperator<T>,
+    Op: InternalBinaryOperator<T>,
 {
 }

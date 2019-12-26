@@ -4,17 +4,17 @@ use crate::property::*;
 
 pub trait Magma<T>: Totality<T>
 where
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
     fn operate(lhs: Self, rhs: Self) -> Self {
-        <T as BinaryOperator<Self>>::operate(lhs, rhs)
+        <T as InternalBinaryOperator<Self>>::operate(lhs, rhs)
     }
 }
 
 impl<Op, T> Magma<Op> for T
 where
     T: Totality<Op>,
-    Op: BinaryOperator<T>,
+    Op: InternalBinaryOperator<T>,
 {
 }
 

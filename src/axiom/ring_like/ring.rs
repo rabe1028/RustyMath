@@ -4,15 +4,15 @@ use crate::property::*;
 
 pub trait Ring<Add, Mul>: AbelianGroup<Add> + Semigroup<Mul> + Distributivity<Add, Mul>
 where
-    Add: BinaryOperator<Self>,
-    Mul: BinaryOperator<Self>,
+    Add: InternalBinaryOperator<Self>,
+    Mul: InternalBinaryOperator<Self>,
 {
 }
 
 impl<Add, Mul, T> Ring<Add, Mul> for T
 where
     T: AbelianGroup<Add> + Semigroup<Mul> + Distributivity<Add, Mul>,
-    Add: BinaryOperator<T>,
-    Mul: BinaryOperator<T>,
+    Add: InternalBinaryOperator<T>,
+    Mul: InternalBinaryOperator<T>,
 {
 }

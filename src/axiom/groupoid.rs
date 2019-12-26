@@ -4,13 +4,13 @@ use crate::property::*;
 
 pub trait Groupoid<T>: Category<T> + Invertivility<T>
 where
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
 
 impl<Op, T> Groupoid<Op> for T
 where
     T: Category<Op> + Invertivility<Op>,
-    Op: BinaryOperator<T>,
+    Op: InternalBinaryOperator<T>,
 {
 }

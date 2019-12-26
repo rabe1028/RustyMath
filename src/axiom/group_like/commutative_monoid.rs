@@ -4,13 +4,13 @@ use crate::property::*;
 
 pub trait CommutativeMonoid<T>: Monoid<T> + Commutativity<T>
 where
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
 
 impl<Op, T> CommutativeMonoid<Op> for T
 where
     T: Monoid<Op> + Commutativity<Op>,
-    Op: BinaryOperator<T>,
+    Op: InternalBinaryOperator<T>,
 {
 }

@@ -4,13 +4,13 @@ use crate::property::*;
 
 pub trait AbelianGroup<T>: Group<T> + Commutativity<T>
 where
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
 
 impl<Op, T> AbelianGroup<Op> for T
 where
     T: Group<Op> + Commutativity<Op>,
-    Op: BinaryOperator<T>,
+    Op: InternalBinaryOperator<T>,
 {
 }

@@ -4,13 +4,13 @@ use crate::property::*;
 
 pub trait InverseSemigroup<T>: Semigroup<T> + QuasiGroup<T>
 where
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
 
 impl<Op, T> InverseSemigroup<Op> for T
 where
     T: Semigroup<Op> + QuasiGroup<Op>,
-    Op: BinaryOperator<T>,
+    Op: InternalBinaryOperator<T>,
 {
 }

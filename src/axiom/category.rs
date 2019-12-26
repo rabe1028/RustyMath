@@ -4,13 +4,13 @@ use crate::property::*;
 
 pub trait Category<T>: Semigroupoid<T> + Identity<T>
 where
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
 
 impl<Op, T> Category<Op> for T
 where
     T: Semigroupoid<Op> + Identity<Op>,
-    Op: BinaryOperator<T>,
+    Op: InternalBinaryOperator<T>,
 {
 }

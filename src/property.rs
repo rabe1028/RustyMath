@@ -3,22 +3,30 @@ use crate::operator::*;
 pub trait Totality<T>
 where
     Self: Sized,
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
+
 pub trait Associativity<T>
 where
     Self: Sized + PartialEq + Copy,
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
     fn check_associativity(x: Self, y: Self, z: Self) -> bool {
-        T::operate(x, T::operate(y, z)) == T::operate(T::operate(x, y), z)
+        <T as InternalBinaryOperator<Self>>::operate(
+            x,
+            <T as InternalBinaryOperator<Self>>::operate(y, z),
+        ) == <T as InternalBinaryOperator<Self>>::operate(
+            <T as InternalBinaryOperator<Self>>::operate(x, y),
+            z,
+        )
     }
 }
+
 pub trait Identity<T>
 where
     Self: Sized + PartialEq + Copy,
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
     fn identity() -> Self;
@@ -28,48 +36,62 @@ where
     }
     #[inline(always)]
     fn check_identity(x: Self) -> bool {
-        (T::operate(x, Self::identity()) == x) && (T::operate(Self::identity(), x) == x)
+        (<T as InternalBinaryOperator<Self>>::operate(x, Self::identity()) == x)
+            && (<T as InternalBinaryOperator<Self>>::operate(Self::identity(), x) == x)
     }
 }
 pub trait Invertivility<T>
 where
     Self: Sized,
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
     fn inverse(&self) -> Self;
 }
 pub trait Commutativity<T>
 where
     Self: Sized + PartialEq + Copy,
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
     fn check_commutativity(x: Self, y: Self) -> bool {
-        T::operate(x, y) == T::operate(y, x)
+        <T as InternalBinaryOperator<Self>>::operate(x, y)
+            == <T as InternalBinaryOperator<Self>>::operate(y, x)
     }
 }
 
 pub trait RightDistributivity<Add, Mul>
 where
     Self: Sized + PartialEq + Copy,
-    Mul: BinaryOperator<Self>,
-    Add: BinaryOperator<Self>,
+    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
     fn check_right_distributivity(x: Self, y: Self, z: Self) -> bool {
-        Mul::operate(Add::operate(x, y), z) == Add::operate(Mul::operate(x, z), Mul::operate(y, z))
+        <Mul as InternalBinaryOperator<Self>>::operate(
+            <Add as InternalBinaryOperator<Self>>::operate(x, y),
+            z,
+        ) == <Add as InternalBinaryOperator<Self>>::operate(
+            <Mul as InternalBinaryOperator<Self>>::operate(x, z),
+            <Mul as InternalBinaryOperator<Self>>::operate(y, z),
+        )
     }
 }
 
 pub trait LeftDistributivity<Add, Mul>
 where
     Self: Sized + PartialEq + Copy,
-    Mul: BinaryOperator<Self>,
-    Add: BinaryOperator<Self>,
+    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
     fn check_left_distributivity(x: Self, y: Self, z: Self) -> bool {
-        Mul::operate(x, Add::operate(y, z)) == Add::operate(Mul::operate(x, y), Mul::operate(x, z))
+        <Mul as InternalBinaryOperator<Self>>::operate(
+            x,
+            <Add as InternalBinaryOperator<Self>>::operate(y, z),
+        ) == <Add as InternalBinaryOperator<Self>>::operate(
+            <Mul as InternalBinaryOperator<Self>>::operate(x, y),
+            <Mul as InternalBinaryOperator<Self>>::operate(x, z),
+        )
     }
 }
 
@@ -77,8 +99,8 @@ pub trait Distributivity<Add, Mul>:
     RightDistributivity<Add, Mul> + LeftDistributivity<Add, Mul>
 where
     Self: Sized + PartialEq + Copy,
-    Mul: BinaryOperator<Self>,
-    Add: BinaryOperator<Self>,
+    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
     fn check_distributivity(x: Self, y: Self, z: Self) -> bool {
@@ -89,65 +111,77 @@ where
 impl<T, Add, Mul> Distributivity<Add, Mul> for T
 where
     T: LeftDistributivity<Add, Mul> + RightDistributivity<Add, Mul>,
-    Add: BinaryOperator<T>,
-    Mul: BinaryOperator<T>,
+    Add: InternalBinaryOperator<T>,
+    Mul: InternalBinaryOperator<T>,
 {
 }
 
 pub trait Absorbency<Add, Mul>
 where
     Self: Sized + PartialEq + Copy,
-    Add: BinaryOperator<Self>,
-    Mul: BinaryOperator<Self>,
+    Add: InternalBinaryOperator<Self>,
+    Mul: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
     fn check_absorbency(x: Self, y: Self) -> bool {
-        Mul::operate(x, Add::operate(x, y)) == x && Add::operate(x, Mul::operate(x, y)) == x
+        <Mul as InternalBinaryOperator<Self>>::operate(
+            x,
+            <Add as InternalBinaryOperator<Self>>::operate(x, y),
+        ) == x
+            && <Add as InternalBinaryOperator<Self>>::operate(
+                x,
+                <Mul as InternalBinaryOperator<Self>>::operate(x, y),
+            ) == x
     }
 }
 
 pub trait Divisibility<Add, Mul>
 where
     Self: Sized + PartialEq + Copy,
-    Add: BinaryOperator<Self>,
-    Mul: BinaryOperator<Self>,
+    Add: InternalBinaryOperator<Self>,
+    Mul: InternalBinaryOperator<Self>,
 {
 }
 
 pub trait LeftCancellative<T>
 where
     Self: Sized,
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
 pub trait RightCancellative<T>
 where
     Self: Sized,
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
 pub trait Cancellative<T>: LeftCancellative<T> + RightCancellative<T>
 where
     Self: Sized,
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
 
 impl<Op, T> Cancellative<Op> for T
 where
     T: LeftCancellative<Op> + RightCancellative<Op>,
-    Op: BinaryOperator<T>,
+    Op: InternalBinaryOperator<T>,
 {
 }
 
 pub trait Mediality<T>
 where
     Self: Sized + PartialEq + Copy,
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
     fn check_mediality(a: Self, b: Self, c: Self, d: Self) -> bool {
-        T::operate(T::operate(a, b), T::operate(c, d))
-            == T::operate(T::operate(a, c), T::operate(b, d))
+        <T as InternalBinaryOperator<Self>>::operate(
+            <T as InternalBinaryOperator<Self>>::operate(a, b),
+            <T as InternalBinaryOperator<Self>>::operate(c, d),
+        ) == <T as InternalBinaryOperator<Self>>::operate(
+            <T as InternalBinaryOperator<Self>>::operate(a, c),
+            <T as InternalBinaryOperator<Self>>::operate(b, d),
+        )
     }
 }

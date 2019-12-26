@@ -24,7 +24,7 @@ impl PartialEq for RationalNumber {
     }
 }
 
-impl BinaryOperator<RationalNumber> for Addition {
+impl BinaryOperator<RationalNumber, RationalNumber, RationalNumber> for Addition {
     #[inline(always)]
     fn operate(lhs: RationalNumber, rhs: RationalNumber) -> RationalNumber {
         RationalNumber {
@@ -33,6 +33,8 @@ impl BinaryOperator<RationalNumber> for Addition {
         }
     }
 }
+
+impl InternalBinaryOperator<RationalNumber> for Addition {}
 
 impl Totality<Addition> for RationalNumber {}
 impl Associativity<Addition> for RationalNumber {}
@@ -55,7 +57,7 @@ impl Invertivility<Addition> for RationalNumber {
 
 impl Commutativity<Addition> for RationalNumber {}
 
-impl BinaryOperator<RationalNumber> for Multiplication {
+impl BinaryOperator<RationalNumber, RationalNumber, RationalNumber> for Multiplication {
     #[inline(always)]
     fn operate(lhs: RationalNumber, rhs: RationalNumber) -> RationalNumber {
         RationalNumber {
@@ -64,6 +66,8 @@ impl BinaryOperator<RationalNumber> for Multiplication {
         }
     }
 }
+
+impl InternalBinaryOperator<RationalNumber> for Multiplication {}
 
 impl Totality<Multiplication> for RationalNumber {}
 impl Associativity<Multiplication> for RationalNumber {}

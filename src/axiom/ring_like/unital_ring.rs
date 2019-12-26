@@ -4,8 +4,8 @@ use crate::property::*;
 
 pub trait UnitalRing<Add, Mul>: Ring<Add, Mul> + Monoid<Mul>
 where
-    Add: BinaryOperator<Self>,
-    Mul: BinaryOperator<Self>,
+    Add: InternalBinaryOperator<Self>,
+    Mul: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
     fn one() -> Self {
@@ -31,7 +31,7 @@ where
 impl<Add, Mul, T> UnitalRing<Add, Mul> for T
 where
     T: Ring<Add, Mul> + Monoid<Mul>,
-    Add: BinaryOperator<T>,
-    Mul: BinaryOperator<T>,
+    Add: InternalBinaryOperator<T>,
+    Mul: InternalBinaryOperator<T>,
 {
 }

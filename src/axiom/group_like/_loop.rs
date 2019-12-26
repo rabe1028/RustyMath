@@ -4,13 +4,13 @@ use crate::property::*;
 
 pub trait Loop<T>: QuasiGroup<T> + Identity<T>
 where
-    T: BinaryOperator<Self>,
+    T: InternalBinaryOperator<Self>,
 {
 }
 
 impl<Op, T> Loop<Op> for T
 where
     T: QuasiGroup<Op> + Identity<Op>,
-    Op: BinaryOperator<T>,
+    Op: InternalBinaryOperator<T>,
 {
 }
