@@ -1,6 +1,6 @@
 use crate::axiom::*;
 use crate::operator::*;
-use crate::property::*;
+
 
 pub trait IntegralDomain<Add, Mul>: CommutativeRing<Add, Mul>
 where
