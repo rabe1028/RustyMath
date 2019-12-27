@@ -1,7 +1,6 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-
 pub trait IntegralDomain<Add, Mul>: CommutativeRing<Add, Mul>
 where
     Add: InternalBinaryOperator<Self>,

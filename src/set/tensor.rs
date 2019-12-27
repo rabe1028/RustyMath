@@ -1,4 +1,3 @@
-
 use crate::operator::*;
 use crate::property::*;
 
@@ -114,29 +113,31 @@ where
 {
 }
 
-
-
-
 /*
 Test Array Struct Implementation
 */
 
+#[derive(Debug, Clone, PartialEq)]
 struct BasicArray<ElementType, Shape> {
     _inner: Vec<ElementType>,
     _phantom: PhantomData<Shape>,
 }
 
-impl<ElementType,Shape> BasicArray<ElementType, Shape> 
-where Shape: HList + IndexShape
+impl<ElementType, Shape> BasicArray<ElementType, Shape>
+where
+    Shape: HList + IndexShape,
 {
     pub fn from_vec(vec: Vec<ElementType>) -> Self {
         assert!(vec.len() == Shape::get_capacity());
-        BasicArray { _inner: vec, _phantom: PhantomData}
+        BasicArray {
+            _inner: vec,
+            _phantom: PhantomData,
+        }
     }
     /*
     pub fn zeros<I: Into<Shape>>(_: I) -> Self {
         // Addition Zero Element
-        BasicArray { 
+        BasicArray {
             _inner: vec![0; Shape::get_capacity()],
             _phantom: PhantomData,
         }
@@ -182,8 +183,9 @@ impl<ElementType, Shape>
     > for Addition
 where
     ElementType: std::ops::Add,
-    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
+
     Shape: HList,
+    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
     #[inline(always)]
     fn operate(
@@ -201,4 +203,28 @@ where
             _phantom: PhantomData,
         }
     }
+}
+
+impl<ElementType, Shape> InternalBinaryOperator<BasicArray<ElementType, Shape>> for Addition
+where
+    ElementType: std::ops::Add,
+    Shape: HList,
+    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
+{
+}
+
+impl<ElementType, Shape> Totality<Addition> for BasicArray<ElementType, Shape>
+where
+    ElementType: std::ops::Add,
+    Shape: HList,
+    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
+{
+}
+
+impl<ElementType, Shape> Associativity<Addition> for BasicArray<ElementType, Shape>
+where
+    ElementType: std::ops::Add,
+    Shape: HList,
+    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
+{
 }

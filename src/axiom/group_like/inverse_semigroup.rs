@@ -1,7 +1,6 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-
 pub trait InverseSemigroup<T>: Semigroup<T> + QuasiGroup<T>
 where
     T: InternalBinaryOperator<Self>,

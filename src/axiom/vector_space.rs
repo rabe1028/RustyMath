@@ -1,7 +1,6 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-
 /*
 pub trait VectorSpace<Add, Mul>: Module<Add, Mul>
 where

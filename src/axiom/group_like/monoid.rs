@@ -1,7 +1,6 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-
 pub trait Monoid<T>: Semigroup<T> + Category<T> + UnitalMagma<T>
 where
     T: InternalBinaryOperator<Self>,

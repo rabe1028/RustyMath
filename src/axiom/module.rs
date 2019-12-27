@@ -1,7 +1,6 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-
 /*
 pub trait Module<Add, Mul>: AbelianGroup<Add>
 where

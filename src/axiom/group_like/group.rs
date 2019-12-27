@@ -1,7 +1,6 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-
 pub trait Group<T>: Loop<T> + Monoid<T> + InverseSemigroup<T> + Groupoid<T>
 where
     T: InternalBinaryOperator<Self>,
