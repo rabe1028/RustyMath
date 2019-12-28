@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::operator::*;
 use crate::property::*;
 
@@ -25,7 +27,12 @@ impl PartialEq for RationalNumber {
 
 impl BinaryOperator<RationalNumber, RationalNumber, RationalNumber> for Addition {
     #[inline(always)]
-    fn operate(lhs: &RationalNumber, rhs: &RationalNumber) -> RationalNumber {
+    fn operate<'a, 'b>(
+        lhs: impl Into<Cow<'a, RationalNumber>>,
+        rhs: impl Into<Cow<'b, RationalNumber>>,
+    ) -> RationalNumber {
+        let lhs = lhs.into();
+        let rhs = rhs.into();
         RationalNumber {
             p: lhs.p * rhs.q + rhs.p * lhs.q,
             q: lhs.q * rhs.q,
@@ -58,7 +65,13 @@ impl Commutativity<Addition> for RationalNumber {}
 
 impl BinaryOperator<RationalNumber, RationalNumber, RationalNumber> for Multiplication {
     #[inline(always)]
-    fn operate(lhs: &RationalNumber, rhs: &RationalNumber) -> RationalNumber {
+    fn operate<'a, 'b>(
+        lhs: impl Into<Cow<'a, RationalNumber>>,
+        rhs: impl Into<Cow<'b, RationalNumber>>,
+    ) -> RationalNumber {
+        let lhs = lhs.into();
+        let rhs = rhs.into();
+
         RationalNumber {
             p: lhs.p * rhs.p,
             q: lhs.q * rhs.q,

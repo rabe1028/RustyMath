@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::operator::*;
 
 pub trait Totality<T>
@@ -12,12 +14,22 @@ where
     Self: Sized + PartialEq + Clone,
     T: InternalBinaryOperator<Self>,
 {
-    fn check_associativity(x: &Self, y: &Self, z: &Self) -> bool {
+    fn check_associativity<'a, 'b, 'c, 'd: 'a + 'b + 'c, L, M, N>(x: L, y: M, z: N) -> bool
+    where
+        Self: 'd,
+        L: Into<Cow<'a, Self>>,
+        M: Into<Cow<'b, Self>>,
+        N: Into<Cow<'c, Self>>,
+    {
+        let x = x.into();
+        let y = y.into();
+        let z = z.into();
+
         <T as InternalBinaryOperator<Self>>::operate(
-            x,
-            &<T as InternalBinaryOperator<Self>>::operate(y, z),
+            x.clone(),
+            Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(y.clone(), z.clone())),
         ) == <T as InternalBinaryOperator<Self>>::operate(
-            &<T as InternalBinaryOperator<Self>>::operate(x, y),
+            Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(x, y)),
             z,
         )
     }
@@ -35,9 +47,15 @@ where
         *self == Self::identity()
     }
     #[inline(always)]
-    fn check_identity(x: &Self) -> bool {
-        (<T as InternalBinaryOperator<Self>>::operate(x, &Self::identity()) == *x)
-            && (<T as InternalBinaryOperator<Self>>::operate(&Self::identity(), x) == *x)
+    fn check_identity<'a, 'b: 'a>(x: impl Into<Cow<'a, Self>>) -> bool
+    where
+        Self: 'b,
+    {
+        let x = x.into();
+        let id : Cow<'_, Self>= Cow::Owned(Self::identity());
+        let left: Cow<'a, Self> = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(x.clone(), id.clone()));
+        let right: Cow<'a, Self> = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(id.clone(), x.clone()));
+        (left == x) && (right == x)
     }
 }
 pub trait Invertivility<T>
@@ -53,8 +71,16 @@ where
     T: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
-    fn check_commutativity(x: &Self, y: &Self) -> bool {
-        <T as InternalBinaryOperator<Self>>::operate(x, y)
+    fn check_commutativity<'a, 'b, 'c: 'a + 'b>(
+        x: impl Into<Cow<'a, Self>>,
+        y: impl Into<Cow<'b, Self>>,
+    ) -> bool
+    where
+        Self: 'c,
+    {
+        let x = x.into();
+        let y = y.into();
+        <T as InternalBinaryOperator<Self>>::operate(x.clone(), y.clone())
             == <T as InternalBinaryOperator<Self>>::operate(y, x)
     }
 }
@@ -66,13 +92,23 @@ where
     Add: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
-    fn check_right_distributivity(x: &Self, y: &Self, z: &Self) -> bool {
+    fn check_right_distributivity<'a, 'b, 'c, 'd: 'a + 'b + 'c, L, M, N>(x: L, y: M, z: N) -> bool
+    where
+        Self: 'd,
+        L: Into<Cow<'a, Self>>,
+        M: Into<Cow<'b, Self>>,
+        N: Into<Cow<'c, Self>>,
+    {
+        let x = x.into();
+        let y = y.into();
+        let z = z.into();
+
         <Mul as InternalBinaryOperator<Self>>::operate(
-            &<Add as InternalBinaryOperator<Self>>::operate(x, y),
-            z,
+            Cow::Owned(<Add as InternalBinaryOperator<Self>>::operate(x.clone(), y.clone())),
+            z.clone(),
         ) == <Add as InternalBinaryOperator<Self>>::operate(
-            &<Mul as InternalBinaryOperator<Self>>::operate(x, z),
-            &<Mul as InternalBinaryOperator<Self>>::operate(y, z),
+            Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(x.clone(), z.clone())),
+            Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(y.clone(), z.clone())),
         )
     }
 }
@@ -84,13 +120,23 @@ where
     Add: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
-    fn check_left_distributivity(x: &Self, y: &Self, z: &Self) -> bool {
+    fn check_left_distributivity<'a, 'b, 'c, 'd: 'a + 'b + 'c, L, M, N>(x: L, y: M, z: N) -> bool
+    where
+        Self: 'd,
+        L: Into<Cow<'a, Self>>,
+        M: Into<Cow<'b, Self>>,
+        N: Into<Cow<'c, Self>>,
+    {
+        let x = x.into();
+        let y = y.into();
+        let z = z.into();
+
         <Mul as InternalBinaryOperator<Self>>::operate(
-            x,
-            &<Add as InternalBinaryOperator<Self>>::operate(y, z),
+            x.clone(),
+            Cow::Owned(<Add as InternalBinaryOperator<Self>>::operate(y.clone(), z.clone())),
         ) == <Add as InternalBinaryOperator<Self>>::operate(
-            &<Mul as InternalBinaryOperator<Self>>::operate(x, y),
-            &<Mul as InternalBinaryOperator<Self>>::operate(x, z),
+            Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(x.clone(), y)),
+            Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(x.clone(), z)),
         )
     }
 }
@@ -103,8 +149,17 @@ where
     Add: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
-    fn check_distributivity(x: &Self, y: &Self, z: &Self) -> bool {
-        Self::check_left_distributivity(x, y, z) && Self::check_right_distributivity(x, y, z)
+    fn check_distributivity<'a, 'b, 'c, 'd: 'a + 'b + 'c, L, M, N>(x: L, y: M, z: N) -> bool
+    where
+        Self: 'd,
+        L: Into<Cow<'a, Self>>,
+        M: Into<Cow<'b, Self>>,
+        N: Into<Cow<'c, Self>>,
+    {
+        let x = x.into();
+        let y = y.into();
+        let z = z.into();
+        Self::check_left_distributivity(x.clone(), y.clone(), z.clone()) && Self::check_right_distributivity(x, y, z)
     }
 }
 
@@ -123,15 +178,33 @@ where
     Mul: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
-    fn check_absorbency(x: &Self, y: &Self) -> bool {
-        <Mul as InternalBinaryOperator<Self>>::operate(
-            x,
-            &<Add as InternalBinaryOperator<Self>>::operate(x, y),
-        ) == *x
-            && <Add as InternalBinaryOperator<Self>>::operate(
-                x,
-                &<Mul as InternalBinaryOperator<Self>>::operate(x, y),
-            ) == *x
+    fn check_absorbency<'a, 'b, 'c: 'a + 'b>(
+        x: impl Into<Cow<'a, Self>>,
+        y: impl Into<Cow<'b, Self>>,
+    ) -> bool
+    where
+        Self: 'c,
+    {
+        let x = x.into();
+        let y = y.into();
+
+        let add_xy = Cow::Owned(<Add as InternalBinaryOperator<Self>>::operate(
+            x.clone(),
+            y.clone(),
+        ));
+        let mul_xy = Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(
+            x.clone(),
+            y.clone(),
+        ));
+
+        Cow::Borrowed(&<Mul as InternalBinaryOperator<Self>>::operate(
+            x.clone(),
+            add_xy,
+        )) == x
+            && Cow::Borrowed(&<Add as InternalBinaryOperator<Self>>::operate(
+                x.clone(),
+                mul_xy,
+            )) == x
     }
 }
 
@@ -175,13 +248,30 @@ where
     T: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
-    fn check_mediality(a: &Self, b: &Self, c: &Self, d: &Self) -> bool {
-        <T as InternalBinaryOperator<Self>>::operate(
-            &<T as InternalBinaryOperator<Self>>::operate(a, b),
-            &<T as InternalBinaryOperator<Self>>::operate(c, d),
-        ) == <T as InternalBinaryOperator<Self>>::operate(
-            &<T as InternalBinaryOperator<Self>>::operate(a, c),
-            &<T as InternalBinaryOperator<Self>>::operate(b, d),
-        )
+    fn check_mediality<'a, 'b, 'c, 'd, 'long: 'a + 'b + 'c + 'd, A, B, C, D>(
+        a: A,
+        b: B,
+        c: C,
+        d: D,
+    ) -> bool
+    where
+        Self: 'long,
+        A: Into<Cow<'a, Self>>,
+        B: Into<Cow<'b, Self>>,
+        C: Into<Cow<'c, Self>>,
+        D: Into<Cow<'d, Self>>,
+    {
+        let a = a.into();
+        let b = b.into();
+        let c = c.into();
+        let d = d.into();
+
+        let ab = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(a.clone(), b.clone()));
+        let cd = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(c.clone(), d.clone()));
+        let ac = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(a, c));
+        let bd = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(b, d));
+
+        <T as InternalBinaryOperator<Self>>::operate(ab, cd)
+            == <T as InternalBinaryOperator<Self>>::operate(ac, bd)
     }
 }

@@ -4,6 +4,8 @@ use crate::property::*;
 use std::marker::PhantomData;
 use std::ops::Add;
 
+use std::borrow::Cow;
+
 use frunk::hlist::HList;
 use frunk::*; //{HCons, HNil};
 use typenum::uint::Unsigned;
@@ -183,15 +185,21 @@ impl<ElementType, Shape>
     > for Addition
 where
     BasicArray<ElementType, Shape>: Clone,
-    ElementType: std::ops::Add<Output=ElementType>,
+    ElementType: std::ops::Add<Output = ElementType> + Copy,
     Shape: HList,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
     #[inline(always)]
-    fn operate(
-        lhs: &BasicArray<ElementType, Shape>,
-        rhs: &BasicArray<ElementType, Shape>,
-    ) -> BasicArray<ElementType, Shape> {
+    fn operate<'a, 'b>(
+        lhs: impl Into<Cow<'a, BasicArray<ElementType, Shape>>>,
+        rhs: impl Into<Cow<'b, BasicArray<ElementType, Shape>>>,
+    ) -> BasicArray<ElementType, Shape>
+    where
+        BasicArray<ElementType, Shape>: 'a + 'b,
+    {
+        let lhs = lhs.into();
+        let rhs = rhs.into();
+
         let mut new_vec: Vec<ElementType> = vec![];
         for i in 0..lhs._inner.len() {
             new_vec.push(lhs._inner[i] + rhs._inner[i]);
@@ -206,7 +214,7 @@ where
 impl<ElementType, Shape> InternalBinaryOperator<BasicArray<ElementType, Shape>> for Addition
 where
     BasicArray<ElementType, Shape>: Clone,
-    ElementType: std::ops::Add<Output=ElementType>,
+    ElementType: std::ops::Add<Output = ElementType> + Copy,
     Shape: HList,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
@@ -215,7 +223,7 @@ where
 impl<ElementType, Shape> Totality<Addition> for BasicArray<ElementType, Shape>
 where
     BasicArray<ElementType, Shape>: Clone,
-    ElementType: std::ops::Add<Output=ElementType>,
+    ElementType: std::ops::Add<Output = ElementType> + Copy,
     Shape: HList,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
@@ -224,8 +232,20 @@ where
 impl<ElementType, Shape> Associativity<Addition> for BasicArray<ElementType, Shape>
 where
     BasicArray<ElementType, Shape>: Clone,
-    ElementType: std::ops::Add<Output=ElementType> + PartialEq,
+    ElementType: std::ops::Add<Output = ElementType> + Copy + PartialEq,
     Shape: HList + PartialEq,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
 }
+
+/*
+fn cow_test<'a, 'b, 'c: 'a, 'd: 'b, A, B, C, S, T>(a: S, b: T) -> C
+where
+    A: Clone + 'c,
+    B: Clone + 'd,
+    S: Into<Cow<'a, A>>,
+    T: Into<Cow<'b, B>>,
+{
+
+}
+*/

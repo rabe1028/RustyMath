@@ -6,7 +6,10 @@ where
     B: std::clone::Clone,
 {
     #[inline(always)]
-    fn operate(lhs: &A, rhs: &B) -> C;
+    fn operate<'a, 'b>(lhs: impl Into<Cow<'a, A>>, rhs: impl Into<Cow<'b, B>>) -> C
+    where
+        A: 'a,
+        B: 'b;
 }
 
 pub trait InternalBinaryOperator<T>: BinaryOperator<T, T, T>
@@ -14,7 +17,11 @@ where
     T: std::clone::Clone,
 {
     #[inline(always)]
-    fn operate(lhs: &T, rhs: &T) -> T {
+    fn operate<'a, U>(lhs: U, rhs: U) -> T
+    where
+        U: Into<Cow<'a, T>>,
+        T: 'a,
+    {
         <Self as BinaryOperator<T, T, T>>::operate(lhs, rhs)
     }
 }
@@ -25,8 +32,14 @@ where
     T: std::clone::Clone,
 {
     #[inline(always)]
-    fn operate(lhs: &S, rhs: &T) -> T {
-        <Self as BinaryOperator<S, T, T>>::operate(&lhs, &rhs)
+    fn operate<'a, 'b, N, M>(lhs: N, rhs: M) -> T
+    where
+        N: Into<Cow<'a, S>>,
+        M: Into<Cow<'b, T>>,
+        S: 'a,
+        T: 'b,
+    {
+        <Self as BinaryOperator<S, T, T>>::operate(lhs, rhs)
     }
 }
 
