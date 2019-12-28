@@ -27,7 +27,10 @@ where
 
         <T as InternalBinaryOperator<Self>>::operate(
             x.clone(),
-            Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(y.clone(), z.clone())),
+            Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(
+                y.clone(),
+                z.clone(),
+            )),
         ) == <T as InternalBinaryOperator<Self>>::operate(
             Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(x, y)),
             z,
@@ -52,9 +55,15 @@ where
         Self: 'b,
     {
         let x = x.into();
-        let id : Cow<'_, Self>= Cow::Owned(Self::identity());
-        let left: Cow<'a, Self> = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(x.clone(), id.clone()));
-        let right: Cow<'a, Self> = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(id.clone(), x.clone()));
+        let id: Cow<'_, Self> = Cow::Owned(Self::identity());
+        let left: Cow<'a, Self> = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(
+            x.clone(),
+            id.clone(),
+        ));
+        let right: Cow<'a, Self> = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(
+            id.clone(),
+            x.clone(),
+        ));
         (left == x) && (right == x)
     }
 }
@@ -104,11 +113,20 @@ where
         let z = z.into();
 
         <Mul as InternalBinaryOperator<Self>>::operate(
-            Cow::Owned(<Add as InternalBinaryOperator<Self>>::operate(x.clone(), y.clone())),
+            Cow::Owned(<Add as InternalBinaryOperator<Self>>::operate(
+                x.clone(),
+                y.clone(),
+            )),
             z.clone(),
         ) == <Add as InternalBinaryOperator<Self>>::operate(
-            Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(x.clone(), z.clone())),
-            Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(y.clone(), z.clone())),
+            Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(
+                x.clone(),
+                z.clone(),
+            )),
+            Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(
+                y.clone(),
+                z.clone(),
+            )),
         )
     }
 }
@@ -133,7 +151,10 @@ where
 
         <Mul as InternalBinaryOperator<Self>>::operate(
             x.clone(),
-            Cow::Owned(<Add as InternalBinaryOperator<Self>>::operate(y.clone(), z.clone())),
+            Cow::Owned(<Add as InternalBinaryOperator<Self>>::operate(
+                y.clone(),
+                z.clone(),
+            )),
         ) == <Add as InternalBinaryOperator<Self>>::operate(
             Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(x.clone(), y)),
             Cow::Owned(<Mul as InternalBinaryOperator<Self>>::operate(x.clone(), z)),
@@ -159,7 +180,8 @@ where
         let x = x.into();
         let y = y.into();
         let z = z.into();
-        Self::check_left_distributivity(x.clone(), y.clone(), z.clone()) && Self::check_right_distributivity(x, y, z)
+        Self::check_left_distributivity(x.clone(), y.clone(), z.clone())
+            && Self::check_right_distributivity(x, y, z)
     }
 }
 
@@ -266,8 +288,14 @@ where
         let c = c.into();
         let d = d.into();
 
-        let ab = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(a.clone(), b.clone()));
-        let cd = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(c.clone(), d.clone()));
+        let ab = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(
+            a.clone(),
+            b.clone(),
+        ));
+        let cd = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(
+            c.clone(),
+            d.clone(),
+        ));
         let ac = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(a, c));
         let bd = Cow::Owned(<T as InternalBinaryOperator<Self>>::operate(b, d));
 

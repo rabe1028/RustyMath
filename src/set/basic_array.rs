@@ -1,9 +1,8 @@
-use crate::set::*;
 use crate::operator::*;
 use crate::property::*;
+use crate::set::*;
 
 use std::marker::PhantomData;
-use std::ops::Add;
 
 use std::borrow::Cow;
 
@@ -138,24 +137,12 @@ where
 #[cfg(test)]
 mod tests {
     use crate::set::basic_array::*;
-    use crate::operator::*;
-    use crate::property::*;
-    
-    use std::marker::PhantomData;
-    use std::ops::Add;
-    
-    use std::borrow::Cow;
-    
-    use frunk::hlist::HList;
-    use frunk::*; //{HCons, HNil};
-    use typenum::uint::Unsigned;
-    use typenum::*;
 
     #[test]
     fn construct_0d() {
         let _a: BasicArray<isize, HNil> = BasicArray::from_vec(vec![1]);
         let _b: BasicScalar<isize> = BasicArray::from_vec(vec![1]);
-        
+
         assert_eq!(_a, _b);
     }
 
@@ -169,6 +156,5 @@ mod tests {
     fn construct_1d_should_panic() {
         let _a: BasicArray<isize, Hlist!(U3)> = BasicArray::from_vec(vec![1, 2, 3, 4]);
     }
-
 
 }

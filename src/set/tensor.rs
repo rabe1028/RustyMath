@@ -1,10 +1,4 @@
-use crate::operator::*;
-use crate::property::*;
-
-use std::marker::PhantomData;
 use std::ops::Add;
-
-use std::borrow::Cow;
 
 use frunk::hlist::HList;
 use frunk::*; //{HCons, HNil};
@@ -117,4 +111,3 @@ where
     _2: Unsigned,
 {
 }
-
