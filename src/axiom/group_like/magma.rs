@@ -6,7 +6,7 @@ where
     T: InternalBinaryOperator<Self>,
 {
     fn operate(lhs: Self, rhs: Self) -> Self {
-        <T as InternalBinaryOperator<Self>>::operate(lhs, rhs)
+        <T as InternalBinaryOperator<Self>>::operate(&lhs, &rhs)
     }
 }
 

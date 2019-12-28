@@ -25,7 +25,7 @@ impl PartialEq for RationalNumber {
 
 impl BinaryOperator<RationalNumber, RationalNumber, RationalNumber> for Addition {
     #[inline(always)]
-    fn operate(lhs: RationalNumber, rhs: RationalNumber) -> RationalNumber {
+    fn operate(lhs: &RationalNumber, rhs: &RationalNumber) -> RationalNumber {
         RationalNumber {
             p: lhs.p * rhs.q + rhs.p * lhs.q,
             q: lhs.q * rhs.q,
@@ -58,7 +58,7 @@ impl Commutativity<Addition> for RationalNumber {}
 
 impl BinaryOperator<RationalNumber, RationalNumber, RationalNumber> for Multiplication {
     #[inline(always)]
-    fn operate(lhs: RationalNumber, rhs: RationalNumber) -> RationalNumber {
+    fn operate(lhs: &RationalNumber, rhs: &RationalNumber) -> RationalNumber {
         RationalNumber {
             p: lhs.p * rhs.p,
             q: lhs.q * rhs.q,

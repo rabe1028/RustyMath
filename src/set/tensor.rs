@@ -182,22 +182,20 @@ impl<ElementType, Shape>
         BasicArray<ElementType, Shape>,
     > for Addition
 where
-    ElementType: std::ops::Add,
-
+    BasicArray<ElementType, Shape>: Clone,
+    ElementType: std::ops::Add<Output=ElementType>,
     Shape: HList,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
     #[inline(always)]
     fn operate(
-        lhs: BasicArray<ElementType, Shape>,
-        rhs: BasicArray<ElementType, Shape>,
+        lhs: &BasicArray<ElementType, Shape>,
+        rhs: &BasicArray<ElementType, Shape>,
     ) -> BasicArray<ElementType, Shape> {
-        let new_vec: Vec<ElementType> = lhs
-            ._inner
-            .into_iter()
-            .zip(rhs._inner.into_iter())
-            .map(|(a, b)| a + b)
-            .collect();
+        let mut new_vec: Vec<ElementType> = vec![];
+        for i in 0..lhs._inner.len() {
+            new_vec.push(lhs._inner[i] + rhs._inner[i]);
+        }
         BasicArray {
             _inner: new_vec,
             _phantom: PhantomData,
@@ -207,7 +205,8 @@ where
 
 impl<ElementType, Shape> InternalBinaryOperator<BasicArray<ElementType, Shape>> for Addition
 where
-    ElementType: std::ops::Add,
+    BasicArray<ElementType, Shape>: Clone,
+    ElementType: std::ops::Add<Output=ElementType>,
     Shape: HList,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
@@ -215,7 +214,8 @@ where
 
 impl<ElementType, Shape> Totality<Addition> for BasicArray<ElementType, Shape>
 where
-    ElementType: std::ops::Add,
+    BasicArray<ElementType, Shape>: Clone,
+    ElementType: std::ops::Add<Output=ElementType>,
     Shape: HList,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
@@ -223,8 +223,9 @@ where
 
 impl<ElementType, Shape> Associativity<Addition> for BasicArray<ElementType, Shape>
 where
-    ElementType: std::ops::Add,
-    Shape: HList,
+    BasicArray<ElementType, Shape>: Clone,
+    ElementType: std::ops::Add<Output=ElementType> + PartialEq,
+    Shape: HList + PartialEq,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
 }
