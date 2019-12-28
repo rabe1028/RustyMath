@@ -3,6 +3,7 @@ use std::borrow::Cow;
 use crate::operator::*;
 use crate::property::*;
 
+
 #[derive(Clone, Copy)]
 struct RationalNumber {
     p: isize,
@@ -105,3 +106,4 @@ impl Identity<Multiplication> for RationalNumber {
         RationalNumber { p: 1, q: 1 }
     }
 }
+

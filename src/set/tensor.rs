@@ -11,6 +11,7 @@ use frunk::*; //{HCons, HNil};
 use typenum::uint::Unsigned;
 use typenum::*;
 
+/*
 trait Size {}
 trait StaticSize: Size {}
 
@@ -25,8 +26,9 @@ macro_rules! impl_static {
 impl_static! {
     U1,U2,U3,U4,U5
 }
+*/
 
-trait TypeLen {
+pub trait TypeLen {
     type Length: Unsigned; // HList length (type int)
 
     fn elem_count() -> usize;
@@ -54,7 +56,7 @@ where
     }
 }
 
-trait IndexShape {
+pub trait IndexShape {
     // all usize hlist
     type Shape: HList;
 
@@ -93,7 +95,7 @@ where
     }
 }
 
-trait Tensor<ElementType, Shape>
+pub trait Tensor<ElementType, Shape>
 where
     Shape: HList + IndexShape,
 {
@@ -102,150 +104,17 @@ where
     fn index<I: Into<<Shape as IndexShape>::Shape>>(&self, index: I) -> &ElementType;
 }
 
-trait Scalar<ElementType>: Tensor<ElementType, HNil> {}
-trait Vector<ElementType, _1>: Tensor<ElementType, Hlist!(_1)>
+pub trait Scalar<ElementType>: Tensor<ElementType, HNil> {}
+pub trait Vector<ElementType, _1>: Tensor<ElementType, Hlist!(_1)>
 where
     _1: Unsigned,
 {
 }
-trait Matrix<ElementType, _1, _2>: Tensor<ElementType, Hlist!(_1, _2)>
-where
-    _1: Unsigned,
-    _2: Unsigned,
-{
-}
 
-/*
-Test Array Struct Implementation
-*/
-
-#[derive(Debug, Clone, PartialEq)]
-struct BasicArray<ElementType, Shape> {
-    _inner: Vec<ElementType>,
-    _phantom: PhantomData<Shape>,
-}
-
-impl<ElementType, Shape> BasicArray<ElementType, Shape>
-where
-    Shape: HList + IndexShape,
-{
-    pub fn from_vec(vec: Vec<ElementType>) -> Self {
-        assert!(vec.len() == Shape::get_capacity());
-        BasicArray {
-            _inner: vec,
-            _phantom: PhantomData,
-        }
-    }
-    /*
-    pub fn zeros<I: Into<Shape>>(_: I) -> Self {
-        // Addition Zero Element
-        BasicArray {
-            _inner: vec![0; Shape::get_capacity()],
-            _phantom: PhantomData,
-        }
-    }
-    */
-}
-
-impl<ElementType, Shape> Tensor<ElementType, Shape> for BasicArray<ElementType, Shape>
-where
-    Shape: HList + IndexShape,
-{
-    fn index<I: Into<<Shape as IndexShape>::Shape>>(&self, index: I) -> &ElementType {
-        let (offset, _) = Shape::get_index(index.into());
-        &self._inner[offset]
-    }
-}
-
-impl<ElementType> Scalar<ElementType> for BasicArray<ElementType, HNil> {}
-
-impl<ElementType, _1> Vector<ElementType, _1> for BasicArray<ElementType, Hlist!(_1)> where
-    _1: Unsigned
-{
-}
-
-impl<ElementType, _1, _2> Matrix<ElementType, _1, _2> for BasicArray<ElementType, Hlist!(_1, _2)>
+pub trait Matrix<ElementType, _1, _2>: Tensor<ElementType, Hlist!(_1, _2)>
 where
     _1: Unsigned,
     _2: Unsigned,
 {
 }
 
-type BasicScalar<ElementType> = BasicArray<ElementType, HNil>;
-
-type BasicVector<ElementType, _1> = BasicArray<ElementType, Hlist!(_1)>;
-
-type BasicMatrix<ElementType, _1, _2> = BasicArray<ElementType, Hlist!(_1, _2)>;
-
-impl<ElementType, Shape>
-    BinaryOperator<
-        BasicArray<ElementType, Shape>,
-        BasicArray<ElementType, Shape>,
-        BasicArray<ElementType, Shape>,
-    > for Addition
-where
-    BasicArray<ElementType, Shape>: Clone,
-    ElementType: std::ops::Add<Output = ElementType> + Copy,
-    Shape: HList,
-    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
-{
-    #[inline(always)]
-    fn operate<'a, 'b>(
-        lhs: impl Into<Cow<'a, BasicArray<ElementType, Shape>>>,
-        rhs: impl Into<Cow<'b, BasicArray<ElementType, Shape>>>,
-    ) -> BasicArray<ElementType, Shape>
-    where
-        BasicArray<ElementType, Shape>: 'a + 'b,
-    {
-        let lhs = lhs.into();
-        let rhs = rhs.into();
-
-        let mut new_vec: Vec<ElementType> = vec![];
-        for i in 0..lhs._inner.len() {
-            new_vec.push(lhs._inner[i] + rhs._inner[i]);
-        }
-        BasicArray {
-            _inner: new_vec,
-            _phantom: PhantomData,
-        }
-    }
-}
-
-impl<ElementType, Shape> InternalBinaryOperator<BasicArray<ElementType, Shape>> for Addition
-where
-    BasicArray<ElementType, Shape>: Clone,
-    ElementType: std::ops::Add<Output = ElementType> + Copy,
-    Shape: HList,
-    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
-{
-}
-
-impl<ElementType, Shape> Totality<Addition> for BasicArray<ElementType, Shape>
-where
-    BasicArray<ElementType, Shape>: Clone,
-    ElementType: std::ops::Add<Output = ElementType> + Copy,
-    Shape: HList,
-    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
-{
-}
-
-impl<ElementType, Shape> Associativity<Addition> for BasicArray<ElementType, Shape>
-where
-    BasicArray<ElementType, Shape>: Clone,
-    ElementType: std::ops::Add<Output = ElementType> + Copy + PartialEq,
-    Shape: HList + PartialEq,
-    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
-{
-}
-
-/*
-fn cow_test<'a, 'b, 'c: 'a, 'd: 'b, A, B, C, S, T>(a: S, b: T) -> C
-where
-    A: Clone + 'c,
-    B: Clone + 'd,
-    S: Into<Cow<'a, A>>,
-    T: Into<Cow<'b, B>>,
-{
-
-}
-*/

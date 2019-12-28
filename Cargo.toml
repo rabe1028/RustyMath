@@ -9,5 +9,4 @@ edition = "2018"
 [dependencies]
 typenum="*"
 frunk="*"
-num-bigint = "*"
 num = "*"
