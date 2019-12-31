@@ -99,8 +99,6 @@ where
 #[cfg(test)]
 mod tests {
     use crate::util::*;
-    use frunk::*;
-    use typenum::*;
 
     #[test]
     fn append() {

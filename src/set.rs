@@ -14,7 +14,7 @@ macro_rules! impl_scalar {
     ($($ty: ty),*) => {
         $(
             impl Tensor<$ty, HNil> for $ty {
-                fn index<I: Into<HNil>>(&self, index: I) -> &Self {
+                fn index<I: Into<HNil>>(&self, _index: I) -> &Self {
                     &self
                 }
             }

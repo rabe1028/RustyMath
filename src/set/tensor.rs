@@ -1,11 +1,8 @@
-use std::ops::Add;
-
 use frunk::hlist::HList;
 use frunk::*; //{HCons, HNil};
 use typenum::uint::Unsigned;
-use typenum::*;
 
-use crate::util::{IndexShape, TypeLength};
+use crate::util::IndexShape;
 
 pub trait Tensor<ElementType, Shape>
 where

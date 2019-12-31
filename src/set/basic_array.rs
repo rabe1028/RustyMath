@@ -1,7 +1,7 @@
 use crate::operator::*;
 use crate::property::*;
 use crate::set::*;
-use crate::util::{IndexShape, TypeLength};
+use crate::util::IndexShape;
 
 use std::marker::PhantomData;
 
@@ -146,7 +146,6 @@ where
 #[cfg(test)]
 mod tests {
     use crate::set::basic_array::*;
-    use frunk::*;
 
     #[test]
     fn construct_0d() {
