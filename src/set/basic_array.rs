@@ -1,6 +1,7 @@
 use crate::operator::*;
 use crate::property::*;
 use crate::set::*;
+use crate::util::{IndexShape, TypeLength};
 
 use std::marker::PhantomData;
 
@@ -53,7 +54,15 @@ where
     }
 }
 
-impl<ElementType> Scalar<ElementType> for BasicArray<ElementType, HNil> {}
+impl<ElementType> Scalar<ElementType> for BasicArray<ElementType, HNil> {
+    fn new(elem: ElementType) -> Self {
+        BasicArray::from_vec(vec![elem])
+    }
+
+    fn get(&self) -> &ElementType {
+        self.index(HNil)
+    }
+}
 
 impl<ElementType, _1> Vector<ElementType, _1> for BasicArray<ElementType, Hlist!(_1)> where
     _1: Unsigned
@@ -137,6 +146,7 @@ where
 #[cfg(test)]
 mod tests {
     use crate::set::basic_array::*;
+    use frunk::*;
 
     #[test]
     fn construct_0d() {
@@ -144,6 +154,18 @@ mod tests {
         let _b: BasicScalar<isize> = BasicArray::from_vec(vec![1]);
 
         assert_eq!(_a, _b);
+    }
+
+    #[test]
+    #[should_panic]
+    fn construct_0d_should_panic() {
+        let _a: BasicArray<isize, Hlist!(U5)> = BasicArray::from_vec(vec![1]);
+    }
+
+    #[test]
+    fn test_index_0d() {
+        let a: BasicScalar<isize> = BasicScalar::new(3);
+        assert_eq!(*a.get(), 3);
     }
 
     #[test]
@@ -156,5 +178,4 @@ mod tests {
     fn construct_1d_should_panic() {
         let _a: BasicArray<isize, Hlist!(U3)> = BasicArray::from_vec(vec![1, 2, 3, 4]);
     }
-
 }

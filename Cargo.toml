@@ -10,3 +10,5 @@ edition = "2018"
 typenum="*"
 frunk="*"
 num = "*"
+
+[dev-dependencies]
