@@ -122,6 +122,41 @@ impl HSliceable<UTerm, UTerm> for HNil {
     }
 }
 
+/*
+impl<Head, Tail> HSliceable<UTerm, UTerm> for HCons<Head, Tail>
+where
+    <Tail as TypeLength>::Length: Unsigned + Add<U1>,
+    <<Tail as TypeLength>::Length as Add<U1>>::Output: Unsigned,
+{
+    type Sliced = HNil;
+
+    fn slice(self, _: U0, _: U0) -> Self::Sliced {
+        HNil
+    }
+}
+*/
+
+/*
+impl<U, Head, Tail> HSliceable<UTerm, U> for HCons<Head, Tail>
+where
+    U: Unsigned + Sub<B1>,
+    Sub1<U>: Unsigned,
+    Tail: HList + TypeLength + HSliceable<UTerm, <U as Sub<B1>>::Output>,
+    <Tail as TypeLength>::Length: Unsigned + Add<U1>,
+    <<Tail as TypeLength>::Length as Add<U1>>::Output: Unsigned,
+{
+    type Sliced = HCons<Head, <Tail as HSliceable<UTerm, <U as Sub<B1>>::Output>>::Sliced>;
+
+    fn slice(self, from: UTerm, to: U) -> Self::Sliced {
+        let to = to - B1::new();
+        HCons {
+            head: self.head,
+            tail: self.tail.slice(from, to),
+        }
+    }
+}
+*/
+
 impl<U: Unsigned, B: Bit, Head, Tail> HSliceable<UTerm, UInt<UInt<U, B>, B0>> for HCons<Head, Tail>
 where
     Tail: HList + TypeLength + HSliceable<UTerm, UInt<U, B>>,
@@ -156,6 +191,7 @@ where
     }
 }
 
+/*
 impl<U1: Unsigned, U2: Unsigned, Head, Tail> HSliceable<UInt<U1, B1>, UInt<U2, B1>>
     for HCons<Head, Tail>
 where
@@ -223,10 +259,15 @@ where
         self.tail.slice(from, to)
     }
 }
+*/
 
 #[cfg(test)]
 mod tests {
     use crate::util::*;
+    use frunk::hlist::HList;
+    use frunk::*;
+    use typenum::uint::Unsigned;
+    use typenum::*;
 
     #[test]
     fn append() {
@@ -240,5 +281,19 @@ mod tests {
     #[test]
     fn type_length() {
         assert_type_eq!(<Hlist!(U1, U1, U1) as TypeLength>::Length, U3);
+    }
+
+    #[test]
+    fn slice_hnil() {
+        let h = hlist![];
+        let s = h.slice(UTerm::new(), UTerm::new());
+    }
+
+    #[test]
+    fn slice() {
+        let h = hlist![1, "hi", U1::new(), U1::new(), "Foo", 12.345];
+
+        //let sub = h.slice(U0::new(), U1::new());
+        //assert_eq!(sub, hlist![1, "hi", U1::new()]);
     }
 }
