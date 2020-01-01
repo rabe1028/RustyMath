@@ -300,7 +300,6 @@ where
     }
 }
 
-
 impl<_1: Unsigned, _2: Unsigned, _B1: Bit,_B2:Bit, Head, Tail> HSliceable<UInt<UInt<_1,_B1>, B0>, UInt<UInt<_2, _B2>, B1>>
     for HCons<Head, Tail>
 where
@@ -316,7 +315,6 @@ where
         self.tail.slice(from - B1::new(), to - B1::new())
     }
 }
-
 
 /*
 UInt<UInt<U,B>,B1> to
@@ -355,77 +353,6 @@ where
     }
 }
 
-/*
-Old Impls
-
-impl<U1: Unsigned, U2: Unsigned, Head, Tail> HSliceable<UInt<U1, B1>, UInt<U2, B1>>
-    for HCons<Head, Tail>
-where
-    Self: TypeLength,
-    Tail: HList + TypeLength + HSliceable<UInt<U1, B0>, UInt<U2, B0>>,
-    <Tail as TypeLength>::Length: Unsigned + Add<U1>,
-    <<Tail as TypeLength>::Length as Add<U1>>::Output: Unsigned,
-{
-    type Sliced = <Tail as HSliceable<UInt<U1, B0>, UInt<U2, B0>>>::Sliced;
-
-    fn slice(self, from: UInt<U1, B1>, to: UInt<U2, B1>) -> Self::Sliced {
-        let from: UInt<U1, B0> = UInt::new();
-        let to: UInt<U2, B0> = UInt::new();
-        self.tail.slice(from, to)
-    }
-}
-
-impl<U1: Unsigned, U2: Unsigned, B: Bit, Head, Tail> HSliceable<UInt<U1, B1>, UInt<UInt<U2, B>, B0>>
-    for HCons<Head, Tail>
-where
-    Self: TypeLength,
-    Tail: HList + TypeLength + HSliceable<UInt<U1, B0>, UInt<U2, B>>,
-    <Tail as TypeLength>::Length: Unsigned + Add<U1>,
-    <<Tail as TypeLength>::Length as Add<U1>>::Output: Unsigned,
-{
-    type Sliced = <Tail as HSliceable<UInt<U1, B0>, UInt<U2, B>>>::Sliced;
-
-    fn slice(self, from: UInt<U1, B1>, to: UInt<UInt<U2, B>, B0>) -> Self::Sliced {
-        let from: UInt<U1, B0> = UInt::new();
-        let to: UInt<U2, B> = UInt::new();
-        self.tail.slice(from, to)
-    }
-}
-
-impl<U1: Unsigned, U2: Unsigned, B: Bit, Head, Tail> HSliceable<UInt<UInt<U1, B>, B0>, UInt<U2, B1>>
-    for HCons<Head, Tail>
-where
-    Self: TypeLength,
-    Tail: HList + TypeLength + HSliceable<UInt<U1, B>, UInt<U2, B0>>,
-    <Tail as TypeLength>::Length: Unsigned + Add<U1>,
-    <<Tail as TypeLength>::Length as Add<U1>>::Output: Unsigned,
-{
-    type Sliced = <Tail as HSliceable<UInt<U1, B>, UInt<U2, B0>>>::Sliced;
-
-    fn slice(self, from: UInt<UInt<U1, B>, B0>, to: UInt<U2, B1>) -> Self::Sliced {
-        let from: UInt<U1, B> = UInt::new();
-        let to: UInt<U2, B0> = UInt::new();
-        self.tail.slice(from, to)
-    }
-}
-
-impl<U1: Unsigned, U2: Unsigned, BU1: Bit, BU2: Bit, Head, Tail>
-    HSliceable<UInt<UInt<U1, BU1>, B0>, UInt<UInt<U2, BU2>, B0>> for HCons<Head, Tail>
-where
-    Self: TypeLength,
-    Tail: HList + TypeLength + HSliceable<UInt<U1, BU1>, UInt<U2, BU2>>,
-    <Tail as TypeLength>::Length: Unsigned + Add<U1>,
-    <<Tail as TypeLength>::Length as Add<U1>>::Output: Unsigned,
-{
-    type Sliced = <Tail as HSliceable<UInt<U1, BU1>, UInt<U2, BU2>>>::Sliced;
-
-    fn slice(self, from: UInt<UInt<U1, BU1>, B0>, to: UInt<UInt<U2, BU2>, B0>) -> Self::Sliced {
-        let from: UInt<U1, BU1> = UInt::new();
-        let to: UInt<U2, BU2> = UInt::new();
-        self.tail.slice(from, to)
-    }
-}
-*/
 
 #[cfg(test)]
 mod tests {
@@ -461,6 +388,7 @@ mod tests {
         let h = hlist![1, "hi", U1::new(), U1::new(), "Foo", 12.345];
 
         // U4 -> U3, U5 -> U4になってる？
+        // fix
         let sub = h.slice(U0::new(), U4::new());
         assert_eq!(sub, hlist![1, "hi", U1::new(), U1::new()]);
 
@@ -521,5 +449,23 @@ mod tests {
 
         let sub = h.slice(U2::new(), U4::new());
         assert_eq!(sub, hlist![U1::new(), U1::new()]);
+    }
+
+    #[test]
+    fn slice_even_to_n() {
+        let h = hlist![1, "hi", U1::new(), U1::new(), "Foo", 12.345];
+
+        let sub = h.slice(U3::new(), U3::new());
+        assert_eq!(sub, hlist![]);
+
+        let h = hlist![1, "hi", U1::new(), U1::new(), "Foo", 12.345];
+
+        let sub = h.slice(U3::new(), U4::new());
+        assert_eq!(sub, hlist![U1::new()]);
+
+        let h = hlist![1, "hi", U1::new(), U1::new(), "Foo", 12.345];
+
+        let sub = h.slice(U3::new(), U5::new());
+        assert_eq!(sub, hlist![U1::new(), "Foo"]);
     }
 }
