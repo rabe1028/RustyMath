@@ -49,9 +49,7 @@ impl IndexShape for HNil {
 impl<Head, Tail> IndexShape for HCons<Head, Tail>
 where
     Head: Unsigned,
-    //Head: std::ops::Mul<<Tail as IndexShape>::Capacity>,
     Tail: HList + IndexShape,
-    //<Tail as IndexShape>::Capacity: Unsigned,
 {
     type Shape = HCons<usize, <Tail as IndexShape>::Shape>;
     //type Capacity = Prod<Head, <Tail as IndexShape>::Capacity>;
@@ -68,38 +66,6 @@ where
     }
 }
 
-/*
-//HListのAddが対応
-
-pub trait HAppendable<RHS> {
-    type Appended: HList;
-
-    fn append(self, other: RHS) -> Self::Appended;
-}
-
-impl<T: HList> HAppendable<T> for HNil {
-    type Appended = T;
-
-    fn append(self, rhs: T) -> Self::Appended {
-        rhs
-    }
-}
-
-impl<H1, T1, RHS> HAppendable<RHS> for HCons<H1, T1>
-where
-    T1: HList + HAppendable<RHS>,
-    RHS: HList,
-{
-    type Appended = HCons<H1, <T1 as HAppendable<RHS>>::Appended>;
-
-    fn append(self, rhs: RHS) -> Self::Appended {
-        HCons {
-            head: self.head,
-            tail: self.tail.append(rhs),
-        }
-    }
-}
-*/
 
 /*
 Slice Implementation
@@ -360,15 +326,6 @@ where
 #[cfg(test)]
 mod tests {
     use crate::util::*;
-
-    #[test]
-    fn append() {
-        let h1 = hlist![1, "hi"];
-        let h2 = hlist!["hoge", 11];
-
-        //assert_eq!(h1.append(h2), hlist![1, "hi", "hoge", 11]);
-        assert_eq!(h1 + h2, hlist![1, "hi", "hoge", 11]);
-    }
 
     #[test]
     fn type_length() {
