@@ -1,5 +1,5 @@
 use std::ops::Add;
-use std::ops::Sub;
+
 
 use frunk::hlist::HList;
 use frunk::*;
@@ -27,6 +27,8 @@ where
 #[cfg(test)]
 mod tests {
     use crate::util::*;
+
+    use typenum::*;
 
     #[test]
     fn type_length() {

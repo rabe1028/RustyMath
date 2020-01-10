@@ -278,6 +278,8 @@ where
 mod tests {
     use crate::util::*;
 
+    use typenum::*;
+
     #[test]
     fn slice_hnil() {
         let h = hlist![];
