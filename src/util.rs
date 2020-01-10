@@ -1,10 +1,8 @@
-
-
-
 use frunk::hlist::HList;
 use frunk::*;
 use typenum::uint::Unsigned;
 
+use std::ops::Add;
 
 pub mod typelength;
 
@@ -17,6 +15,8 @@ pub use hsliceable::*;
 pub mod hinsertable;
 
 pub use hinsertable::*;
+
+pub type Join<A, B> = <A as Add<B>>::Output;
 
 pub trait IndexShape {
     // all usize hlist

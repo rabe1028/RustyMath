@@ -1,7 +1,7 @@
 use crate::operator::*;
 use crate::property::*;
 use crate::set::*;
-use crate::util::IndexShape;
+use crate::util::*;
 
 use std::marker::PhantomData;
 
@@ -12,25 +12,30 @@ use frunk::*; //{HCons, HNil};
 use typenum::uint::Unsigned;
 use typenum::*;
 
+use std::ops::Add;
+
 /*
 Test Array Struct Implementation
 */
 
 #[derive(Debug, Clone, PartialEq)]
-struct BasicArray<ElementType, Shape> {
+struct BasicArray<ElementType, Contravariant, Covariant> {
     _inner: Vec<ElementType>,
-    _phantom: PhantomData<Shape>,
+    _contravariant: PhantomData<Contravariant>,
+    _covariant: PhantomData<Covariant>,
 }
 
-impl<ElementType, Shape> BasicArray<ElementType, Shape>
+impl<ElementType, Contravariant, Covariant> BasicArray<ElementType, Contravariant, Covariant>
 where
-    Shape: HList + IndexShape,
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
 {
     pub fn from_vec(vec: Vec<ElementType>) -> Self {
-        assert!(vec.len() == Shape::get_capacity());
+        assert!(vec.len() == Contravariant::get_capacity() * Covariant::get_capacity());
         BasicArray {
             _inner: vec,
-            _phantom: PhantomData,
+            _contravariant: PhantomData,
+            _covariant: PhantomData,
         }
     }
     /*
@@ -44,63 +49,87 @@ where
     */
 }
 
-impl<ElementType, Shape> Tensor<ElementType, Shape> for BasicArray<ElementType, Shape>
+impl<ElementType, Contravariant, Covariant> Tensor<ElementType, Contravariant, Covariant>
+    for BasicArray<ElementType, Contravariant, Covariant>
 where
-    Shape: HList + IndexShape,
+    Contravariant: HList + IndexShape + Add<Covariant>,
+    Covariant: HList + IndexShape,
+    Join<Contravariant, Covariant>: IndexShape,
+    <Contravariant as IndexShape>::Shape: Add<
+        <Covariant as IndexShape>::Shape,
+        Output = <Join<Contravariant, Covariant> as IndexShape>::Shape,
+    >,
 {
-    fn index<I: Into<<Shape as IndexShape>::Shape>>(&self, index: I) -> &ElementType {
-        let (offset, _) = Shape::get_index(index.into());
+    type Joined = Join<Contravariant, Covariant>;
+    fn index<
+        I: Into<<Contravariant as IndexShape>::Shape>,
+        J: Into<<Covariant as IndexShape>::Shape>,
+    >(
+        &self,
+        cont: I,
+        cov: J,
+    ) -> &ElementType {
+        let cont = cont.into();
+        let cov = cov.into();
+        let (offset, _) = Self::Joined::get_index(cont + cov);
         &self._inner[offset]
     }
 }
 
-impl<ElementType> Scalar<ElementType> for BasicArray<ElementType, HNil> {
+impl<ElementType> Scalar<ElementType> for BasicArray<ElementType, HNil, HNil> {
     fn new(elem: ElementType) -> Self {
         BasicArray::from_vec(vec![elem])
     }
 
     fn get(&self) -> &ElementType {
-        self.index(HNil)
+        self.index(HNil, HNil)
     }
 }
 
-impl<ElementType, _1> Vector<ElementType, _1> for BasicArray<ElementType, Hlist!(_1)> where
+impl<ElementType, _1> Vector<ElementType, _1> for BasicArray<ElementType, Hlist!(_1), HNil> where
     _1: Unsigned
 {
 }
 
-impl<ElementType, _1, _2> Matrix<ElementType, _1, _2> for BasicArray<ElementType, Hlist!(_1, _2)>
+impl<ElementType, _1> Covector<ElementType, _1> for BasicArray<ElementType, HNil, Hlist!(_1)> where
+    _1: Unsigned
+{
+}
+
+impl<ElementType, _1, _2> Matrix<ElementType, _1, _2>
+    for BasicArray<ElementType, Hlist!(_1), Hlist!(_2)>
 where
     _1: Unsigned,
     _2: Unsigned,
 {
 }
 
-type BasicScalar<ElementType> = BasicArray<ElementType, HNil>;
+type BasicScalar<ElementType> = BasicArray<ElementType, HNil, HNil>;
 
-type BasicVector<ElementType, _1> = BasicArray<ElementType, Hlist!(_1)>;
+type BasicVector<ElementType, _1> = BasicArray<ElementType, Hlist!(_1), HNil>;
 
-type BasicMatrix<ElementType, _1, _2> = BasicArray<ElementType, Hlist!(_1, _2)>;
+type BasicMatrix<ElementType, _1, _2> = BasicArray<ElementType, Hlist!(_1), Hlist!(_2)>;
 
-impl<ElementType, Shape>
+impl<ElementType, Contravariant, Covariant>
     BinaryOperator<
-        BasicArray<ElementType, Shape>,
-        BasicArray<ElementType, Shape>,
-        BasicArray<ElementType, Shape>,
+        BasicArray<ElementType, Contravariant, Covariant>,
+        BasicArray<ElementType, Contravariant, Covariant>,
+        BasicArray<ElementType, Contravariant, Covariant>,
     > for Addition
 where
-    BasicArray<ElementType, Shape>: Clone,
+    BasicArray<ElementType, Contravariant, Covariant>: Clone,
     ElementType: std::ops::Add<Output = ElementType> + Copy,
-    Shape: HList,
+    Contravariant: HList + IndexShape + Add<Covariant>,
+    Covariant: HList + IndexShape,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
     #[inline(always)]
     fn operate<'a, 'b>(
-        lhs: impl Into<Cow<'a, BasicArray<ElementType, Shape>>>,
-        rhs: impl Into<Cow<'b, BasicArray<ElementType, Shape>>>,
-    ) -> BasicArray<ElementType, Shape>
+        lhs: impl Into<Cow<'a, BasicArray<ElementType, Contravariant, Covariant>>>,
+        rhs: impl Into<Cow<'b, BasicArray<ElementType, Contravariant, Covariant>>>,
+    ) -> BasicArray<ElementType, Contravariant, Covariant>
     where
-        BasicArray<ElementType, Shape>: 'a + 'b,
+        BasicArray<ElementType, Contravariant, Covariant>: 'a + 'b,
     {
         let lhs = lhs.into();
         let rhs = rhs.into();
@@ -111,34 +140,41 @@ where
         }
         BasicArray {
             _inner: new_vec,
-            _phantom: PhantomData,
+            _contravariant: PhantomData,
+            _covariant: PhantomData,
         }
     }
 }
 
-impl<ElementType, Shape> InternalBinaryOperator<BasicArray<ElementType, Shape>> for Addition
+impl<ElementType, Contravariant, Covariant>
+    InternalBinaryOperator<BasicArray<ElementType, Contravariant, Covariant>> for Addition
 where
-    BasicArray<ElementType, Shape>: Clone,
+    BasicArray<ElementType, Contravariant, Covariant>: Clone,
     ElementType: std::ops::Add<Output = ElementType> + Copy,
-    Shape: HList,
+    Contravariant: HList + IndexShape + Add<Covariant>,
+    Covariant: HList + IndexShape,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
 }
 
-impl<ElementType, Shape> Totality<Addition> for BasicArray<ElementType, Shape>
+impl<ElementType, Contravariant, Covariant> Totality<Addition>
+    for BasicArray<ElementType, Contravariant, Covariant>
 where
-    BasicArray<ElementType, Shape>: Clone,
+    BasicArray<ElementType, Contravariant, Covariant>: Clone,
     ElementType: std::ops::Add<Output = ElementType> + Copy,
-    Shape: HList,
+    Contravariant: HList + IndexShape + Add<Covariant>,
+    Covariant: HList + IndexShape,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
 }
 
-impl<ElementType, Shape> Associativity<Addition> for BasicArray<ElementType, Shape>
+impl<ElementType, Contravariant, Covariant> Associativity<Addition>
+    for BasicArray<ElementType, Contravariant, Covariant>
 where
-    BasicArray<ElementType, Shape>: Clone,
+    BasicArray<ElementType, Contravariant, Covariant>: Clone,
     ElementType: std::ops::Add<Output = ElementType> + Copy + PartialEq,
-    Shape: HList + PartialEq,
+    Contravariant: HList + IndexShape + PartialEq + Add<Covariant>,
+    Covariant: HList + IndexShape + PartialEq,
     std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
 }
@@ -149,7 +185,7 @@ mod tests {
 
     #[test]
     fn construct_0d() {
-        let _a: BasicArray<isize, HNil> = BasicArray::from_vec(vec![1]);
+        let _a: BasicArray<isize, HNil, HNil> = BasicArray::from_vec(vec![1]);
         let _b: BasicScalar<isize> = BasicArray::from_vec(vec![1]);
 
         assert_eq!(_a, _b);
@@ -158,7 +194,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn construct_0d_should_panic() {
-        let _a: BasicArray<isize, Hlist!(U5)> = BasicArray::from_vec(vec![1]);
+        let _a: BasicArray<isize, Hlist!(U5), HNil> = BasicArray::from_vec(vec![1]);
     }
 
     #[test]
@@ -169,12 +205,12 @@ mod tests {
 
     #[test]
     fn construct_1d() {
-        let _a: BasicArray<isize, Hlist!(U4)> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let _a: BasicArray<isize, Hlist!(U4), HNil> = BasicArray::from_vec(vec![1, 2, 3, 4]);
     }
 
     #[test]
     #[should_panic]
     fn construct_1d_should_panic() {
-        let _a: BasicArray<isize, Hlist!(U3)> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let _a: BasicArray<isize, Hlist!(U3), HNil> = BasicArray::from_vec(vec![1, 2, 3, 4]);
     }
 }
