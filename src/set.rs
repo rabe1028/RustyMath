@@ -13,8 +13,9 @@ use frunk::*;
 macro_rules! impl_scalar {
     ($($ty: ty),*) => {
         $(
-            impl Tensor<$ty, HNil> for $ty {
-                fn index<I: Into<HNil>>(&self, _index: I) -> &Self {
+            impl Tensor<$ty, HNil, HNil> for $ty {
+                type Joined = HNil;
+                fn index<I: Into<HNil>, J: Into<HNil>>(&self, cont: I, cov: J) -> &Self {
                     &self
                 }
             }

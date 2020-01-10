@@ -1,6 +1,5 @@
 use std::ops::Add;
 
-
 use frunk::hlist::HList;
 use frunk::*;
 use typenum::uint::Unsigned;
