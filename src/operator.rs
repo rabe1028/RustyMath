@@ -43,6 +43,6 @@ where
     }
 }
 
-pub struct Addition {}
+pub enum Addition {}
 
-pub struct Multiplication {}
+pub enum Multiplication {}
