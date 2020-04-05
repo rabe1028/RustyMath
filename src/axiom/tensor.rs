@@ -4,12 +4,20 @@ use typenum::uint::Unsigned;
 
 use crate::util::IndexShape;
 
+use std::borrow::Cow;
+
+use crate::axiom::*;
+use crate::operator::*;
+use crate::property::*;
+
 pub trait Tensor<ElementType, Contravariant, Covariant>
 where
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
+    Self: std::marker::Sized,
 {
     type Joined;
+    // const capacity: usize = Contravariant::cap * Covariant::cap;
     // index
     // a[[1, 2, 3]] = a.index([1, 2, 3])
     fn index<
@@ -20,6 +28,18 @@ where
         cont: I,
         cov: J,
     ) -> &ElementType;
+
+    fn from_vec(vec: Vec<ElementType>) -> Self;
+
+    fn zeros() -> Self
+    where
+        ElementType: UnitalRing<Addition, Multiplication>,
+        Addition: InternalBinaryOperator<ElementType>,
+        Multiplication: InternalBinaryOperator<ElementType>,
+    {
+        let cap = Contravariant::get_capacity() * Covariant::get_capacity();
+        Self::from_vec(vec![ElementType::zero(); cap])
+    }
 }
 
 pub trait Scalar<ElementType>: Tensor<ElementType, HNil, HNil> {

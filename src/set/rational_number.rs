@@ -33,6 +33,7 @@ impl BinaryOperator<RationalNumber, RationalNumber, RationalNumber> for Addition
     ) -> RationalNumber {
         let lhs = lhs.into();
         let rhs = rhs.into();
+
         RationalNumber {
             p: lhs.p * rhs.q + rhs.p * lhs.q,
             q: lhs.q * rhs.q,

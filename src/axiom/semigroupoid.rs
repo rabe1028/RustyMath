@@ -9,7 +9,7 @@ where
 
 impl<Op, T> Semigroupoid<Op> for T
 where
-    T: Semigroupoid<Op>,
+    T: Associativity<Op>,
     Op: InternalBinaryOperator<T>,
 {
 }

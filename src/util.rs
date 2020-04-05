@@ -22,6 +22,7 @@ pub trait IndexShape {
     // all usize hlist
     type Shape: HList;
     //type Capacity;
+    // const cap: usize;
 
     fn get_index(index: Self::Shape) -> (usize, usize);
     fn get_capacity() -> usize;
@@ -30,13 +31,15 @@ pub trait IndexShape {
 impl IndexShape for HNil {
     type Shape = HNil;
     //type Capacity = U1;
+    // const cap: usize = 1;
 
     fn get_index(_: Self::Shape) -> (usize, usize) {
         (0, 1)
     }
 
     fn get_capacity() -> usize {
-        1
+        // Self::cap
+        1 
     }
 }
 
@@ -47,6 +50,7 @@ where
 {
     type Shape = HCons<usize, <Tail as IndexShape>::Shape>;
     //type Capacity = Prod<Head, <Tail as IndexShape>::Capacity>;
+    // const cap: usize = Head::to_usize() * Tail::cap;
 
     fn get_index(index: Self::Shape) -> (usize, usize) {
         let (h, tail) = index.pop();

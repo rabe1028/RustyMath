@@ -19,7 +19,11 @@ Test Array Struct Implementation
 */
 
 #[derive(Debug, Clone, PartialEq)]
-struct BasicArray<ElementType, Contravariant, Covariant> {
+struct BasicArray<ElementType, Contravariant, Covariant>
+where
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
     _inner: Vec<ElementType>,
     _contravariant: PhantomData<Contravariant>,
     _covariant: PhantomData<Covariant>,
@@ -30,23 +34,22 @@ where
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
-    pub fn from_vec(vec: Vec<ElementType>) -> Self {
-        assert!(vec.len() == Contravariant::get_capacity() * Covariant::get_capacity());
-        BasicArray {
-            _inner: vec,
-            _contravariant: PhantomData,
-            _covariant: PhantomData,
-        }
-    }
-    /*
-    pub fn zeros<I: Into<Shape>>(_: I) -> Self {
-        // Addition Zero Element
-        BasicArray {
-            _inner: vec![0; Shape::get_capacity()],
-            _phantom: PhantomData,
-        }
-    }
-    */
+    // pub fn from_vec(vec: Vec<ElementType>) -> Self {
+    //     assert!(vec.len() == Contravariant::get_capacity() * Covariant::get_capacity());
+    //     BasicArray {
+    //         _inner: vec,
+    //         _contravariant: PhantomData,
+    //         _covariant: PhantomData,
+    //     }
+    // }
+
+    // pub fn zeros<I: Into<Shape>>(_: I) -> Self {
+    //     // Addition Zero Element
+    //     BasicArray {
+    //         _inner: vec![0; Shape::get_capacity()],
+    //         _phantom: PhantomData,
+    //     }
+    // }
 }
 
 impl<ElementType, Contravariant, Covariant> Tensor<ElementType, Contravariant, Covariant>
@@ -73,6 +76,15 @@ where
         let cov = cov.into();
         let (offset, _) = Self::Joined::get_index(cont + cov);
         &self._inner[offset]
+    }
+
+    fn from_vec(vec: Vec<ElementType>) -> Self {
+        assert!(vec.len() == Contravariant::get_capacity() * Covariant::get_capacity());
+        BasicArray {
+            _inner: vec,
+            _contravariant: PhantomData,
+            _covariant: PhantomData,
+        }
     }
 }
 
@@ -179,6 +191,35 @@ where
 {
 }
 
+// for Lazy Evaluation
+
+struct LazyBinaryOperation<Op, Left, Right> {
+    lhs: Left,
+    rhs: Right,
+    _op: PhantomData<Op>,
+}
+
+impl<Op, Left, Right> LazyBinaryOperation<Op, Left, Right> {
+    fn eval(self) {
+        // TODO: implement
+    }
+}
+
+impl<Rhs, ElementType, Contravariant, Covariant> Add<Rhs> for BasicArray<ElementType, Contravariant, Covariant>
+where
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
+    type Output = LazyBinaryOperation<Addition, Self, Rhs>;
+    fn add(self, other: Rhs) -> Self::Output {
+        LazyBinaryOperation {
+            lhs: self,
+            rhs: other,
+            _op: PhantomData,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::set::basic_array::*;
@@ -206,6 +247,9 @@ mod tests {
     #[test]
     fn construct_1d() {
         let _a: BasicArray<isize, Hlist!(U4), HNil> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let _b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+
+        assert_eq!(_a, _b);
     }
 
     #[test]
