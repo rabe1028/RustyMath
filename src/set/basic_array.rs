@@ -202,6 +202,24 @@ where
 // 3 - Owned & Borrowed
 // 4 - Borrowed & Borrowed
 // このようにしないと，BinaryOperatorのGenericsに入れる型引数が悪さをする
+// Owned&Ownedのときに，lifetime parameterがimplの文中にないから，怒られる
+
+// struct LazyBinaryOperation<'a, Op, Left, Right, Output>
+// where
+//     Op: BinaryOperator<Left, Right, Output>,
+//     Left: 'a + std::clone::Clone + Into<std::borrow::Cow<'a, Left>>,
+//     Right: 'a + std::clone::Clone + Into<std::borrow::Cow<'a, Right>>,
+// {
+//     lhs: Left,
+//     rhs: Right,
+//     _op: PhantomData<&'a Op>,
+//     _out: PhantomData<Output>,
+// }
+
+pub trait LazyOperation {
+    type Output;
+    fn eval(self) -> Self::Output;
+}
 
 struct LazyBinaryOperationOO<Op, Left, Right, Output>
 where
@@ -251,69 +269,98 @@ where
     _out: PhantomData<Output>,
 }
 
-impl<Op, Left, Right, Output> LazyBinaryOperationOO<Op, Left, Right, Output>
+// impl<'a, Op, Left, Right, Output> LazyBinaryOperation<'a, Op, Left, Right, Output>
+// where
+//     Op: BinaryOperator<Left, Right, Output>,
+//     Left: 'a + std::clone::Clone + Into<std::borrow::Cow<'a, Left>>,
+//     Right: 'a + std::clone::Clone + Into<std::borrow::Cow<'a, Right>>,
+// {
+//     fn eval(self) -> Output {
+//         // TODO: implement
+//         Op::operate(self.lhs, self.rhs)
+//     }
+// }
+
+impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperationOO<Op, Left, Right, Output> 
 where
     Op: BinaryOperator<Left, Right, Output>,
     Left: std::clone::Clone,
     Right: std::clone::Clone,
+    Left: 'a + Into<std::borrow::Cow<'a, Left>>,
+    Right: 'a + Into<std::borrow::Cow<'a, Right>>,
 {
-    fn eval<'a>(self) -> Output
-    where
-        Left: 'a + Into<std::borrow::Cow<'a, Left>>,
-        Right: 'a + Into<std::borrow::Cow<'a, Right>>,
-    {
-        // TODO: implement
+    type Output = Output;
+    fn eval(self) -> Self::Output {
         Op::operate(self.lhs, self.rhs)
     }
 }
 
-impl<'a, Op, Left, Right, Output> LazyBinaryOperationBO<'a, Op, Left, Right, Output>
+impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperationBO<'a, Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
     Left: std::clone::Clone,
     Right: std::clone::Clone,
+    &'a Left: Into<std::borrow::Cow<'a, Left>>,
+    Right: 'a + Into<std::borrow::Cow<'a, Right>>,
 {
-    fn eval(self) -> Output
-    where
-        &'a Left: Into<std::borrow::Cow<'a, Left>>,
-        Right: 'a + Into<std::borrow::Cow<'a, Right>>,
+    type Output = Output;
+    fn eval(self) -> Self::Output
     {
-        // TODO: implement
         Op::operate(self.lhs, self.rhs)
     }
 }
 
-impl<'a, Op, Left, Right, Output> LazyBinaryOperationOB<'a, Op, Left, Right, Output>
+impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperationOB<'a, Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
     Left: std::clone::Clone,
     Right: std::clone::Clone,
+    Left: 'a + Into<std::borrow::Cow<'a, Left>>,
+    &'a Right: Into<std::borrow::Cow<'a, Right>>,
 {
+    type Output = Output;
     fn eval(self) -> Output
-    where
-        Left: 'a + Into<std::borrow::Cow<'a, Left>>,
-        &'a Right: Into<std::borrow::Cow<'a, Right>>,
     {
-        // TODO: implement
         Op::operate(self.lhs, self.rhs)
     }
 }
 
-impl<'a, Op, Left, Right, Output> LazyBinaryOperationBB<'a, Op, Left, Right, Output>
+impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperationBB<'a, Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
     Left: std::clone::Clone,
     Right: std::clone::Clone,
+    &'a Left: Into<std::borrow::Cow<'a, Left>>,
+    &'a Right: Into<std::borrow::Cow<'a, Right>>,
 {
-    fn eval(self) -> Output
-    where
-        &'a Left: Into<std::borrow::Cow<'a, Left>>,
-        &'a Right: Into<std::borrow::Cow<'a, Right>>,
+    type Output = Output;
+    fn eval(self) -> Self::Output
     {
-        // TODO: implement
         Op::operate(self.lhs, self.rhs)
     }
 }
+
+// impl<'a, ElementType, Contravariant, Covariant> Add<BasicArray<ElementType, Contravariant, Covariant>>
+//     for BasicArray<ElementType, Contravariant, Covariant>
+// where
+//     BasicArray<ElementType, Contravariant, Covariant>: Clone,
+//     ElementType: std::ops::Add<Output = ElementType> + Copy,
+//     Contravariant: HList + IndexShape + Add<Covariant>,
+//     Covariant: HList + IndexShape,
+//     // Self: Into<std::borrow::Cow<'a, Self>>,
+// {
+//     type Output = LazyBinaryOperation<'a, Addition, Self, Self, Self>;
+//     fn add(self, other: Self) -> Self::Output
+//     where Self: 'a + Into<std::borrow::Cow<'a, Self>>,
+//     {
+//         LazyBinaryOperation {
+//             lhs: self,
+//             rhs: other,
+//             _op: PhantomData,
+//             _out: PhantomData,
+//         }
+//     }
+// }
 
 impl<ElementType, Contravariant, Covariant> Add<BasicArray<ElementType, Contravariant, Covariant>>
     for BasicArray<ElementType, Contravariant, Covariant>
@@ -325,7 +372,8 @@ where
     // Self: Into<std::borrow::Cow<'a, Self>>,
 {
     type Output = LazyBinaryOperationOO<Addition, Self, Self, Self>;
-    fn add(self, other: Self) -> Self::Output {
+    fn add(self, other: Self) -> Self::Output
+    {
         LazyBinaryOperationOO {
             lhs: self,
             rhs: other,
