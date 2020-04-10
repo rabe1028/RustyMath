@@ -34,22 +34,6 @@ where
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
-    // pub fn from_vec(vec: Vec<ElementType>) -> Self {
-    //     assert!(vec.len() == Contravariant::get_capacity() * Covariant::get_capacity());
-    //     BasicArray {
-    //         _inner: vec,
-    //         _contravariant: PhantomData,
-    //         _covariant: PhantomData,
-    //     }
-    // }
-
-    // pub fn zeros<I: Into<Shape>>(_: I) -> Self {
-    //     // Addition Zero Element
-    //     BasicArray {
-    //         _inner: vec![0; Shape::get_capacity()],
-    //         _phantom: PhantomData,
-    //     }
-    // }
 }
 
 impl<ElementType, Contravariant, Covariant> Tensor<ElementType, Contravariant, Covariant>
@@ -133,7 +117,6 @@ where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
-    //std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
     #[inline(always)]
     fn operate<'a, 'b>(
@@ -165,7 +148,6 @@ where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
-    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
 }
 
@@ -176,7 +158,6 @@ where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
-    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
 }
 
@@ -187,7 +168,6 @@ where
     ElementType: std::ops::Add<Output = ElementType> + Copy + PartialEq,
     Contravariant: HList + IndexShape + PartialEq + Add<Covariant>,
     Covariant: HList + IndexShape + PartialEq,
-    std::vec::Vec<ElementType>: std::iter::FromIterator<<ElementType as std::ops::Add>::Output>,
 {
 }
 
@@ -369,7 +349,6 @@ where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
-    // Self: Into<std::borrow::Cow<'a, Self>>,
 {
     type Output = LazyBinaryOperationOO<Addition, Self, Self, Self>;
     fn add(self, other: Self) -> Self::Output
