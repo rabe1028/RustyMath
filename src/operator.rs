@@ -43,6 +43,8 @@ where
     }
 }
 
+#[derive(Debug, Eq, PartialEq)]
 pub enum Addition {}
 
+#[derive(Debug, Eq, PartialEq)]
 pub enum Multiplication {}

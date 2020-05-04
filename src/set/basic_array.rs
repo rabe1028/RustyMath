@@ -29,6 +29,36 @@ where
     _covariant: PhantomData<Covariant>,
 }
 
+impl<'a, ElementType, Contravariant, Covariant>
+    From<BasicArray<ElementType, Contravariant, Covariant>>
+    for Cow<'a, BasicArray<ElementType, Contravariant, Covariant>>
+where
+    Contravariant: HList + IndexShape + std::clone::Clone,
+    Covariant: HList + IndexShape + std::clone::Clone,
+    ElementType: std::clone::Clone,
+{
+    fn from(
+        t: BasicArray<ElementType, Contravariant, Covariant>,
+    ) -> Cow<'a, BasicArray<ElementType, Contravariant, Covariant>> {
+        Cow::Owned(t)
+    }
+}
+
+impl<'a, ElementType, Contravariant, Covariant>
+    From<&'a BasicArray<ElementType, Contravariant, Covariant>>
+    for Cow<'a, BasicArray<ElementType, Contravariant, Covariant>>
+where
+    Contravariant: HList + IndexShape + std::clone::Clone,
+    Covariant: HList + IndexShape + std::clone::Clone,
+    ElementType: std::clone::Clone,
+{
+    fn from(
+        t: &'a BasicArray<ElementType, Contravariant, Covariant>,
+    ) -> Cow<'a, BasicArray<ElementType, Contravariant, Covariant>> {
+        Cow::Borrowed(t)
+    }
+}
+
 impl<ElementType, Contravariant, Covariant> BasicArray<ElementType, Contravariant, Covariant>
 where
     Contravariant: HList + IndexShape,
@@ -201,6 +231,7 @@ pub trait LazyOperation {
     fn eval(self) -> Self::Output;
 }
 
+#[derive(Debug, Eq, PartialEq)]
 struct LazyBinaryOperationOO<Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
@@ -213,6 +244,7 @@ where
     _out: PhantomData<Output>,
 }
 
+#[derive(Debug, Eq, PartialEq)]
 struct LazyBinaryOperationBO<'a, Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
@@ -225,6 +257,7 @@ where
     _out: PhantomData<Output>,
 }
 
+#[derive(Debug, Eq, PartialEq)]
 struct LazyBinaryOperationOB<'a, Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
@@ -237,6 +270,7 @@ where
     _out: PhantomData<Output>,
 }
 
+#[derive(Debug, Eq, PartialEq)]
 struct LazyBinaryOperationBB<'a, Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
@@ -249,19 +283,7 @@ where
     _out: PhantomData<Output>,
 }
 
-// impl<'a, Op, Left, Right, Output> LazyBinaryOperation<'a, Op, Left, Right, Output>
-// where
-//     Op: BinaryOperator<Left, Right, Output>,
-//     Left: 'a + std::clone::Clone + Into<std::borrow::Cow<'a, Left>>,
-//     Right: 'a + std::clone::Clone + Into<std::borrow::Cow<'a, Right>>,
-// {
-//     fn eval(self) -> Output {
-//         // TODO: implement
-//         Op::operate(self.lhs, self.rhs)
-//     }
-// }
-
-impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperationOO<Op, Left, Right, Output> 
+impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperationOO<Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
     Left: std::clone::Clone,
@@ -275,7 +297,8 @@ where
     }
 }
 
-impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperationBO<'a, Op, Left, Right, Output>
+impl<'a, Op, Left, Right, Output> LazyOperation
+    for LazyBinaryOperationBO<'a, Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
     Left: std::clone::Clone,
@@ -284,13 +307,13 @@ where
     Right: 'a + Into<std::borrow::Cow<'a, Right>>,
 {
     type Output = Output;
-    fn eval(self) -> Self::Output
-    {
+    fn eval(self) -> Self::Output {
         Op::operate(self.lhs, self.rhs)
     }
 }
 
-impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperationOB<'a, Op, Left, Right, Output>
+impl<'a, Op, Left, Right, Output> LazyOperation
+    for LazyBinaryOperationOB<'a, Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
     Left: std::clone::Clone,
@@ -299,13 +322,13 @@ where
     &'a Right: Into<std::borrow::Cow<'a, Right>>,
 {
     type Output = Output;
-    fn eval(self) -> Output
-    {
+    fn eval(self) -> Output {
         Op::operate(self.lhs, self.rhs)
     }
 }
 
-impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperationBB<'a, Op, Left, Right, Output>
+impl<'a, Op, Left, Right, Output> LazyOperation
+    for LazyBinaryOperationBB<'a, Op, Left, Right, Output>
 where
     Op: BinaryOperator<Left, Right, Output>,
     Left: std::clone::Clone,
@@ -314,33 +337,10 @@ where
     &'a Right: Into<std::borrow::Cow<'a, Right>>,
 {
     type Output = Output;
-    fn eval(self) -> Self::Output
-    {
+    fn eval(self) -> Self::Output {
         Op::operate(self.lhs, self.rhs)
     }
 }
-
-// impl<'a, ElementType, Contravariant, Covariant> Add<BasicArray<ElementType, Contravariant, Covariant>>
-//     for BasicArray<ElementType, Contravariant, Covariant>
-// where
-//     BasicArray<ElementType, Contravariant, Covariant>: Clone,
-//     ElementType: std::ops::Add<Output = ElementType> + Copy,
-//     Contravariant: HList + IndexShape + Add<Covariant>,
-//     Covariant: HList + IndexShape,
-//     // Self: Into<std::borrow::Cow<'a, Self>>,
-// {
-//     type Output = LazyBinaryOperation<'a, Addition, Self, Self, Self>;
-//     fn add(self, other: Self) -> Self::Output
-//     where Self: 'a + Into<std::borrow::Cow<'a, Self>>,
-//     {
-//         LazyBinaryOperation {
-//             lhs: self,
-//             rhs: other,
-//             _op: PhantomData,
-//             _out: PhantomData,
-//         }
-//     }
-// }
 
 impl<ElementType, Contravariant, Covariant> Add<BasicArray<ElementType, Contravariant, Covariant>>
     for BasicArray<ElementType, Contravariant, Covariant>
@@ -351,8 +351,7 @@ where
     Covariant: HList + IndexShape,
 {
     type Output = LazyBinaryOperationOO<Addition, Self, Self, Self>;
-    fn add(self, other: Self) -> Self::Output
-    {
+    fn add(self, other: Self) -> Self::Output {
         LazyBinaryOperationOO {
             lhs: self,
             rhs: other,
@@ -470,5 +469,85 @@ mod tests {
     #[should_panic]
     fn construct_1d_should_panic() {
         let _a: BasicArray<isize, Hlist!(U3), HNil> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+    }
+
+    #[test]
+    fn lazy_add_owned_owned() {
+        let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+
+        assert_eq!(
+            a + b,
+            LazyBinaryOperationOO {
+                lhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
+                rhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
+                _op: PhantomData,
+                _out: PhantomData,
+            }
+        );
+
+        let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        assert_eq!((a+b).eval(), BasicArray::from_vec(vec![2, 4, 6, 8]));
+    }
+
+    #[test]
+    fn lazy_add_owned_borrowed() {
+        let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+
+        assert_eq!(
+            a + &b,
+            LazyBinaryOperationOB {
+                lhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
+                rhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
+                _op: PhantomData,
+                _out: PhantomData,
+            }
+        );
+
+        let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        assert_eq!((a+&b).eval(), BasicArray::from_vec(vec![2, 4, 6, 8]));
+    }
+
+    #[test]
+    fn lazy_add_borrowed_owned() {
+        let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+
+        assert_eq!(
+            &a + b,
+            LazyBinaryOperationBO {
+                lhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
+                rhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
+                _op: PhantomData,
+                _out: PhantomData,
+            }
+        );
+
+        let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        assert_eq!((&a+b).eval(), BasicArray::from_vec(vec![2, 4, 6, 8]));
+    }
+
+    #[test]
+    fn lazy_add_borrowed_borrowed() {
+        let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+
+        assert_eq!(
+            &a + &b,
+            LazyBinaryOperationBB {
+                lhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
+                rhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
+                _op: PhantomData,
+                _out: PhantomData,
+            }
+        );
+
+        let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        assert_eq!((&a+&b).eval(), BasicArray::from_vec(vec![2, 4, 6, 8]));
     }
 }
