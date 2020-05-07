@@ -277,6 +277,22 @@ where
     }
 }
 
+impl<Op, Left, Right, Output> InputSanitizer for LazyBinaryOperationOO<Op, Left, Right, Output>
+where
+    Left: std::clone::Clone + InputSanitizer,
+    Right: std::clone::Clone + InputSanitizer,
+    Op: std::clone::Clone + BinaryOperator<Sanitize<Left>, Sanitize<Right>, Output>,
+    Output: std::clone::Clone,
+{
+    type InputShape = Output;
+    fn sanitize<'a>(self) -> std::borrow::Cow<'a, Self::InputShape>
+    where
+        Self: 'a,
+    {
+        Cow::Owned(self.eval())
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 struct LazyBinaryOperationOO<Op, Left, Right, Output>
 where
@@ -356,6 +372,27 @@ where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     Contravariant: std::clone::Clone + HList + IndexShape + Add<Covariant>,
     Covariant: std::clone::Clone + HList + IndexShape,
+    Self: std::clone::Clone + InputSanitizer, //Left
+    Rhs: std::clone::Clone + InputSanitizer,  //Right
+    Addition: std::clone::Clone + BinaryOperator<Sanitize<Self>, Sanitize<Rhs>, Sanitize<Self>>,
+{
+    type Output = LazyBinaryOperationOO<Addition, Self, Rhs, Sanitize<Self>>;
+    fn add(self, other: Rhs) -> Self::Output {
+        LazyBinaryOperationOO {
+            lhs: self,
+            rhs: other,
+            _op: PhantomData,
+            _out: PhantomData,
+        }
+    }
+}
+
+impl<Op, Left, Right, Output, Rhs> Add<Rhs> for LazyBinaryOperationOO<Op, Left, Right, Output>
+where
+    Left: std::clone::Clone + InputSanitizer,
+    Right: std::clone::Clone + InputSanitizer,
+    Op: std::clone::Clone + BinaryOperator<Sanitize<Left>, Sanitize<Right>, Output>,
+    Output: std::clone::Clone,
     Self: std::clone::Clone + InputSanitizer, //Left
     Rhs: std::clone::Clone + InputSanitizer,  //Right
     Addition: std::clone::Clone + BinaryOperator<Sanitize<Self>, Sanitize<Rhs>, Sanitize<Self>>,
@@ -489,12 +526,12 @@ mod tests {
         assert_eq!((&a + &b).eval(), BasicArray::from_vec(vec![2, 4, 6, 8]));
     }
 
-    // #[test]
-    // fn lazy_add_2op() {
-    //     let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
-    //     let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
-    //     let c: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+    #[test]
+    fn lazy_add_2op() {
+        let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let c: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
 
-    //     assert_eq!((a + b + c).eval(), BasicArray::from_vec(vec![3, 6, 9, 12]));
-    // }
+        assert_eq!((a + b + c).eval(), BasicArray::from_vec(vec![3, 6, 9, 12]));
+    }
 }
