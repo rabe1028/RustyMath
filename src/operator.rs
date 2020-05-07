@@ -5,7 +5,6 @@ where
     A: std::clone::Clone,
     B: std::clone::Clone,
 {
-    #[inline(always)]
     fn operate<'a, 'b>(lhs: impl Into<Cow<'a, A>>, rhs: impl Into<Cow<'b, B>>) -> C
     where
         A: 'a,
@@ -43,8 +42,8 @@ where
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Addition {}
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Multiplication {}

@@ -43,7 +43,6 @@ where
     Self: Sized + PartialEq + Copy,
     T: InternalBinaryOperator<Self>,
 {
-    #[inline(always)]
     fn identity() -> Self;
     #[inline(always)]
     fn is_identity(&self) -> bool {
