@@ -182,7 +182,7 @@ macro_rules! impl_scalar {
         $(
             impl Tensor<$ty, HNil, HNil> for $ty {
                 type Joined = HNil;
-                fn index<I: Into<HNil>, J: Into<HNil>>(&self, cont: I, cov: J) -> &Self {
+                fn index<I: Into<HNil>, J: Into<HNil>>(&self, _cont: I, _cov: J) -> &Self {
                     &self
                 }
 

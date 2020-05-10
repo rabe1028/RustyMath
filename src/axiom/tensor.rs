@@ -4,11 +4,11 @@ use typenum::uint::Unsigned;
 
 use crate::util::IndexShape;
 
-use std::borrow::Cow;
+
 
 use crate::axiom::*;
 use crate::operator::*;
-use crate::property::*;
+
 
 pub trait Tensor<ElementType, Contravariant, Covariant>
 where
