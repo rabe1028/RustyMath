@@ -159,10 +159,15 @@ where
         let lhs = lhs.into();
         let rhs = rhs.into();
 
-        let mut new_vec: Vec<ElementType> = vec![];
-        for i in 0..lhs._inner.len() {
-            new_vec.push(lhs._inner[i] + rhs._inner[i]);
-        }
+        assert_eq!(lhs._inner.len(), rhs._inner.len());
+        
+        let new_vec = lhs
+            ._inner
+            .iter()
+            .zip(rhs._inner.iter())
+            .map(|(l, r)| *l + *r)
+            .collect();
+
         BasicArray {
             _inner: new_vec,
             _contravariant: PhantomData,
@@ -306,6 +311,7 @@ where
     _out: PhantomData<Output>,
 }
 
+// for no blas normal impls
 impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperation<Op, Left, Right, Output>
 where
     Left: std::clone::Clone + InputSanitizer,
