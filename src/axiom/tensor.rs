@@ -3,12 +3,11 @@ use frunk::*; //{HCons, HNil};
 use typenum::uint::Unsigned;
 
 use crate::util::IndexShape;
-
-
+use crate::util::Join;
+use std::ops::Add;
 
 use crate::axiom::*;
 use crate::operator::*;
-
 
 pub trait Tensor<ElementType, Contravariant, Covariant>
 where
@@ -16,7 +15,7 @@ where
     Covariant: HList + IndexShape,
     Self: std::marker::Sized,
 {
-    type Joined;
+    type Joined;// = Join<Contravariant, Covariant>;
     // const capacity: usize = Contravariant::cap * Covariant::cap;
     // index
     // a[[1, 2, 3]] = a.index([1, 2, 3])
@@ -28,6 +27,15 @@ where
         cont: I,
         cov: J,
     ) -> &ElementType;
+
+    fn index_mut<
+        I: Into<<Contravariant as IndexShape>::Shape>,
+        J: Into<<Covariant as IndexShape>::Shape>,
+    >(
+        &mut self,
+        cont: I,
+        cov: J,
+    ) -> &mut ElementType;
 
     fn from_vec(vec: Vec<ElementType>) -> Self;
 

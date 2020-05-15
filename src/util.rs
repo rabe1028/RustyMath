@@ -18,7 +18,7 @@ pub use hinsertable::*;
 
 pub type Join<A, B> = <A as Add<B>>::Output;
 
-pub trait IndexShape {
+pub trait IndexShape: HList {
     // all usize hlist
     type Shape: HList;
     //type Capacity;

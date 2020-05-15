@@ -186,6 +186,10 @@ macro_rules! impl_scalar {
                     &self
                 }
 
+                fn index_mut<I: Into<HNil>, J: Into<HNil>>(&mut self, _cont: I, _cov: J) -> &mut Self {
+                    self
+                }
+
                 fn from_vec(vec: Vec<$ty>) -> Self {
                     assert!(vec.len() == 1);
                     vec[0]

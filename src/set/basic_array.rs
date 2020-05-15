@@ -92,6 +92,20 @@ where
         &self._inner[offset]
     }
 
+    fn index_mut<
+        I: Into<<Contravariant as IndexShape>::Shape>,
+        J: Into<<Covariant as IndexShape>::Shape>,
+    >(
+        &mut self,
+        cont: I,
+        cov: J,
+    ) -> &mut ElementType {
+        let cont = cont.into();
+        let cov = cov.into();
+        let (offset, _) = Self::Joined::get_index(cont + cov);
+        &mut self._inner[offset]
+    }
+
     fn from_vec(vec: Vec<ElementType>) -> Self {
         assert!(vec.len() == Contravariant::get_capacity() * Covariant::get_capacity());
         BasicArray {
@@ -136,6 +150,43 @@ type BasicVector<ElementType, _1> = BasicArray<ElementType, Hlist!(_1), HNil>;
 
 type BasicMatrix<ElementType, _1, _2> = BasicArray<ElementType, Hlist!(_1), Hlist!(_2)>;
 
+impl<ElementType, Contravariant, Covariant, I, J> std::ops::Index<(I, J)>
+    for BasicArray<ElementType, Contravariant, Covariant>
+where
+    BasicArray<ElementType, Contravariant, Covariant>: Clone,
+    ElementType: std::ops::Add<Output = ElementType> + Copy,
+    Contravariant: IndexShape + Add<Covariant>,
+    Covariant: IndexShape,
+    Join<Contravariant, Covariant>: IndexShape,
+    <Contravariant as IndexShape>::Shape: Add<
+        <Covariant as IndexShape>::Shape,
+        Output = <Join<Contravariant, Covariant> as IndexShape>::Shape,
+    >,
+    I: Into<<Contravariant as IndexShape>::Shape>,
+    J: Into<<Covariant as IndexShape>::Shape>,
+{
+    type Output = ElementType;
+    fn index(&self, (cont, cov): (I, J)) -> &Self::Output {
+        let cont = cont.into();
+        let cov = cov.into();
+        let (offset, _) =
+            <Self as Tensor<ElementType, Contravariant, Covariant>>::Joined::get_index(cont + cov);
+        &self._inner[offset]
+    }
+}
+
+// impl<ElementType, _1, _2> std::ops::Index<(usize, usize)> for BasicMatrix<ElementType, _1, _2>
+// where
+//     Self: std::clone::Clone,
+//     _1: Unsigned,
+//     _2: Unsigned,
+// {
+//     type Output = ElementType;
+//     fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
+//         unimplemented!();
+//     }
+// }
+
 impl<ElementType, Contravariant, Covariant>
     BinaryOperator<
         BasicArray<ElementType, Contravariant, Covariant>,
@@ -160,7 +211,6 @@ where
         let rhs = rhs.into();
 
         assert_eq!(lhs._inner.len(), rhs._inner.len());
-        
         let new_vec = lhs
             ._inner
             .iter()
@@ -205,6 +255,68 @@ where
     Covariant: HList + IndexShape + PartialEq,
 {
 }
+
+impl<ElementType, _1, _2, _3>
+    BinaryOperator<
+        BasicMatrix<ElementType, _1, _2>,
+        BasicMatrix<ElementType, _2, _3>,
+        BasicMatrix<ElementType, _1, _3>,
+    > for Multiplication
+where
+    BasicMatrix<ElementType, _1, _2>: Clone,
+    BasicMatrix<ElementType, _2, _3>: Clone,
+    ElementType: std::ops::Mul<Output = ElementType> + std::ops::Add<Output = ElementType> + Copy,
+    ElementType: UnitalRing<Addition, Multiplication>,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+    _1: Unsigned,
+    _2: Unsigned,
+    _3: Unsigned,
+{
+    #[inline(always)]
+    fn operate<'a, 'b>(
+        lhs: impl Into<Cow<'a, BasicMatrix<ElementType, _1, _2>>>,
+        rhs: impl Into<Cow<'b, BasicMatrix<ElementType, _2, _3>>>,
+    ) -> BasicMatrix<ElementType, _1, _3>
+    where
+        BasicMatrix<ElementType, _1, _2>: 'a,
+        BasicMatrix<ElementType, _2, _3>: 'b,
+    {
+        let lhs = lhs.into();
+        let rhs = rhs.into();
+
+        let mut new_mat = BasicMatrix::<ElementType, _1, _3>::zeros();
+
+        for i in 0.._1::to_usize() {
+            for j in 0.._3::to_usize() {
+                for k in 0.._2::to_usize() {
+                    *new_mat.index_mut(hlist!(i), hlist!(j)) = *new_mat.index(hlist!(i), hlist!(j))
+                        + *lhs.index(hlist!(i), hlist!(k)) * *rhs.index(hlist!(k), hlist!(j));
+                }
+            }
+        }
+
+        new_mat
+    }
+}
+
+// impl<ElementType, _1, _2> Totality<Multiplication> for BasicMatrix<ElementType, _1, _2>
+// where
+//     BasicMatrix<ElementType, _1, _2>: Clone,
+//     ElementType: std::ops::Mul<Output = ElementType> + Copy,
+//     _1: Unsigned,
+//     _2: Unsigned,
+// {
+// }
+
+// impl<ElementType, _1, _2> Associativity<Multiplication> for BasicMatrix<ElementType, _1, _2>
+// where
+//     BasicMatrix<ElementType, _1, _2>: Clone,
+//     ElementType: std::ops::Mul<Output = ElementType> + Copy,
+//     _1: Unsigned,
+//     _2: Unsigned,
+// {
+// }
 
 // for Lazy Evaluation
 // Addの戻り値にライフタイムがあると無理っぽい
@@ -450,6 +562,38 @@ mod tests {
     #[should_panic]
     fn construct_1d_should_panic() {
         let _a: BasicArray<isize, Hlist!(U3), HNil> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+    }
+
+    #[test]
+    fn vec_index_test() {
+        let b: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        //<Hlist!(U4) as IndexShape>::Shape::new(&b).unwrap();
+        let _: <Hlist!(U4) as IndexShape>::Shape = hlist!(3);
+        // assert_eq!(b.index(hlist!(1),hlist!()), 2);
+        assert_eq!(b[(hlist!(1), hlist!())], 2);
+    }
+
+    #[test]
+    fn vec_add_test() {
+        let a: BasicArray<isize, Hlist!(U4), HNil> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicArray<isize, Hlist!(U4), HNil> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let c: BasicArray<isize, Hlist!(U4), HNil> = BasicArray::from_vec(vec![2, 4, 6, 8]);
+        assert_eq!(<Addition as InternalBinaryOperator<_>>::operate(&a, &b), c);
+    }
+
+    #[test]
+    fn mat_mul_test() {
+        let a: BasicMatrix<isize, U2, U2> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let b: BasicMatrix<isize, U2, U2> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        let c: BasicMatrix<isize, U2, U2> = BasicArray::from_vec(vec![7, 10, 15, 22]);
+        assert_eq!(
+            <Multiplication as BinaryOperator<_, _, _>>::operate(&a, &b),
+            c
+        );
+        assert_eq!(
+            <Multiplication as BinaryOperator<_, _, _>>::operate(&a, &a),
+            c
+        );
     }
 
     #[test]
