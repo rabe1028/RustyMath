@@ -46,6 +46,7 @@
   - before: BinaryOperator<A, B, C>
   - After: BinaryOperator<A, B, Output=C>
   - 関連型にして，制約を強める
+  - また，Cowを使わないで，stdと同様の実装にする
 
 - trait aliasについて
   - 各代数的法則(axios)は，propertyの言い換えとするのが理想
