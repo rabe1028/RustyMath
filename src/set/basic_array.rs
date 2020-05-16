@@ -167,25 +167,21 @@ where
 {
     type Output = ElementType;
     fn index(&self, (cont, cov): (I, J)) -> &Self::Output {
-        let cont = cont.into();
-        let cov = cov.into();
-        let (offset, _) =
-            <Self as Tensor<ElementType, Contravariant, Covariant>>::Joined::get_index(cont + cov);
-        &self._inner[offset]
+        <Self as Tensor<_, _, _>>::index(self, cont, cov)
     }
 }
 
-// impl<ElementType, _1, _2> std::ops::Index<(usize, usize)> for BasicMatrix<ElementType, _1, _2>
-// where
-//     Self: std::clone::Clone,
-//     _1: Unsigned,
-//     _2: Unsigned,
-// {
-//     type Output = ElementType;
-//     fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
-//         unimplemented!();
-//     }
-// }
+impl<ElementType, _1, _2> std::ops::Index<[usize; 2]> for BasicMatrix<ElementType, _1, _2>
+where
+    Self: std::clone::Clone,
+    _1: Unsigned,
+    _2: Unsigned,
+{
+    type Output = ElementType;
+    fn index(&self, ind: [usize; 2]) -> &Self::Output {
+        <Self as Tensor<_, _, _>>::index(self, hlist!(ind[0]), hlist!(ind[1]))
+    }
+}
 
 impl<ElementType, Contravariant, Covariant>
     BinaryOperator<
@@ -571,6 +567,9 @@ mod tests {
         let _: <Hlist!(U4) as IndexShape>::Shape = hlist!(3);
         // assert_eq!(b.index(hlist!(1),hlist!()), 2);
         assert_eq!(b[(hlist!(1), hlist!())], 2);
+        let b: BasicMatrix<isize, U2, U2> = BasicArray::from_vec(vec![1, 2, 3, 4]);
+        assert_eq!(b[(hlist!(1), hlist!(1))], 4);
+        assert_eq!(b[[1,1]], 4);
     }
 
     #[test]
