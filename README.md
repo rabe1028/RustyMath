@@ -42,7 +42,10 @@
     - 構造体の型でGenericsを受け取るのを，そのままTrait Genericsに流し込む構造になっているため，
       全てのメソッドを実装するときに，同様の制約をつける必要がある
     - BasicArray<ElementType, Covariant, Contravariant>に対して，Tensorの型は一意になるので，Genericsはいらないのでは？
-    
+- Operatorの設計の変更
+  - before: BinaryOperator<A, B, C>
+  - After: BinaryOperator<A, B, Output=C>
+  - 関連型にして，制約を強める
 
 - trait aliasについて
   - 各代数的法則(axios)は，propertyの言い換えとするのが理想
