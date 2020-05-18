@@ -3,8 +3,8 @@ use frunk::*; //{HCons, HNil};
 use typenum::uint::Unsigned;
 
 use crate::util::IndexShape;
-use crate::util::Join;
-use std::ops::Add;
+
+
 
 use crate::axiom::*;
 use crate::operator::*;
