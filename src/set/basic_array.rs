@@ -153,7 +153,6 @@ type BasicMatrix<ElementType, _1, _2> = BasicArray<ElementType, Hlist!(_1), Hlis
 impl<ElementType, Contravariant, Covariant, I, J> std::ops::Index<(I, J)>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
-    BasicArray<ElementType, Contravariant, Covariant>: Clone,
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     Contravariant: IndexShape + Add<Covariant>,
     Covariant: IndexShape,
@@ -173,7 +172,6 @@ where
 
 impl<ElementType, _1, _2> std::ops::Index<[usize; 2]> for BasicMatrix<ElementType, _1, _2>
 where
-    Self: std::clone::Clone,
     _1: Unsigned,
     _2: Unsigned,
 {
@@ -183,29 +181,126 @@ where
     }
 }
 
+// forward_internal_binop! {
+//     Addition,
+//     BasicArray<ElementType, Contravariant, Contravariant>
+//     where
+//         ElementType: Add + Copy,
+//         Contravariant: HList + IndexShape,
+//         Covariant: HList + IndexShape,
+//     (lhs, rhs) => {
+//         assert_eq!(lhs._inner.len(), rhs._inner.len());
+//         let new_vec = lhs
+//             ._inner
+//             .iter()
+//             .zip(rhs._inner.iter())
+//             .map(|(l, r)| *l + *r)
+//             .collect();
+
+//         BasicArray {
+//             _inner: new_vec,
+//             _contravariant: PhantomData,
+//             _covariant: PhantomData,
+//         }
+//     }
+// }
+
 impl<ElementType, Contravariant, Covariant>
     BinaryOperator<
         BasicArray<ElementType, Contravariant, Covariant>,
         BasicArray<ElementType, Contravariant, Covariant>,
+    > for Addition
+where
+    ElementType: std::ops::Add<Output = ElementType> + Copy,
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
+    type Output = BasicArray<ElementType, Contravariant, Covariant>;
+    fn operate(
+        lhs: BasicArray<ElementType, Contravariant, Covariant>,
+        rhs: BasicArray<ElementType, Contravariant, Covariant>,
+    ) -> BasicArray<ElementType, Contravariant, Covariant> {
+        // assert_eq!(lhs._inner.len(), rhs._inner.len());
+        // let new_vec = lhs
+        //     ._inner
+        //     .iter()
+        //     .zip(rhs._inner.iter())
+        //     .map(|(l, r)| *l + *r)
+        //     .collect();
+
+        // BasicArray {
+        //     _inner: new_vec,
+        //     _contravariant: PhantomData,
+        //     _covariant: PhantomData,
+        // }
+
+        <Addition as BinaryOperator<
+            &BasicArray<ElementType, Contravariant, Covariant>,
+            &BasicArray<ElementType, Contravariant, Covariant>,
+        >>::operate(&lhs, &rhs)
+    }
+}
+
+// forward_binop! macro cannot use generics, so we impl all.
+impl<'a, ElementType, Contravariant, Covariant>
+    BinaryOperator<
+        &'a BasicArray<ElementType, Contravariant, Covariant>,
         BasicArray<ElementType, Contravariant, Covariant>,
     > for Addition
 where
-    BasicArray<ElementType, Contravariant, Covariant>: Clone,
     ElementType: std::ops::Add<Output = ElementType> + Copy,
-    Contravariant: HList + IndexShape + Add<Covariant>,
+    Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
-    #[inline(always)]
-    fn operate<'a, 'b>(
-        lhs: impl Into<Cow<'a, BasicArray<ElementType, Contravariant, Covariant>>>,
-        rhs: impl Into<Cow<'b, BasicArray<ElementType, Contravariant, Covariant>>>,
-    ) -> BasicArray<ElementType, Contravariant, Covariant>
-    where
-        BasicArray<ElementType, Contravariant, Covariant>: 'a + 'b,
-    {
-        let lhs = lhs.into();
-        let rhs = rhs.into();
+    type Output = BasicArray<ElementType, Contravariant, Covariant>;
+    fn operate(
+        lhs: &'a BasicArray<ElementType, Contravariant, Covariant>,
+        rhs: BasicArray<ElementType, Contravariant, Covariant>,
+    ) -> BasicArray<ElementType, Contravariant, Covariant> {
+        <Addition as BinaryOperator<
+            &BasicArray<ElementType, Contravariant, Covariant>,
+            &BasicArray<ElementType, Contravariant, Covariant>,
+        >>::operate(lhs, &rhs)
+    }
+}
 
+impl<'a, ElementType, Contravariant, Covariant>
+    BinaryOperator<
+        BasicArray<ElementType, Contravariant, Covariant>,
+        &'a BasicArray<ElementType, Contravariant, Covariant>,
+    > for Addition
+where
+    ElementType: std::ops::Add<Output = ElementType> + Copy,
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
+    type Output = BasicArray<ElementType, Contravariant, Covariant>;
+    fn operate(
+        lhs: BasicArray<ElementType, Contravariant, Covariant>,
+        rhs: &'a BasicArray<ElementType, Contravariant, Covariant>,
+    ) -> BasicArray<ElementType, Contravariant, Covariant> {
+        <Addition as BinaryOperator<
+            &BasicArray<ElementType, Contravariant, Covariant>,
+            &BasicArray<ElementType, Contravariant, Covariant>,
+        >>::operate(&lhs, rhs)
+    }
+}
+
+impl<'a, ElementType, Contravariant, Covariant>
+    BinaryOperator<
+        &'a BasicArray<ElementType, Contravariant, Covariant>,
+        &'a BasicArray<ElementType, Contravariant, Covariant>,
+    > for Addition
+where
+    ElementType: std::ops::Add<Output = ElementType> + Copy,
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
+    type Output = BasicArray<ElementType, Contravariant, Covariant>;
+    fn operate(
+        lhs: &'a BasicArray<ElementType, Contravariant, Covariant>,
+        rhs: &'a BasicArray<ElementType, Contravariant, Covariant>,
+    ) -> BasicArray<ElementType, Contravariant, Covariant> {
         assert_eq!(lhs._inner.len(), rhs._inner.len());
         let new_vec = lhs
             ._inner
@@ -225,7 +320,6 @@ where
 impl<ElementType, Contravariant, Covariant>
     InternalBinaryOperator<BasicArray<ElementType, Contravariant, Covariant>> for Addition
 where
-    BasicArray<ElementType, Contravariant, Covariant>: Clone,
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
@@ -235,7 +329,6 @@ where
 impl<ElementType, Contravariant, Covariant> Totality<Addition>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
-    BasicArray<ElementType, Contravariant, Covariant>: Clone,
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
@@ -245,22 +338,16 @@ where
 impl<ElementType, Contravariant, Covariant> Associativity<Addition>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
-    BasicArray<ElementType, Contravariant, Covariant>: Clone,
-    ElementType: std::ops::Add<Output = ElementType> + Copy + PartialEq,
-    Contravariant: HList + IndexShape + PartialEq + Add<Covariant>,
-    Covariant: HList + IndexShape + PartialEq,
+    ElementType: std::ops::Add<Output = ElementType> + PartialEq + Copy,
+    Contravariant: HList + IndexShape + PartialEq + Add<Covariant> + Clone,
+    Covariant: HList + IndexShape + PartialEq + Clone,
 {
 }
 
 impl<ElementType, _1, _2, _3>
-    BinaryOperator<
-        BasicMatrix<ElementType, _1, _2>,
-        BasicMatrix<ElementType, _2, _3>,
-        BasicMatrix<ElementType, _1, _3>,
-    > for Multiplication
+    BinaryOperator<BasicMatrix<ElementType, _1, _2>, BasicMatrix<ElementType, _2, _3>>
+    for Multiplication
 where
-    BasicMatrix<ElementType, _1, _2>: Clone,
-    BasicMatrix<ElementType, _2, _3>: Clone,
     ElementType: std::ops::Mul<Output = ElementType> + std::ops::Add<Output = ElementType> + Copy,
     ElementType: UnitalRing<Addition, Multiplication>,
     Multiplication: InternalBinaryOperator<ElementType>,
@@ -269,18 +356,87 @@ where
     _2: Unsigned,
     _3: Unsigned,
 {
+    type Output = BasicMatrix<ElementType, _1, _3>;
     #[inline(always)]
-    fn operate<'a, 'b>(
-        lhs: impl Into<Cow<'a, BasicMatrix<ElementType, _1, _2>>>,
-        rhs: impl Into<Cow<'b, BasicMatrix<ElementType, _2, _3>>>,
-    ) -> BasicMatrix<ElementType, _1, _3>
-    where
-        BasicMatrix<ElementType, _1, _2>: 'a,
-        BasicMatrix<ElementType, _2, _3>: 'b,
-    {
-        let lhs = lhs.into();
-        let rhs = rhs.into();
+    fn operate(
+        lhs: BasicMatrix<ElementType, _1, _2>,
+        rhs: BasicMatrix<ElementType, _2, _3>,
+    ) -> BasicMatrix<ElementType, _1, _3> {
+        <Multiplication as BinaryOperator<
+            &BasicMatrix<ElementType, _1, _2>,
+            &BasicMatrix<ElementType, _2, _3>,
+        >>::operate(&lhs, &rhs)
+    }
+}
 
+impl<'a, ElementType, _1, _2, _3>
+    BinaryOperator<&'a BasicMatrix<ElementType, _1, _2>, BasicMatrix<ElementType, _2, _3>>
+    for Multiplication
+where
+    ElementType: std::ops::Mul<Output = ElementType> + std::ops::Add<Output = ElementType> + Copy,
+    ElementType: UnitalRing<Addition, Multiplication>,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+    _1: Unsigned,
+    _2: Unsigned,
+    _3: Unsigned,
+{
+    type Output = BasicMatrix<ElementType, _1, _3>;
+    #[inline(always)]
+    fn operate(
+        lhs: &'a BasicMatrix<ElementType, _1, _2>,
+        rhs: BasicMatrix<ElementType, _2, _3>,
+    ) -> BasicMatrix<ElementType, _1, _3> {
+        <Multiplication as BinaryOperator<
+            &BasicMatrix<ElementType, _1, _2>,
+            &BasicMatrix<ElementType, _2, _3>,
+        >>::operate(lhs, &rhs)
+    }
+}
+
+impl<'a, ElementType, _1, _2, _3>
+    BinaryOperator<BasicMatrix<ElementType, _1, _2>, &'a BasicMatrix<ElementType, _2, _3>>
+    for Multiplication
+where
+    ElementType: std::ops::Mul<Output = ElementType> + std::ops::Add<Output = ElementType> + Copy,
+    ElementType: UnitalRing<Addition, Multiplication>,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+    _1: Unsigned,
+    _2: Unsigned,
+    _3: Unsigned,
+{
+    type Output = BasicMatrix<ElementType, _1, _3>;
+    #[inline(always)]
+    fn operate(
+        lhs: BasicMatrix<ElementType, _1, _2>,
+        rhs: &'a BasicMatrix<ElementType, _2, _3>,
+    ) -> BasicMatrix<ElementType, _1, _3> {
+        <Multiplication as BinaryOperator<
+            &BasicMatrix<ElementType, _1, _2>,
+            &BasicMatrix<ElementType, _2, _3>,
+        >>::operate(&lhs, rhs)
+    }
+}
+
+impl<'a, ElementType, _1, _2, _3>
+    BinaryOperator<&'a BasicMatrix<ElementType, _1, _2>, &'a BasicMatrix<ElementType, _2, _3>>
+    for Multiplication
+where
+    ElementType: std::ops::Mul<Output = ElementType> + std::ops::Add<Output = ElementType> + Copy,
+    ElementType: UnitalRing<Addition, Multiplication>,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+    _1: Unsigned,
+    _2: Unsigned,
+    _3: Unsigned,
+{
+    type Output = BasicMatrix<ElementType, _1, _3>;
+    #[inline(always)]
+    fn operate(
+        lhs: &'a BasicMatrix<ElementType, _1, _2>,
+        rhs: &'a BasicMatrix<ElementType, _2, _3>,
+    ) -> BasicMatrix<ElementType, _1, _3> {
         let mut new_mat = BasicMatrix::<ElementType, _1, _3>::zeros();
 
         for i in 0.._1::to_usize() {
@@ -348,27 +504,25 @@ where
 // (他を使うと，借用先で借用することになり，失敗する)
 
 pub trait LazyOperation {
-    type Output: std::clone::Clone;
+    type Output;
     fn eval(self) -> Self::Output;
 }
 
 pub trait InputSanitizer {
-    type InputShape: std::clone::Clone;
-    fn sanitize<'a>(self) -> std::borrow::Cow<'a, Self::InputShape>
-    where
-        Self: 'a;
+    type InputShape;
+    fn sanitize(self) -> Self::InputShape;
 }
 
 impl<ElementType, Contravariant, Covariant> InputSanitizer
     for BasicArray<ElementType, Contravariant, Covariant>
 where
-    ElementType: std::ops::Add<Output = ElementType> + Copy,
-    Contravariant: std::clone::Clone + HList + IndexShape + Add<Covariant>,
-    Covariant: std::clone::Clone + HList + IndexShape,
+    ElementType: std::ops::Add<Output = ElementType>,
+    Contravariant: HList + IndexShape + Add<Covariant>,
+    Covariant: HList + IndexShape,
 {
     type InputShape = Self;
-    fn sanitize<'a>(self) -> std::borrow::Cow<'a, Self::InputShape> {
-        Cow::Owned(self)
+    fn sanitize(self) -> Self::InputShape {
+        self
     }
 }
 
@@ -377,57 +531,48 @@ type Sanitize<A> = <A as InputSanitizer>::InputShape;
 impl<ElementType, Contravariant, Covariant> InputSanitizer
     for &'_ BasicArray<ElementType, Contravariant, Covariant>
 where
-    ElementType: std::ops::Add<Output = ElementType> + Copy,
-    Contravariant: std::clone::Clone + HList + IndexShape + Add<Covariant>,
-    Covariant: std::clone::Clone + HList + IndexShape,
+    ElementType: std::ops::Add<Output = ElementType>,
+    Contravariant: HList + IndexShape + Add<Covariant>,
+    Covariant: HList + IndexShape,
 {
-    type InputShape = BasicArray<ElementType, Contravariant, Covariant>;
-    fn sanitize<'a>(self) -> std::borrow::Cow<'a, Self::InputShape>
-    where
-        Self: 'a,
-    {
-        Cow::Borrowed(self)
+    type InputShape = Self;
+    fn sanitize(self) -> Self::InputShape {
+        self
     }
 }
 
-impl<Op, Left, Right, Output> InputSanitizer for LazyBinaryOperation<Op, Left, Right, Output>
+impl<Op, Left, Right> InputSanitizer for LazyBinaryOperation<Op, Left, Right>
 where
-    Left: std::clone::Clone + InputSanitizer,
-    Right: std::clone::Clone + InputSanitizer,
-    Op: std::clone::Clone + BinaryOperator<Sanitize<Left>, Sanitize<Right>, Output>,
-    Output: std::clone::Clone,
+    Left: InputSanitizer,
+    Right: InputSanitizer,
+    Op: BinaryOperator<Sanitize<Left>, Sanitize<Right>>,
 {
-    type InputShape = Output;
-    fn sanitize<'a>(self) -> std::borrow::Cow<'a, Self::InputShape>
-    where
-        Self: 'a,
-    {
-        Cow::Owned(self.eval())
+    type InputShape = <Op as BinaryOperator<Sanitize<Left>, Sanitize<Right>>>::Output;
+    fn sanitize(self) -> Self::InputShape {
+        self.eval()
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-struct LazyBinaryOperation<Op, Left, Right, Output>
+struct LazyBinaryOperation<Op, Left, Right>
 where
-    Left: std::clone::Clone + InputSanitizer,
-    Right: std::clone::Clone + InputSanitizer,
-    Op: std::clone::Clone + BinaryOperator<Sanitize<Left>, Sanitize<Right>, Output>,
+    Left: InputSanitizer,
+    Right: InputSanitizer,
+    Op: BinaryOperator<Sanitize<Left>, Sanitize<Right>>,
 {
     lhs: Left,
     rhs: Right,
     _op: PhantomData<Op>,
-    _out: PhantomData<Output>,
 }
 
 // for no blas normal impls
-impl<'a, Op, Left, Right, Output> LazyOperation for LazyBinaryOperation<Op, Left, Right, Output>
+impl<'a, Op, Left, Right> LazyOperation for LazyBinaryOperation<Op, Left, Right>
 where
-    Left: std::clone::Clone + InputSanitizer,
-    Right: std::clone::Clone + InputSanitizer,
-    Op: std::clone::Clone + BinaryOperator<Sanitize<Left>, Sanitize<Right>, Output>,
-    Output: std::clone::Clone,
+    Left: InputSanitizer,
+    Right: InputSanitizer,
+    Op: BinaryOperator<Sanitize<Left>, Sanitize<Right>>,
 {
-    type Output = Output;
+    type Output = <Op as BinaryOperator<Sanitize<Left>, Sanitize<Right>>>::Output;
     fn eval(self) -> Self::Output {
         Op::operate(self.lhs.sanitize(), self.rhs.sanitize())
     }
@@ -460,21 +605,19 @@ where
 impl<ElementType, Contravariant, Covariant, Rhs> Add<Rhs>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
-    BasicArray<ElementType, Contravariant, Covariant>: Clone,
     ElementType: std::ops::Add<Output = ElementType> + Copy,
-    Contravariant: std::clone::Clone + HList + IndexShape + Add<Covariant>,
-    Covariant: std::clone::Clone + HList + IndexShape,
-    Self: std::clone::Clone + InputSanitizer, //Left
-    Rhs: std::clone::Clone + InputSanitizer<InputShape = Self>, //Right
-    Addition: std::clone::Clone + BinaryOperator<Sanitize<Self>, Sanitize<Rhs>, Self>,
+    Contravariant: HList + IndexShape + Add<Covariant>,
+    Covariant: HList + IndexShape,
+    Self: InputSanitizer, //Left
+    Rhs: InputSanitizer, //Right
+    Addition: BinaryOperator<Sanitize<Self>, Sanitize<Rhs>>,
 {
-    type Output = LazyBinaryOperation<Addition, Self, Rhs, Self>;
+    type Output = LazyBinaryOperation<Addition, Self, Rhs>;
     fn add(self, other: Rhs) -> Self::Output {
         LazyBinaryOperation {
             lhs: self,
             rhs: other,
             _op: PhantomData,
-            _out: PhantomData,
         }
     }
 }
@@ -482,42 +625,38 @@ where
 impl<ElementType, Contravariant, Covariant, Rhs> Add<Rhs>
     for &'_ BasicArray<ElementType, Contravariant, Covariant>
 where
-    BasicArray<ElementType, Contravariant, Covariant>: Clone,
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     Contravariant: std::clone::Clone + HList + IndexShape + Add<Covariant>,
     Covariant: std::clone::Clone + HList + IndexShape,
-    Self: std::clone::Clone + InputSanitizer, //Left
-    Rhs: std::clone::Clone + InputSanitizer,  //Right
-    Addition: std::clone::Clone + BinaryOperator<Sanitize<Self>, Sanitize<Rhs>, Sanitize<Self>>,
+    Self: InputSanitizer, //Left
+    Rhs: InputSanitizer,  //Right
+    Addition: std::clone::Clone + BinaryOperator<Sanitize<Self>, Sanitize<Rhs>>,
 {
-    type Output = LazyBinaryOperation<Addition, Self, Rhs, Sanitize<Self>>;
+    type Output = LazyBinaryOperation<Addition, Self, Rhs>;
     fn add(self, other: Rhs) -> Self::Output {
         LazyBinaryOperation {
             lhs: self,
             rhs: other,
             _op: PhantomData,
-            _out: PhantomData,
         }
     }
 }
 
-impl<Op, Left, Right, Output, Rhs> Add<Rhs> for LazyBinaryOperation<Op, Left, Right, Output>
+impl<Op, Left, Right, Rhs> Add<Rhs> for LazyBinaryOperation<Op, Left, Right>
 where
-    Left: std::clone::Clone + InputSanitizer,
-    Right: std::clone::Clone + InputSanitizer,
-    Op: std::clone::Clone + BinaryOperator<Sanitize<Left>, Sanitize<Right>, Output>,
-    Output: std::clone::Clone,
-    Self: std::clone::Clone + InputSanitizer, //Left
+    Left: InputSanitizer,
+    Right: InputSanitizer,
+    Op: BinaryOperator<Sanitize<Left>, Sanitize<Right>>,
+    Self: InputSanitizer, //Left
     Rhs: std::clone::Clone + InputSanitizer,  //Right
-    Addition: std::clone::Clone + BinaryOperator<Sanitize<Self>, Sanitize<Rhs>, Sanitize<Self>>,
+    Addition: std::clone::Clone + BinaryOperator<Sanitize<Self>, Sanitize<Rhs>>,
 {
-    type Output = LazyBinaryOperation<Addition, Self, Rhs, Sanitize<Self>>;
+    type Output = LazyBinaryOperation<Addition, Self, Rhs>;
     fn add(self, other: Rhs) -> Self::Output {
         LazyBinaryOperation {
             lhs: self,
             rhs: other,
             _op: PhantomData,
-            _out: PhantomData,
         }
     }
 }
@@ -569,7 +708,7 @@ mod tests {
         assert_eq!(b[(hlist!(1), hlist!())], 2);
         let b: BasicMatrix<isize, U2, U2> = BasicArray::from_vec(vec![1, 2, 3, 4]);
         assert_eq!(b[(hlist!(1), hlist!(1))], 4);
-        assert_eq!(b[[1,1]], 4);
+        assert_eq!(b[[1, 1]], 4);
     }
 
     #[test]
@@ -577,7 +716,7 @@ mod tests {
         let a: BasicArray<isize, Hlist!(U4), HNil> = BasicArray::from_vec(vec![1, 2, 3, 4]);
         let b: BasicArray<isize, Hlist!(U4), HNil> = BasicArray::from_vec(vec![1, 2, 3, 4]);
         let c: BasicArray<isize, Hlist!(U4), HNil> = BasicArray::from_vec(vec![2, 4, 6, 8]);
-        assert_eq!(<Addition as InternalBinaryOperator<_>>::operate(&a, &b), c);
+        assert_eq!(<Addition as BinaryOperator<_, _>>::operate(&a, &b), c);
     }
 
     #[test]
@@ -585,14 +724,8 @@ mod tests {
         let a: BasicMatrix<isize, U2, U2> = BasicArray::from_vec(vec![1, 2, 3, 4]);
         let b: BasicMatrix<isize, U2, U2> = BasicArray::from_vec(vec![1, 2, 3, 4]);
         let c: BasicMatrix<isize, U2, U2> = BasicArray::from_vec(vec![7, 10, 15, 22]);
-        assert_eq!(
-            <Multiplication as BinaryOperator<_, _, _>>::operate(&a, &b),
-            c
-        );
-        assert_eq!(
-            <Multiplication as BinaryOperator<_, _, _>>::operate(&a, &a),
-            c
-        );
+        assert_eq!(<Multiplication as BinaryOperator<_, _>>::operate(&a, &b), c);
+        assert_eq!(<Multiplication as BinaryOperator<_, _>>::operate(&a, &a), c);
     }
 
     #[test]
@@ -606,7 +739,6 @@ mod tests {
                 lhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
                 rhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
                 _op: PhantomData,
-                _out: PhantomData,
             }
         );
 
@@ -626,7 +758,6 @@ mod tests {
                 lhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
                 rhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
                 _op: PhantomData,
-                _out: PhantomData,
             }
         );
 
@@ -646,7 +777,6 @@ mod tests {
                 lhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
                 rhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
                 _op: PhantomData,
-                _out: PhantomData,
             }
         );
 
@@ -666,7 +796,6 @@ mod tests {
                 lhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
                 rhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
                 _op: PhantomData,
-                _out: PhantomData,
             }
         );
 

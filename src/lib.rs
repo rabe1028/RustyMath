@@ -1,4 +1,5 @@
 pub mod axiom;
+#[macro_use]
 pub mod operator;
 pub mod property;
 pub mod set;
