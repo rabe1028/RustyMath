@@ -15,23 +15,10 @@ use crate::property::*;
 macro_rules! impl_unital_ring {
     ($($ty: ty),*) => {
         $(
-            impl BinaryOperator<$ty,$ty,$ty> for Addition {
-                #[inline(always)]
-                fn operate<'a, 'b>(
-                    lhs: impl Into<Cow<'a, $ty>>,
-                    rhs: impl Into<Cow<'b, $ty>>,
-                ) -> $ty {
-                    let lhs = match lhs.into() {
-                        Cow::Borrowed(b) => *b,
-                        Cow::Owned(b) => b
-                    };
-                    let rhs = match rhs.into() {
-                        Cow::Borrowed(b) => *b,
-                        Cow::Owned(b) => b
-                    };
-                    lhs + rhs
-                }
-            }
+            forward_internal_binop! {Addition, $ty, (lhs, rhs) => {
+                lhs + rhs
+            }}
+            
 
             impl InternalBinaryOperator<$ty> for Addition {}
 
@@ -53,23 +40,9 @@ macro_rules! impl_unital_ring {
 
             impl Commutativity<Addition> for $ty {}
 
-            impl BinaryOperator<$ty,$ty,$ty>  for Multiplication {
-                #[inline(always)]
-                fn operate<'a, 'b>(
-                    lhs: impl Into<Cow<'a, $ty>>,
-                    rhs: impl Into<Cow<'b, $ty>>,
-                ) -> $ty {
-                    let lhs = match lhs.into() {
-                        Cow::Borrowed(b) => *b,
-                        Cow::Owned(b) => b
-                    };
-                    let rhs = match rhs.into() {
-                        Cow::Borrowed(b) => *b,
-                        Cow::Owned(b) => b
-                    };
-                    lhs * rhs
-                }
-            }
+            forward_internal_binop! {Multiplication, $ty, (lhs, rhs) => {
+                lhs * rhs
+            }}
 
             impl InternalBinaryOperator<$ty> for Multiplication {}
 
@@ -101,23 +74,10 @@ macro_rules! impl_unital_ring {
 macro_rules! impl_unital_ring_unsigned {
     ($($ty: ty),*) => {
         $(
-            impl BinaryOperator<$ty,$ty,$ty> for Addition {
-                #[inline(always)]
-                fn operate<'a, 'b>(
-                    lhs: impl Into<Cow<'a, $ty>>,
-                    rhs: impl Into<Cow<'b, $ty>>,
-                ) -> $ty {
-                    let lhs = match lhs.into() {
-                        Cow::Borrowed(b) => *b,
-                        Cow::Owned(b) => b
-                    };
-                    let rhs = match rhs.into() {
-                        Cow::Borrowed(b) => *b,
-                        Cow::Owned(b) => b
-                    };
-                    lhs + rhs
-                }
-            }
+            // No invertivility for addition op
+            forward_internal_binop! {Addition, $ty, (lhs, rhs) => {
+                lhs + rhs
+            }}
 
             impl InternalBinaryOperator<$ty> for Addition {}
 
@@ -132,23 +92,9 @@ macro_rules! impl_unital_ring_unsigned {
 
             impl Commutativity<Addition> for $ty {}
 
-            impl BinaryOperator<$ty,$ty,$ty>  for Multiplication {
-                #[inline(always)]
-                fn operate<'a, 'b>(
-                    lhs: impl Into<Cow<'a, $ty>>,
-                    rhs: impl Into<Cow<'b, $ty>>,
-                ) -> $ty {
-                    let lhs = match lhs.into() {
-                        Cow::Borrowed(b) => *b,
-                        Cow::Owned(b) => b
-                    };
-                    let rhs = match rhs.into() {
-                        Cow::Borrowed(b) => *b,
-                        Cow::Owned(b) => b
-                    };
-                    lhs * rhs
-                }
-            }
+            forward_internal_binop! {Multiplication, $ty, (lhs, rhs) => {
+                lhs * rhs
+            }}
 
             impl InternalBinaryOperator<$ty> for Multiplication {}
 

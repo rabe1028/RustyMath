@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+#[macro_use(forward_internal_binop)]
 use crate::operator::*;
 use crate::property::*;
 
@@ -9,7 +10,8 @@ struct RationalNumber {
     q: isize,
 }
 
-impl RationalNumber {
+impl RationalNumber
+{
     pub fn new(p: isize, q: isize) -> Option<Self> {
         if q == 0 {
             None
@@ -25,15 +27,8 @@ impl PartialEq for RationalNumber {
     }
 }
 
-impl BinaryOperator<RationalNumber, RationalNumber, RationalNumber> for Addition {
-    #[inline(always)]
-    fn operate<'a, 'b>(
-        lhs: impl Into<Cow<'a, RationalNumber>>,
-        rhs: impl Into<Cow<'b, RationalNumber>>,
-    ) -> RationalNumber {
-        let lhs = lhs.into();
-        let rhs = rhs.into();
-
+forward_internal_binop! { Addition, RationalNumber,
+    (lhs, rhs) => {
         RationalNumber {
             p: lhs.p * rhs.q + rhs.p * lhs.q,
             q: lhs.q * rhs.q,
@@ -64,15 +59,8 @@ impl Invertivility<Addition> for RationalNumber {
 
 impl Commutativity<Addition> for RationalNumber {}
 
-impl BinaryOperator<RationalNumber, RationalNumber, RationalNumber> for Multiplication {
-    #[inline(always)]
-    fn operate<'a, 'b>(
-        lhs: impl Into<Cow<'a, RationalNumber>>,
-        rhs: impl Into<Cow<'b, RationalNumber>>,
-    ) -> RationalNumber {
-        let lhs = lhs.into();
-        let rhs = rhs.into();
-
+forward_internal_binop! { Multiplication, RationalNumber,
+    (lhs, rhs) => {
         RationalNumber {
             p: lhs.p * rhs.p,
             q: lhs.q * rhs.q,

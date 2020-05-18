@@ -1,44 +1,95 @@
 use std::borrow::Cow;
 
-pub trait BinaryOperator<A, B, C>
-where
-    A: std::clone::Clone,
-    B: std::clone::Clone,
-{
-    fn operate<'a, 'b>(lhs: impl Into<Cow<'a, A>>, rhs: impl Into<Cow<'b, B>>) -> C
-    where
-        A: 'a,
-        B: 'b;
+pub trait BinaryOperator<A, B> {
+    type Output;
+    fn operate(lhs: A, rhs: B) -> Self::Output;
 }
 
-pub trait InternalBinaryOperator<T>: BinaryOperator<T, T, T>
-where
-    T: std::clone::Clone,
-{
+#[macro_export]
+macro_rules! forward_ref_binop {
+    ($op:ty,$lhs:ty, $rhs:ty,$out:ty) => {
+        impl<'a> BinaryOperator<&'a $lhs, $rhs> for $op {
+            type Output = <$op as BinaryOperator<$lhs, $rhs>>::Output;
+
+            #[inline]
+            fn operate(lhs: &'a $lhs, rhs: $rhs) -> Self::Output {
+                <$op as BinaryOperator<$lhs, $rhs>>::operate(*lhs, rhs)
+            }
+        }
+
+        impl<'a> BinaryOperator<$lhs, &'a $rhs> for $op {
+            type Output = <$op as BinaryOperator<$lhs, $rhs>>::Output;
+
+            #[inline]
+            fn operate(lhs: $lhs, rhs: &'a $rhs) -> Self::Output {
+                <$op as BinaryOperator<$lhs, $rhs>>::operate(lhs, *rhs)
+            }
+        }
+
+        impl<'a> BinaryOperator<&'a $lhs, &'a $rhs> for $op {
+            type Output = <$op as BinaryOperator<$lhs, $rhs>>::Output;
+
+            #[inline]
+            fn operate(lhs: &'a $lhs, rhs: &'a $rhs) -> Self::Output {
+                <$op as BinaryOperator<$lhs, $rhs>>::operate(*lhs, *rhs)
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! forward_binop {
+    ($op:ty,$lhs:ty, $rhs:ty,$out:ty, ($l:ident, $r:ident) => $x: expr) => {
+        impl BinaryOperator<$lhs, $rhs> for $op {
+            type Output = $out;
+            fn operate($l: $lhs, $r: $rhs) -> Self::Output {
+                $x
+            }
+        }
+
+        forward_ref_binop! {$op, $lhs, $rhs, $out}
+    };
+}
+
+pub trait InternalBinaryOperator<T>: BinaryOperator<T, T, Output = T> {
     #[inline(always)]
-    fn operate<'a, U>(lhs: U, rhs: U) -> T
-    where
-        U: Into<Cow<'a, T>>,
-        T: 'a,
-    {
-        <Self as BinaryOperator<T, T, T>>::operate(lhs, rhs)
+    fn operate(lhs: T, rhs: T) -> T {
+        <Self as BinaryOperator<T, T>>::operate(lhs, rhs)
     }
 }
 
-pub trait ExternalBinaryOperator<S, T>: BinaryOperator<S, T, T>
-where
-    S: std::clone::Clone,
-    T: std::clone::Clone,
-{
+#[macro_export]
+macro_rules! forward_internal_binop {
+    ($op:ty, $t:ty,  ($lhs:ident, $rhs:ident) => $x: expr) => {
+        forward_binop! {$op, $t, $t, $t, ($lhs, $rhs) => $x}
+    };
+    (
+        $op:ty,
+        $name:ident $(< $( $lt:tt $( : $clt:tt $(+ $dlt:tt )* )? ),+ >)?
+        $(where $( $wlt:tt : $wclt:tt $(+ $wdlt:tt )* ),+ )?
+        ,
+        ($lhs:ident, $rhs:ident) => $x: expr
+    ) => {
+        impl $(< $( $lt $( : $clt $(+ $dlt )* )? ),+ >)?
+            BinaryOperator<
+                $name $(< $( $lt ),+ >)? ,
+                $name $(< $( $lt ),+ >)? ,
+            >
+        for $op
+        $(where $($wlt: $wclt $(+ $wdlt)*),+)?
+        {
+            type Output = $name $(< $( $lt ),+ >)? ;
+            fn operate($l: $name $(< $( $lt ),+ >)?, $r: $name $(< $( $lt ),+ >)?) -> Self::Output {
+                $x
+            }
+        }
+    };
+}
+
+pub trait ExternalBinaryOperator<S, T>: BinaryOperator<S, T, Output = T> {
     #[inline(always)]
-    fn operate<'a, 'b, N, M>(lhs: N, rhs: M) -> T
-    where
-        N: Into<Cow<'a, S>>,
-        M: Into<Cow<'b, T>>,
-        S: 'a,
-        T: 'b,
-    {
-        <Self as BinaryOperator<S, T, T>>::operate(lhs, rhs)
+    fn operate(lhs: S, rhs: T) -> T {
+        <Self as BinaryOperator<S, T>>::operate(lhs, rhs)
     }
 }
 
@@ -47,3 +98,7 @@ pub enum Addition {}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Multiplication {}
+
+// for vector operation
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum InnerProduct {}
