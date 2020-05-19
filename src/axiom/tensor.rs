@@ -4,8 +4,6 @@ use typenum::uint::Unsigned;
 
 use crate::util::IndexShape;
 
-
-
 use crate::axiom::*;
 use crate::operator::*;
 
@@ -15,10 +13,10 @@ where
     Covariant: HList + IndexShape,
     Self: std::marker::Sized,
 {
-    type Joined;// = Join<Contravariant, Covariant>;
-    // const capacity: usize = Contravariant::cap * Covariant::cap;
-    // index
-    // a[[1, 2, 3]] = a.index([1, 2, 3])
+    type Joined; // = Join<Contravariant, Covariant>;
+                 // const capacity: usize = Contravariant::cap * Covariant::cap;
+                 // index
+                 // a[[1, 2, 3]] = a.index([1, 2, 3])
     fn index<
         I: Into<<Contravariant as IndexShape>::Shape>,
         J: Into<<Covariant as IndexShape>::Shape>,
@@ -50,7 +48,13 @@ where
     }
 }
 
-pub trait Scalar<ElementType>: Tensor<ElementType, HNil, HNil> {
+pub trait Scalar<ElementType>:
+    Tensor<ElementType, HNil, HNil>
+    + UnitalRing<Addition, Multiplication>
+where
+    Addition: InternalBinaryOperator<Self>,
+    Multiplication: InternalBinaryOperator<Self>,
+{
     fn new(elem: ElementType) -> Self;
 
     fn get(&self) -> &ElementType;

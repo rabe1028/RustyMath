@@ -129,7 +129,7 @@ macro_rules! impl_scalar {
             impl Tensor<$ty, HNil, HNil> for $ty {
                 type Joined = HNil;
                 fn index<I: Into<HNil>, J: Into<HNil>>(&self, _cont: I, _cov: J) -> &Self {
-                    &self
+                    self
                 }
 
                 fn index_mut<I: Into<HNil>, J: Into<HNil>>(&mut self, _cont: I, _cov: J) -> &mut Self {

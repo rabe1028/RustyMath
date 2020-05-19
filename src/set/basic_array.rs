@@ -116,7 +116,12 @@ where
     }
 }
 
-impl<ElementType> Scalar<ElementType> for BasicArray<ElementType, HNil, HNil> {
+impl<ElementType> Scalar<ElementType> for BasicScalar<ElementType>
+where
+    ElementType: Scalar<ElementType> + Copy,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+{
     fn new(elem: ElementType) -> Self {
         BasicArray::from_vec(vec![elem])
     }
@@ -220,20 +225,6 @@ where
         lhs: BasicArray<ElementType, Contravariant, Covariant>,
         rhs: BasicArray<ElementType, Contravariant, Covariant>,
     ) -> BasicArray<ElementType, Contravariant, Covariant> {
-        // assert_eq!(lhs._inner.len(), rhs._inner.len());
-        // let new_vec = lhs
-        //     ._inner
-        //     .iter()
-        //     .zip(rhs._inner.iter())
-        //     .map(|(l, r)| *l + *r)
-        //     .collect();
-
-        // BasicArray {
-        //     _inner: new_vec,
-        //     _contravariant: PhantomData,
-        //     _covariant: PhantomData,
-        // }
-
         <Addition as BinaryOperator<
             &BasicArray<ElementType, Contravariant, Covariant>,
             &BasicArray<ElementType, Contravariant, Covariant>,
@@ -339,6 +330,152 @@ impl<ElementType, Contravariant, Covariant> Associativity<Addition>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
     ElementType: std::ops::Add<Output = ElementType> + PartialEq + Copy,
+    Contravariant: HList + IndexShape + PartialEq + Add<Covariant> + Clone,
+    Covariant: HList + IndexShape + PartialEq + Clone,
+{
+}
+
+impl<ElementType, Contravariant, Covariant> Identity<Addition>
+    for BasicArray<ElementType, Contravariant, Covariant>
+where
+    Self: Tensor<ElementType, Contravariant, Covariant>,
+    ElementType: UnitalRing<Addition, Multiplication>
+        + std::ops::Add<Output = ElementType>
+        + PartialEq
+        + Copy,
+    Contravariant: HList + IndexShape + PartialEq + Add<Covariant> + Clone,
+    Covariant: HList + IndexShape + PartialEq + Clone,
+    Addition: InternalBinaryOperator<ElementType>,
+    Multiplication: InternalBinaryOperator<ElementType>,
+{
+    #[inline(always)]
+    fn identity() -> Self {
+        let cap = Contravariant::get_capacity() * Covariant::get_capacity();
+        Self::from_vec(vec![ElementType::zero(); cap])
+    }
+}
+
+impl<ElementType, Contravariant, Covariant>
+    BinaryOperator<
+        BasicArray<ElementType, Contravariant, Covariant>,
+        BasicArray<ElementType, Contravariant, Covariant>,
+    > for HadamardProduct
+where
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
+    type Output = BasicArray<ElementType, Contravariant, Covariant>;
+    fn operate(
+        lhs: BasicArray<ElementType, Contravariant, Covariant>,
+        rhs: BasicArray<ElementType, Contravariant, Covariant>,
+    ) -> BasicArray<ElementType, Contravariant, Covariant> {
+        <Self as BinaryOperator<
+            &BasicArray<ElementType, Contravariant, Covariant>,
+            &BasicArray<ElementType, Contravariant, Covariant>,
+        >>::operate(&lhs, &rhs)
+    }
+}
+
+// forward_binop! macro cannot use generics, so we impl all.
+impl<'a, ElementType, Contravariant, Covariant>
+    BinaryOperator<
+        &'a BasicArray<ElementType, Contravariant, Covariant>,
+        BasicArray<ElementType, Contravariant, Covariant>,
+    > for HadamardProduct
+where
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
+    type Output = BasicArray<ElementType, Contravariant, Covariant>;
+    fn operate(
+        lhs: &'a BasicArray<ElementType, Contravariant, Covariant>,
+        rhs: BasicArray<ElementType, Contravariant, Covariant>,
+    ) -> BasicArray<ElementType, Contravariant, Covariant> {
+        <Self as BinaryOperator<
+            &BasicArray<ElementType, Contravariant, Covariant>,
+            &BasicArray<ElementType, Contravariant, Covariant>,
+        >>::operate(lhs, &rhs)
+    }
+}
+
+impl<'a, ElementType, Contravariant, Covariant>
+    BinaryOperator<
+        BasicArray<ElementType, Contravariant, Covariant>,
+        &'a BasicArray<ElementType, Contravariant, Covariant>,
+    > for HadamardProduct
+where
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
+    type Output = BasicArray<ElementType, Contravariant, Covariant>;
+    fn operate(
+        lhs: BasicArray<ElementType, Contravariant, Covariant>,
+        rhs: &'a BasicArray<ElementType, Contravariant, Covariant>,
+    ) -> BasicArray<ElementType, Contravariant, Covariant> {
+        <Self as BinaryOperator<
+            &BasicArray<ElementType, Contravariant, Covariant>,
+            &BasicArray<ElementType, Contravariant, Covariant>,
+        >>::operate(&lhs, rhs)
+    }
+}
+
+impl<'a, ElementType, Contravariant, Covariant>
+    BinaryOperator<
+        &'a BasicArray<ElementType, Contravariant, Covariant>,
+        &'a BasicArray<ElementType, Contravariant, Covariant>,
+    > for HadamardProduct
+where
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
+    type Output = BasicArray<ElementType, Contravariant, Covariant>;
+    fn operate(
+        lhs: &'a BasicArray<ElementType, Contravariant, Covariant>,
+        rhs: &'a BasicArray<ElementType, Contravariant, Covariant>,
+    ) -> BasicArray<ElementType, Contravariant, Covariant> {
+        assert_eq!(lhs._inner.len(), rhs._inner.len());
+        let new_vec = lhs
+            ._inner
+            .iter()
+            .zip(rhs._inner.iter())
+            .map(|(l, r)| <Multiplication as BinaryOperator<_, _>>::operate(*l, *r))
+            .collect();
+
+        BasicArray {
+            _inner: new_vec,
+            _contravariant: PhantomData,
+            _covariant: PhantomData,
+        }
+    }
+}
+
+impl<ElementType, Contravariant, Covariant>
+    InternalBinaryOperator<BasicArray<ElementType, Contravariant, Covariant>> for HadamardProduct
+where
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Contravariant: HList + IndexShape + Add<Covariant>,
+    Covariant: HList + IndexShape,
+{
+}
+
+impl<ElementType, Contravariant, Covariant> Totality<HadamardProduct>
+    for BasicArray<ElementType, Contravariant, Covariant>
+where
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Contravariant: HList + IndexShape + Add<Covariant>,
+    Covariant: HList + IndexShape,
+{
+}
+
+impl<ElementType, Contravariant, Covariant> Associativity<HadamardProduct>
+    for BasicArray<ElementType, Contravariant, Covariant>
+where
+    ElementType: PartialEq + Copy,
+    Multiplication: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape + PartialEq + Add<Covariant> + Clone,
     Covariant: HList + IndexShape + PartialEq + Clone,
 {
@@ -450,6 +587,89 @@ where
 
         new_mat
     }
+}
+
+impl<ElementType> BinaryOperator<BasicScalar<ElementType>, BasicScalar<ElementType>>
+    for Multiplication
+where
+    ElementType: Scalar<ElementType> + Copy,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+{
+    type Output = BasicScalar<ElementType>;
+    #[inline(always)]
+    fn operate(lhs: BasicScalar<ElementType>, rhs: BasicScalar<ElementType>) -> Self::Output {
+        <HadamardProduct as BinaryOperator<_, _>>::operate(lhs, rhs)
+    }
+}
+
+impl<'a, ElementType> BinaryOperator<&'a BasicScalar<ElementType>, BasicScalar<ElementType>>
+    for Multiplication
+where
+    ElementType: Scalar<ElementType> + Copy,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+{
+    type Output = BasicScalar<ElementType>;
+    #[inline(always)]
+    fn operate(lhs: &'a BasicScalar<ElementType>, rhs: BasicScalar<ElementType>) -> Self::Output {
+        <HadamardProduct as BinaryOperator<_, _>>::operate(lhs, rhs)
+    }
+}
+
+impl<'a, ElementType> BinaryOperator<BasicScalar<ElementType>, &'a BasicScalar<ElementType>>
+    for Multiplication
+where
+    ElementType: Scalar<ElementType> + Copy,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+{
+    type Output = BasicScalar<ElementType>;
+    #[inline(always)]
+    fn operate(lhs: BasicScalar<ElementType>, rhs: &'a BasicScalar<ElementType>) -> Self::Output {
+        <HadamardProduct as BinaryOperator<_, _>>::operate(lhs, rhs)
+    }
+}
+
+impl<'a, ElementType> BinaryOperator<&'a BasicScalar<ElementType>, &'a BasicScalar<ElementType>>
+    for Multiplication
+where
+    ElementType: Scalar<ElementType> + Copy,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+{
+    type Output = BasicScalar<ElementType>;
+    #[inline(always)]
+    fn operate(
+        lhs: &'a BasicScalar<ElementType>,
+        rhs: &'a BasicScalar<ElementType>,
+    ) -> Self::Output {
+        <HadamardProduct as BinaryOperator<_, _>>::operate(lhs, rhs)
+    }
+}
+
+impl<ElementType> InternalBinaryOperator<BasicScalar<ElementType>> for Multiplication
+where
+    ElementType: Scalar<ElementType> + Copy,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+{
+}
+
+impl<ElementType> Totality<Multiplication> for BasicScalar<ElementType>
+where
+    ElementType: Scalar<ElementType> + Copy,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+{
+}
+
+impl<ElementType> Associativity<Multiplication> for BasicScalar<ElementType>
+where
+    ElementType: Scalar<ElementType> + Copy,
+    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<ElementType>,
+{
 }
 
 // impl<ElementType, _1, _2> Totality<Multiplication> for BasicMatrix<ElementType, _1, _2>
@@ -609,7 +829,7 @@ where
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
     Self: InputSanitizer, //Left
-    Rhs: InputSanitizer, //Right
+    Rhs: InputSanitizer,  //Right
     Addition: BinaryOperator<Sanitize<Self>, Sanitize<Rhs>>,
 {
     type Output = LazyBinaryOperation<Addition, Self, Rhs>;
@@ -647,8 +867,8 @@ where
     Left: InputSanitizer,
     Right: InputSanitizer,
     Op: BinaryOperator<Sanitize<Left>, Sanitize<Right>>,
-    Self: InputSanitizer, //Left
-    Rhs: std::clone::Clone + InputSanitizer,  //Right
+    Self: InputSanitizer,                    //Left
+    Rhs: std::clone::Clone + InputSanitizer, //Right
     Addition: std::clone::Clone + BinaryOperator<Sanitize<Self>, Sanitize<Rhs>>,
 {
     type Output = LazyBinaryOperation<Addition, Self, Rhs>;
