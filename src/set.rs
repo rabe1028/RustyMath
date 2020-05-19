@@ -7,8 +7,6 @@ pub mod basic_array;
 use crate::axiom::*;
 use frunk::*;
 
-
-
 use crate::operator::*;
 use crate::property::*;
 
@@ -18,7 +16,7 @@ macro_rules! impl_unital_ring {
             forward_internal_binop! {Addition, $ty, (lhs, rhs) => {
                 lhs + rhs
             }}
-            
+
 
             impl InternalBinaryOperator<$ty> for Addition {}
 
@@ -166,7 +164,6 @@ impl_unital_ring! {
 // impl_scalar! {
 //     isize, i8, i16, i32, i64, usize, u8, u16, u32, u64, f32, f64
 // }
-
 
 impl_scalar! {
     isize, i8, i16, i32, i64, f32, f64

@@ -1,5 +1,3 @@
-
-
 use crate::operator::*;
 
 pub trait Totality<T>

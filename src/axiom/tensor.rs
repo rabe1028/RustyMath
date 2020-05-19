@@ -48,8 +48,7 @@ where
     }
 }
 
-pub trait Scalar<ElementType>:
-    Tensor<ElementType, HNil, HNil>
+pub trait Scalar<ElementType>: Tensor<ElementType, HNil, HNil>
 //     + UnitalRing<Addition, Multiplication>
 // where
 //     Addition: InternalBinaryOperator<Self>,

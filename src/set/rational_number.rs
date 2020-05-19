@@ -1,5 +1,3 @@
-
-
 #[macro_use(forward_internal_binop)]
 use crate::operator::*;
 use crate::property::*;
@@ -10,8 +8,7 @@ struct RationalNumber {
     q: isize,
 }
 
-impl RationalNumber
-{
+impl RationalNumber {
     pub fn new(p: isize, q: isize) -> Option<Self> {
         if q == 0 {
             None

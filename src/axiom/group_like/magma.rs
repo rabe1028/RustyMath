@@ -1,5 +1,3 @@
-
-
 use crate::operator::*;
 use crate::property::*;
 

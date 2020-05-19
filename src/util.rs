@@ -39,7 +39,7 @@ impl IndexShape for HNil {
 
     fn get_capacity() -> usize {
         // Self::cap
-        1 
+        1
     }
 }
 
