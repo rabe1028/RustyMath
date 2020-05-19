@@ -361,6 +361,7 @@ impl<ElementType, Contravariant, Covariant>
         BasicArray<ElementType, Contravariant, Covariant>,
     > for HadamardProduct
 where
+    ElementType: Copy,
     Multiplication: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
@@ -384,6 +385,7 @@ impl<'a, ElementType, Contravariant, Covariant>
         BasicArray<ElementType, Contravariant, Covariant>,
     > for HadamardProduct
 where
+    ElementType: Copy,
     Multiplication: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
@@ -406,6 +408,7 @@ impl<'a, ElementType, Contravariant, Covariant>
         &'a BasicArray<ElementType, Contravariant, Covariant>,
     > for HadamardProduct
 where
+    ElementType: Copy,
     Multiplication: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
@@ -428,6 +431,7 @@ impl<'a, ElementType, Contravariant, Covariant>
         &'a BasicArray<ElementType, Contravariant, Covariant>,
     > for HadamardProduct
 where
+    ElementType: Copy,
     Multiplication: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
@@ -442,7 +446,7 @@ where
             ._inner
             .iter()
             .zip(rhs._inner.iter())
-            .map(|(l, r)| <Multiplication as BinaryOperator<_, _>>::operate(*l, *r))
+            .map(|(l, r)| <Multiplication as InternalBinaryOperator<ElementType>>::operate(*l, *r))
             .collect();
 
         BasicArray {
@@ -456,6 +460,7 @@ where
 impl<ElementType, Contravariant, Covariant>
     InternalBinaryOperator<BasicArray<ElementType, Contravariant, Covariant>> for HadamardProduct
 where
+    ElementType: Copy,
     Multiplication: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
@@ -465,6 +470,7 @@ where
 impl<ElementType, Contravariant, Covariant> Totality<HadamardProduct>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
+    ElementType: Copy,
     Multiplication: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
@@ -666,7 +672,7 @@ where
 
 impl<ElementType> Associativity<Multiplication> for BasicScalar<ElementType>
 where
-    ElementType: Scalar<ElementType> + Copy,
+    ElementType: Scalar<ElementType> + Copy + PartialEq,
     Multiplication: InternalBinaryOperator<ElementType>,
     Addition: InternalBinaryOperator<ElementType>,
 {

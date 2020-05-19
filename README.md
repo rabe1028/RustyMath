@@ -50,7 +50,20 @@
   - After: BinaryOperator<A, B, Output=C>
   - 関連型にして，制約を強める
   - また，Cowを使わないで，stdと同様の実装にする
-
+  - このときに，全てRef同士のOperationに接続することで，Copyをなくす
+    - Cowを使わなくなったことで，意図せずCloneされることはなくなった
+    - しかし，InternalBinaryOperatorの制約のみでは，Ref同士のBinOpは確約されない
+      - 数学的には，RefとOwnに違いはないのが適切
+      - プログラマが&をつける，付けないで所有権をコントロールできることは必須だが，
+        RefのときにInternalBinaryOperatorを実装しないのは，数学的におかしい
+      - 解決策：Sanitizer（Tensorで使ったやつ）をSupport Traitとして，制約に組み込む?
+      - ex) 
+      ```rust
+      pub trait InternalBinaryOperator<&i32>: BinaryOperator<&i32, &i32, Output=&i32::Sanitized> {
+        //...
+      }
+      // &i32::Sanitized = i32
+      ```
 
 - trait aliasについて
   - 各代数的法則(axios)は，propertyの言い換えとするのが理想

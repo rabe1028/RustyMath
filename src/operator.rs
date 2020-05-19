@@ -1,5 +1,3 @@
-
-
 pub trait BinaryOperator<A, B> {
     type Output;
     fn operate(lhs: A, rhs: B) -> Self::Output;

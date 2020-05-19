@@ -50,10 +50,10 @@ where
 
 pub trait Scalar<ElementType>:
     Tensor<ElementType, HNil, HNil>
-    + UnitalRing<Addition, Multiplication>
-where
-    Addition: InternalBinaryOperator<Self>,
-    Multiplication: InternalBinaryOperator<Self>,
+//     + UnitalRing<Addition, Multiplication>
+// where
+//     Addition: InternalBinaryOperator<Self>,
+//     Multiplication: InternalBinaryOperator<Self>,
 {
     fn new(elem: ElementType) -> Self;
 
