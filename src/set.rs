@@ -1,6 +1,5 @@
-pub mod rational_number;
-
-pub use rational_number::*;
+pub mod rational;
+pub use rational::*;
 
 pub mod basic_array;
 
