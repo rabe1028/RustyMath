@@ -16,7 +16,6 @@ macro_rules! impl_unital_ring {
                 lhs + rhs
             }}
 
-
             impl InternalBinaryOperator<$ty> for Addition {}
 
             impl Totality<Addition> for $ty {}

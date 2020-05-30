@@ -69,6 +69,14 @@ macro_rules! forward_inter_binop {
     };
 }
 
+// 20200531
+// Rational<T>のTの制約をUnitalRihg + Cloneのみにすると
+// Rational<Rational<T>>も存在できるから
+// InterlanBinaryOperatorを再起的に定義してしまって，死ぬ
+// -> Auto Traitのときのみ起こる
+// -> genericsによる定義だと問題ないけど，Auto Implだと問題になる
+// -> Auto Implだと，発生しうる型全てを探索するが，Genericsは使われている型に限るみたい？
+
 #[repr(C)]
 #[derive(Clone)]
 struct Rational<T>
@@ -111,7 +119,7 @@ where
     maybe_const! {
         #[inline]
         pub fn new(numer: T, denom: T) -> Option<Self> {
-            if denom == <T as Identity<Addition>>::identity() {
+            if denom == T::zero() {
                 None
             } else {
                 Some(Rational { numer, denom })
@@ -132,10 +140,10 @@ where
     Multiplication: InternalBinaryOperator<T>,
 {
     fn eq(&self, other: &Self) -> bool {
-        <Multiplication as InternalBinaryOperator<_>>::operate(
+        Multiplication::operate(
             self.numer.clone(),
             other.denom.clone(),
-        ) == <Multiplication as InternalBinaryOperator<_>>::operate(
+        ) == Multiplication::operate(
             self.numer.clone(),
             other.denom.clone(),
         )
@@ -170,6 +178,7 @@ where
     Multiplication: InternalBinaryOperator<T>,
 {
 }
+
 
 impl<T> Totality<Addition> for Rational<T>
 where

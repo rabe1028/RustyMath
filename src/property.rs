@@ -13,11 +13,11 @@ where
     T: InternalBinaryOperator<Self>,
 {
     fn check_associativity(x: Self, y: Self, z: Self) -> bool {
-        <T as InternalBinaryOperator<Self>>::operate(
+        T::operate(
             x.clone(),
-            <T as InternalBinaryOperator<Self>>::operate(y.clone(), z.clone()),
-        ) == <T as InternalBinaryOperator<Self>>::operate(
-            <T as InternalBinaryOperator<Self>>::operate(x, y),
+            T::operate(y.clone(), z.clone()),
+        ) == T::operate(
+            T::operate(x, y),
             z,
         )
     }
@@ -36,8 +36,8 @@ where
     #[inline(always)]
     fn check_identity(x: Self) -> bool {
         let id = Self::identity();
-        let left = <T as InternalBinaryOperator<Self>>::operate(x.clone(), id.clone());
-        let right = <T as InternalBinaryOperator<Self>>::operate(id.clone(), x.clone());
+        let left = T::operate(x.clone(), id.clone());
+        let right = T::operate(id.clone(), x.clone());
         (left == x) && (right == x)
     }
 }
@@ -55,8 +55,8 @@ where
 {
     #[inline(always)]
     fn check_commutativity(x: Self, y: Self) -> bool {
-        <T as InternalBinaryOperator<Self>>::operate(x.clone(), y.clone())
-            == <T as InternalBinaryOperator<Self>>::operate(y, x)
+        T::operate(x.clone(), y.clone())
+            == T::operate(y, x)
     }
 }
 
@@ -68,12 +68,12 @@ where
 {
     #[inline(always)]
     fn check_right_distributivity(x: Self, y: Self, z: Self) -> bool {
-        <Mul as InternalBinaryOperator<Self>>::operate(
-            <Add as InternalBinaryOperator<Self>>::operate(x.clone(), y.clone()),
+        Mul::operate(
+            Add::operate(x.clone(), y.clone()),
             z.clone(),
-        ) == <Add as InternalBinaryOperator<Self>>::operate(
-            <Mul as InternalBinaryOperator<Self>>::operate(x.clone(), z.clone()),
-            <Mul as InternalBinaryOperator<Self>>::operate(y.clone(), z.clone()),
+        ) == Add::operate(
+            Mul::operate(x.clone(), z.clone()),
+            Mul::operate(y.clone(), z.clone()),
         )
     }
 }
@@ -86,12 +86,12 @@ where
 {
     #[inline(always)]
     fn check_left_distributivity(x: Self, y: Self, z: Self) -> bool {
-        <Mul as InternalBinaryOperator<Self>>::operate(
+        Mul::operate(
             x.clone(),
-            <Add as InternalBinaryOperator<Self>>::operate(y.clone(), z.clone()),
-        ) == <Add as InternalBinaryOperator<Self>>::operate(
-            <Mul as InternalBinaryOperator<Self>>::operate(x.clone(), y),
-            <Mul as InternalBinaryOperator<Self>>::operate(x.clone(), z),
+            Add::operate(y.clone(), z.clone()),
+        ) == Add::operate(
+            Mul::operate(x.clone(), y),
+            Mul::operate(x.clone(), z),
         )
     }
 }
@@ -126,11 +126,11 @@ where
 {
     #[inline(always)]
     fn check_absorbency(x: Self, y: Self) -> bool {
-        let add_xy = <Add as InternalBinaryOperator<Self>>::operate(x.clone(), y.clone());
-        let mul_xy = <Mul as InternalBinaryOperator<Self>>::operate(x.clone(), y.clone());
+        let add_xy = Add::operate(x.clone(), y.clone());
+        let mul_xy = Mul::operate(x.clone(), y.clone());
 
-        <Mul as InternalBinaryOperator<Self>>::operate(x.clone(), add_xy) == x
-            && <Add as InternalBinaryOperator<Self>>::operate(x.clone(), mul_xy) == x
+        Mul::operate(x.clone(), add_xy) == x
+            && Add::operate(x.clone(), mul_xy) == x
     }
 }
 
@@ -175,12 +175,12 @@ where
 {
     #[inline(always)]
     fn check_mediality(a: Self, b: Self, c: Self, d: Self) -> bool {
-        let ab = <T as InternalBinaryOperator<Self>>::operate(a.clone(), b.clone());
-        let cd = <T as InternalBinaryOperator<Self>>::operate(c.clone(), d.clone());
-        let ac = <T as InternalBinaryOperator<Self>>::operate(a, c);
-        let bd = <T as InternalBinaryOperator<Self>>::operate(b, d);
+        let ab = T::operate(a.clone(), b.clone());
+        let cd = T::operate(c.clone(), d.clone());
+        let ac = T::operate(a, c);
+        let bd = T::operate(b, d);
 
-        <T as InternalBinaryOperator<Self>>::operate(ab, cd)
-            == <T as InternalBinaryOperator<Self>>::operate(ac, bd)
+        T::operate(ab, cd)
+            == T::operate(ac, bd)
     }
 }

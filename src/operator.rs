@@ -50,12 +50,9 @@ macro_rules! forward_binop {
     };
 }
 
-pub trait InternalBinaryOperator<T>: BinaryOperator<T, T, Output = T> {
-    #[inline(always)]
-    fn operate(lhs: T, rhs: T) -> T {
-        <Self as BinaryOperator<T, T>>::operate(lhs, rhs)
-    }
-}
+pub trait InternalBinaryOperator<T>: BinaryOperator<T, T, Output = T> {}
+
+// impl<Op, T> InternalBinaryOperator<T> for Op where Op: BinaryOperator<T, T, Output = T> {}
 
 #[macro_export]
 macro_rules! forward_internal_binop {
@@ -85,12 +82,9 @@ macro_rules! forward_internal_binop {
     };
 }
 
-pub trait ExternalBinaryOperator<S, T>: BinaryOperator<S, T, Output = T> {
-    #[inline(always)]
-    fn operate(lhs: S, rhs: T) -> T {
-        <Self as BinaryOperator<S, T>>::operate(lhs, rhs)
-    }
-}
+pub trait ExternalBinaryOperator<S, T>: BinaryOperator<S, T, Output = T> {}
+
+impl<Op, S, T> ExternalBinaryOperator<S, T> for Op where Op: BinaryOperator<S, T, Output = T> {}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Addition {}

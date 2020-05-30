@@ -317,6 +317,7 @@ where
 {
 }
 
+
 impl<ElementType, Contravariant, Covariant> Totality<Addition>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
@@ -446,7 +447,7 @@ where
             ._inner
             .iter()
             .zip(rhs._inner.iter())
-            .map(|(l, r)| <Multiplication as InternalBinaryOperator<ElementType>>::operate(*l, *r))
+            .map(|(l, r)| Multiplication::operate(*l, *r))
             .collect();
 
         BasicArray {
