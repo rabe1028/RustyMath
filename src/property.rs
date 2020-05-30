@@ -13,13 +13,7 @@ where
     T: InternalBinaryOperator<Self>,
 {
     fn check_associativity(x: Self, y: Self, z: Self) -> bool {
-        T::operate(
-            x.clone(),
-            T::operate(y.clone(), z.clone()),
-        ) == T::operate(
-            T::operate(x, y),
-            z,
-        )
+        T::operate(x.clone(), T::operate(y.clone(), z.clone())) == T::operate(T::operate(x, y), z)
     }
 }
 
@@ -55,8 +49,7 @@ where
 {
     #[inline(always)]
     fn check_commutativity(x: Self, y: Self) -> bool {
-        T::operate(x.clone(), y.clone())
-            == T::operate(y, x)
+        T::operate(x.clone(), y.clone()) == T::operate(y, x)
     }
 }
 
@@ -68,13 +61,11 @@ where
 {
     #[inline(always)]
     fn check_right_distributivity(x: Self, y: Self, z: Self) -> bool {
-        Mul::operate(
-            Add::operate(x.clone(), y.clone()),
-            z.clone(),
-        ) == Add::operate(
-            Mul::operate(x.clone(), z.clone()),
-            Mul::operate(y.clone(), z.clone()),
-        )
+        Mul::operate(Add::operate(x.clone(), y.clone()), z.clone())
+            == Add::operate(
+                Mul::operate(x.clone(), z.clone()),
+                Mul::operate(y.clone(), z.clone()),
+            )
     }
 }
 
@@ -86,13 +77,8 @@ where
 {
     #[inline(always)]
     fn check_left_distributivity(x: Self, y: Self, z: Self) -> bool {
-        Mul::operate(
-            x.clone(),
-            Add::operate(y.clone(), z.clone()),
-        ) == Add::operate(
-            Mul::operate(x.clone(), y),
-            Mul::operate(x.clone(), z),
-        )
+        Mul::operate(x.clone(), Add::operate(y.clone(), z.clone()))
+            == Add::operate(Mul::operate(x.clone(), y), Mul::operate(x.clone(), z))
     }
 }
 
@@ -129,8 +115,7 @@ where
         let add_xy = Add::operate(x.clone(), y.clone());
         let mul_xy = Mul::operate(x.clone(), y.clone());
 
-        Mul::operate(x.clone(), add_xy) == x
-            && Add::operate(x.clone(), mul_xy) == x
+        Mul::operate(x.clone(), add_xy) == x && Add::operate(x.clone(), mul_xy) == x
     }
 }
 
@@ -180,7 +165,14 @@ where
         let ac = T::operate(a, c);
         let bd = T::operate(b, d);
 
-        T::operate(ab, cd)
-            == T::operate(ac, bd)
+        T::operate(ab, cd) == T::operate(ac, bd)
     }
 }
+
+pub trait NoZeroDivisor {}
+
+pub trait IntegrallyClosed {}
+
+pub trait UniqueFactorizable {}
+
+pub trait UniquePrimeFactorizable: UniqueFactorizable {}

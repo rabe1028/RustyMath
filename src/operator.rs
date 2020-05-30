@@ -99,3 +99,6 @@ pub enum InnerProduct {}
 // for hadamard product operation
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum HadamardProduct {}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum GreatestCommonDivisor {}
