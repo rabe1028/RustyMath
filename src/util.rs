@@ -16,6 +16,9 @@ pub mod hinsertable;
 
 pub use hinsertable::*;
 
+pub mod lazy;
+pub use lazy::*;
+
 pub type Join<A, B> = <A as Add<B>>::Output;
 
 pub trait IndexShape: HList {

@@ -64,6 +64,8 @@
       }
       // &i32::Sanitized = i32
       ```
+      - これうまくいかない
+        - BinaryOperator<&i32, i32>とかの制約が抜ける
 
 - trait aliasについて
   - 各代数的法則(axios)は，propertyの言い換えとするのが理想
@@ -76,3 +78,9 @@
     - Semigroupoidの定義では，f: A->B, g: B->Cがあった時にf . gが結合律を満たすため，BinaryOperatorを拡張する必要がある
     - しかし，FnはTraitであるため，ライフタイムが絡み，実装しにくい
     - trait genericsが実装され次第，始める
+
+- TODO
+  - Functor etc
+  - Blas対応
+  - Vector Spaceの作成
+  - 基底を保持する機構の設計

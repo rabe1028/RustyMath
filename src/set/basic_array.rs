@@ -729,16 +729,6 @@ where
 // これにより，LazyBinaryOperation一つで管理可能
 // (他を使うと，借用先で借用することになり，失敗する)
 
-pub trait LazyOperation {
-    type Output;
-    fn eval(self) -> Self::Output;
-}
-
-pub trait InputSanitizer {
-    type InputShape;
-    fn sanitize(self) -> Self::InputShape;
-}
-
 impl<ElementType, Contravariant, Covariant> InputSanitizer
     for BasicArray<ElementType, Contravariant, Covariant>
 where
@@ -752,8 +742,6 @@ where
     }
 }
 
-type Sanitize<A> = <A as InputSanitizer>::InputShape;
-
 impl<ElementType, Contravariant, Covariant> InputSanitizer
     for &'_ BasicArray<ElementType, Contravariant, Covariant>
 where
@@ -764,43 +752,6 @@ where
     type InputShape = Self;
     fn sanitize(self) -> Self::InputShape {
         self
-    }
-}
-
-impl<Op, Left, Right> InputSanitizer for LazyBinaryOperation<Op, Left, Right>
-where
-    Left: InputSanitizer,
-    Right: InputSanitizer,
-    Op: BinaryOperator<Sanitize<Left>, Sanitize<Right>>,
-{
-    type InputShape = <Op as BinaryOperator<Sanitize<Left>, Sanitize<Right>>>::Output;
-    fn sanitize(self) -> Self::InputShape {
-        self.eval()
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-struct LazyBinaryOperation<Op, Left, Right>
-where
-    Left: InputSanitizer,
-    Right: InputSanitizer,
-    Op: BinaryOperator<Sanitize<Left>, Sanitize<Right>>,
-{
-    lhs: Left,
-    rhs: Right,
-    _op: PhantomData<Op>,
-}
-
-// for no blas normal impls
-impl<'a, Op, Left, Right> LazyOperation for LazyBinaryOperation<Op, Left, Right>
-where
-    Left: InputSanitizer,
-    Right: InputSanitizer,
-    Op: BinaryOperator<Sanitize<Left>, Sanitize<Right>>,
-{
-    type Output = <Op as BinaryOperator<Sanitize<Left>, Sanitize<Right>>>::Output;
-    fn eval(self) -> Self::Output {
-        Op::operate(self.lhs.sanitize(), self.rhs.sanitize())
     }
 }
 
@@ -840,11 +791,7 @@ where
 {
     type Output = LazyBinaryOperation<Addition, Self, Rhs>;
     fn add(self, other: Rhs) -> Self::Output {
-        LazyBinaryOperation {
-            lhs: self,
-            rhs: other,
-            _op: PhantomData,
-        }
+        LazyBinaryOperation::new(self, other)
     }
 }
 
@@ -860,30 +807,7 @@ where
 {
     type Output = LazyBinaryOperation<Addition, Self, Rhs>;
     fn add(self, other: Rhs) -> Self::Output {
-        LazyBinaryOperation {
-            lhs: self,
-            rhs: other,
-            _op: PhantomData,
-        }
-    }
-}
-
-impl<Op, Left, Right, Rhs> Add<Rhs> for LazyBinaryOperation<Op, Left, Right>
-where
-    Left: InputSanitizer,
-    Right: InputSanitizer,
-    Op: BinaryOperator<Sanitize<Left>, Sanitize<Right>>,
-    Self: InputSanitizer,                    //Left
-    Rhs: std::clone::Clone + InputSanitizer, //Right
-    Addition: std::clone::Clone + BinaryOperator<Sanitize<Self>, Sanitize<Rhs>>,
-{
-    type Output = LazyBinaryOperation<Addition, Self, Rhs>;
-    fn add(self, other: Rhs) -> Self::Output {
-        LazyBinaryOperation {
-            lhs: self,
-            rhs: other,
-            _op: PhantomData,
-        }
+        LazyBinaryOperation::new(self, other)
     }
 }
 
@@ -961,11 +885,10 @@ mod tests {
 
         assert_eq!(
             a + b,
-            LazyBinaryOperation {
-                lhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
-                rhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
-                _op: PhantomData,
-            }
+            LazyBinaryOperation::new(
+                BasicArray::from_vec(vec![1, 2, 3, 4]),
+                BasicArray::from_vec(vec![1, 2, 3, 4]),
+            )
         );
 
         let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
@@ -980,11 +903,10 @@ mod tests {
 
         assert_eq!(
             a + &b,
-            LazyBinaryOperation {
-                lhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
-                rhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
-                _op: PhantomData,
-            }
+            LazyBinaryOperation::new(
+                BasicArray::from_vec(vec![1, 2, 3, 4]),
+                &BasicArray::from_vec(vec![1, 2, 3, 4]),
+            )
         );
 
         let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
@@ -999,11 +921,10 @@ mod tests {
 
         assert_eq!(
             &a + b,
-            LazyBinaryOperation {
-                lhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
-                rhs: BasicArray::from_vec(vec![1, 2, 3, 4]),
-                _op: PhantomData,
-            }
+            LazyBinaryOperation::new(
+                &BasicArray::from_vec(vec![1, 2, 3, 4]),
+                BasicArray::from_vec(vec![1, 2, 3, 4]),
+            )
         );
 
         let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
@@ -1018,11 +939,10 @@ mod tests {
 
         assert_eq!(
             &a + &b,
-            LazyBinaryOperation {
-                lhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
-                rhs: &BasicArray::from_vec(vec![1, 2, 3, 4]),
-                _op: PhantomData,
-            }
+            LazyBinaryOperation::new(
+                &BasicArray::from_vec(vec![1, 2, 3, 4]),
+                &BasicArray::from_vec(vec![1, 2, 3, 4]),
+            )
         );
 
         let a: BasicVector<isize, U4> = BasicArray::from_vec(vec![1, 2, 3, 4]);
