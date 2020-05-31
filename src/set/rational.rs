@@ -69,6 +69,30 @@ macro_rules! forward_inter_binop {
     };
 }
 
+macro_rules! impl_helper {
+    (impl $type:ident  $(< $( $lt:tt ),+ >)? ) => {
+        impl<T> $type $(< $( $lt ),+ >)? for Rational<T>
+        where
+            T: UnitalRing<Addition, Multiplication> + Clone,
+            Addition: InternalBinaryOperator<T>,
+            Multiplication: InternalBinaryOperator<T>,
+        {}
+    };
+    (
+        impl $type:ident $(< $( $lt:tt ),+ >)?,
+        $(#[$attr:meta])* fn $name:ident $args:tt -> $ret:ty $body:block
+    ) => {
+        impl<T> $type $(< $( $lt ),+ >)? for Rational<T>
+        where
+            T: UnitalRing<Addition, Multiplication> + Clone,
+            Addition: InternalBinaryOperator<T>,
+            Multiplication: InternalBinaryOperator<T>,
+        {
+            $(#[$attr])* fn $name $args -> $ret $body
+        }
+    };
+}
+
 // 20200531
 // Rational<T>のTの制約をUnitalRihg + Cloneのみにすると
 // Rational<Rational<T>>も存在できるから
@@ -78,7 +102,7 @@ macro_rules! forward_inter_binop {
 // -> Auto Implだと，発生しうる型全てを探索するが，Genericsは使われている型に限るみたい？
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct Rational<T>
 where
     T: UnitalRing<Addition, Multiplication> + Clone,
@@ -140,13 +164,8 @@ where
     Multiplication: InternalBinaryOperator<T>,
 {
     fn eq(&self, other: &Self) -> bool {
-        Multiplication::operate(
-            self.numer.clone(),
-            other.denom.clone(),
-        ) == Multiplication::operate(
-            self.numer.clone(),
-            other.denom.clone(),
-        )
+        Multiplication::operate(self.numer.clone(), other.denom.clone())
+            == Multiplication::operate(self.numer.clone(), other.denom.clone())
     }
 }
 
@@ -179,25 +198,10 @@ where
 {
 }
 
-macro_rules! trait_bounds {
-    ($ty:ty) => {}
-}
+impl_helper! {impl Totality<Addition>}
 
-impl<T> Totality<Addition> for Rational<T>
-where
-    T: UnitalRing<Addition, Multiplication> + Clone,
-    Addition: InternalBinaryOperator<T>,
-    Multiplication: InternalBinaryOperator<T>,
-{
-}
+impl_helper! {impl Associativity<Addition>}
 
-impl<T> Associativity<Addition> for Rational<T>
-where
-    T: UnitalRing<Addition, Multiplication> + Clone,
-    Addition: InternalBinaryOperator<T>,
-    Multiplication: InternalBinaryOperator<T>,
-{
-}
 impl<T> Identity<Addition> for Rational<T>
 where
     T: UnitalRing<Addition, Multiplication> + Clone,
@@ -212,14 +216,14 @@ where
     }
 }
 
-impl Invertivility<Addition> for Rational32 {
+impl_helper! {impl Invertivility<Addition>,
     #[inline(always)]
     fn inverse(&self) -> Self {
-        Rational32::new_unchecked(-self.numer, self.denom)
+        Rational::new_unchecked(self.numer.negation(), self.denom.clone())
     }
 }
 
-impl Commutativity<Addition> for Rational32 {}
+impl_helper! {impl Commutativity<Addition>}
 
 forward_inter_binop! { Multiplication,
     (lhs, rhs) => {
@@ -236,27 +240,33 @@ forward_inter_binop! { Multiplication,
     }
 }
 
-impl InternalBinaryOperator<Rational32> for Multiplication {}
+impl<T> InternalBinaryOperator<Rational<T>> for Multiplication
+where
+    T: UnitalRing<Addition, Multiplication> + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+}
 
-impl Totality<Multiplication> for Rational32 {}
-impl Associativity<Multiplication> for Rational32 {}
+impl_helper! {impl Totality<Multiplication>}
+impl_helper! {impl Associativity<Multiplication>}
 
-impl RightDistributivity<Addition, Multiplication> for Rational32 {}
-impl LeftDistributivity<Addition, Multiplication> for Rational32 {}
-//impl Distributivity<Addition, Multiplication> for Rational32 {}
+impl_helper! {impl RightDistributivity<Addition, Multiplication>}
+impl_helper! {impl LeftDistributivity<Addition, Multiplication>}
 
-impl Commutativity<Multiplication> for Rational32 {}
-impl Invertivility<Multiplication> for Rational32 {
+impl_helper! {impl Commutativity<Multiplication>}
+
+impl_helper! {impl Invertivility<Multiplication>,
     #[inline(always)]
     fn inverse(&self) -> Self {
-        Rational32::new_unchecked(self.denom, self.numer)
+        Rational::new_unchecked(self.denom.clone(), self.numer.clone())
     }
 }
 
-impl Identity<Multiplication> for Rational32 {
+impl_helper! {impl Identity<Multiplication>,
     #[inline(always)]
     fn identity() -> Self {
-        Rational32::new_unchecked(i32::one(), i32::one())
+        Rational::new_unchecked(T::one(), T::one())
     }
 }
 

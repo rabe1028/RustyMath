@@ -317,7 +317,6 @@ where
 {
 }
 
-
 impl<ElementType, Contravariant, Covariant> Totality<Addition>
     for BasicArray<ElementType, Contravariant, Covariant>
 where

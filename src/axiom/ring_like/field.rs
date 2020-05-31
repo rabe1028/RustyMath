@@ -15,16 +15,11 @@ where
             Some(<Self as Invertivility<Mul>>::inverse(self))
         }
     }
-
-    #[inline(always)]
-    fn negation(&self) -> Self {
-        <Self as Invertivility<Add>>::inverse(self)
-    }
 }
 
 impl<Add, Mul, T> Field<Add, Mul> for T
 where
-    T:  AbelianGroup<Mul> + EuclidianDomain<Add, Mul>,
+    T: AbelianGroup<Mul> + EuclidianDomain<Add, Mul>,
     Add: InternalBinaryOperator<T>,
     Mul: InternalBinaryOperator<T>,
 {

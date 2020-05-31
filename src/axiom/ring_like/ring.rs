@@ -7,16 +7,24 @@ where
     Add: InternalBinaryOperator<Self>,
     Mul: InternalBinaryOperator<Self>,
 {
+    #[inline(always)]
     fn add(self, other: Self) -> Self {
         Add::operate(self, other)
     }
 
+    #[inline(always)]
     fn sub(self, other: Self) -> Self {
         <Self as Invertivility<Add>>::inv_op(self, other)
     }
 
+    #[inline(always)]
     fn mul(self, other: Self) -> Self {
         Mul::operate(self, other)
+    }
+
+    #[inline(always)]
+    fn negation(&self) -> Self {
+        <Self as Invertivility<Add>>::inverse(self)
     }
 }
 

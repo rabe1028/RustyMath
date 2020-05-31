@@ -78,4 +78,3 @@ where
         LazyBinaryOperation::new(self, other)
     }
 }
-

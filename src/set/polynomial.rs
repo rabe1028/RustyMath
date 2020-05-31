@@ -2,7 +2,8 @@ use crate::axiom::*;
 use crate::operator::*;
 use std::ops::*;
 
-struct Polynomial<Coeff> 
+#[derive(Debug, Clone, Eq, PartialEq)]
+struct Polynomial<Coeff>
 where
     Coeff: Ring<Addition, Multiplication>,
     Addition: InternalBinaryOperator<Coeff>,
@@ -81,13 +82,10 @@ macro_rules! forward_assign {
         where
             T: Ring<Addition, Multiplication> + Clone,
             Addition: InternalBinaryOperator<T>,
-            Multiplication: InternalBinaryOperator<T>, 
+            Multiplication: InternalBinaryOperator<T>,
         {
             fn $name(&mut self, other: Polynomial<T>) {
-                *self = <$op as BinaryOperator<
-                            &Polynomial<T>, 
-                            Polynomial<T>>
-                        >::operate(self, other)
+                *self = <$op as BinaryOperator<&Polynomial<T>, Polynomial<T>>>::operate(self, other)
             }
         }
 
@@ -95,16 +93,14 @@ macro_rules! forward_assign {
         where
             T: Ring<Addition, Multiplication> + Clone,
             Addition: InternalBinaryOperator<T>,
-            Multiplication: InternalBinaryOperator<T>, 
+            Multiplication: InternalBinaryOperator<T>,
         {
             fn $name(&mut self, other: &'a Polynomial<T>) {
-                *self = <$op as BinaryOperator<
-                            &Polynomial<T>, 
-                            &Polynomial<T>>
-                        >::operate(self, other)
+                *self =
+                    <$op as BinaryOperator<&Polynomial<T>, &Polynomial<T>>>::operate(self, other)
             }
         }
-    }
+    };
 }
 
 forward_inter_binop! { Addition,
@@ -112,7 +108,7 @@ forward_inter_binop! { Addition,
         use std::cmp::min;
         let min_size = min(lhs.a.len(), rhs.a.len());
 
-        let a = (0..min_size).map(|i| 
+        let a = (0..min_size).map(|i|
                 Addition::operate(lhs.a[i].clone(),rhs.a[i].clone())
             ).collect();
 
