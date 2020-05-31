@@ -27,7 +27,7 @@ pub trait VectorSpace<Coeff, Add, Mul>: Module<Coeff, Add, Mul>
 where
     Add: InternalBinaryOperator<Self> + InternalBinaryOperator<Coeff>,
     Mul: ExternalBinaryOperator<Coeff, Self> + InternalBinaryOperator<Coeff>,
-    GreatestCommonDivisor: InternalBinaryOperator<Coeff>,
+    GreatestCommonDivisor<Add, Mul>: InternalBinaryOperator<Coeff>,
     Coeff: Field<Add, Mul>,
 {
 }

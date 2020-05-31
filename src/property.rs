@@ -41,6 +41,10 @@ where
     T: InternalBinaryOperator<Self>,
 {
     fn inverse(&self) -> Self;
+
+    fn inv_op(self, other: Self) -> Self {
+        T::operate(self, other.inverse())
+    }
 }
 pub trait Commutativity<T>
 where

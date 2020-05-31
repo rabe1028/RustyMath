@@ -6,7 +6,6 @@ pub trait Field<Add, Mul>: AbelianGroup<Mul> + EuclidianDomain<Add, Mul>
 where
     Add: InternalBinaryOperator<Self>,
     Mul: InternalBinaryOperator<Self>,
-    GreatestCommonDivisor: InternalBinaryOperator<Self>,
 {
     fn reciprocal(&self) -> Option<Self> {
         if self.is_zero() {
@@ -26,6 +25,5 @@ where
     T:  AbelianGroup<Mul> + EuclidianDomain<Add, Mul>,
     Add: InternalBinaryOperator<T>,
     Mul: InternalBinaryOperator<T>,
-    GreatestCommonDivisor: InternalBinaryOperator<T>,
 {
 }
