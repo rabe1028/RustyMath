@@ -179,6 +179,9 @@ where
 {
 }
 
+macro_rules! trait_bounds {
+    ($ty:ty) => {}
+}
 
 impl<T> Totality<Addition> for Rational<T>
 where

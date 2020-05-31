@@ -101,7 +101,7 @@ pub enum InnerProduct {}
 pub enum HadamardProduct {}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum GreatestCommonDivisor<Add,Mul> {
+pub enum GreatestCommonDivisor<Add, Mul> {
     Add(std::marker::PhantomData<Add>),
     Mul(std::marker::PhantomData<Mul>),
 }

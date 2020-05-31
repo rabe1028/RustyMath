@@ -2,6 +2,10 @@ pub mod rational;
 pub use rational::*;
 
 pub mod basic_array;
+pub use basic_array::*;
+
+pub mod polynomial;
+pub use polynomial::*;
 
 use crate::axiom::*;
 use frunk::*;
