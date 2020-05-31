@@ -7,6 +7,7 @@ where
     Add: InternalBinaryOperator<Self>,
     Mul: InternalBinaryOperator<Self>,
 {
+    #[inline(always)]
     fn reciprocal(&self) -> Option<Self> {
         if self.is_zero() {
             None
@@ -15,6 +16,7 @@ where
         }
     }
 
+    #[inline(always)]
     fn negation(&self) -> Self {
         <Self as Invertivility<Add>>::inverse(self)
     }

@@ -35,12 +35,14 @@ where
         (left == x) && (right == x)
     }
 }
-pub trait Invertivility<T>
+pub trait Invertivility<T>: Identity<T>
 where
     Self: Sized + Clone,
     T: InternalBinaryOperator<Self>,
 {
-    fn inverse(&self) -> Self;
+    fn inverse(&self) -> Self {
+        Self::identity().inv_op(self.clone())
+    }
 
     fn inv_op(self, other: Self) -> Self {
         T::operate(self, other.inverse())
