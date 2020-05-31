@@ -7,25 +7,25 @@ where
     Add: InternalBinaryOperator<Self>,
     Mul: InternalBinaryOperator<Self>,
 {
-    #[inline(always)]
-    fn one() -> Self {
-        <Self as Identity<Mul>>::identity()
-    }
+    // #[inline(always)]
+    // fn one() -> Self {
+    //     <Self as Identity<Mul>>::identity()
+    // }
 
-    #[inline(always)]
-    fn is_one(&self) -> bool {
-        <Self as Identity<Mul>>::is_identity(self)
-    }
+    // #[inline(always)]
+    // fn is_one(&self) -> bool {
+    //     <Self as Identity<Mul>>::is_identity(self)
+    // }
 
-    #[inline(always)]
-    fn zero() -> Self {
-        <Self as Identity<Add>>::identity()
-    }
+    // #[inline(always)]
+    // fn zero() -> Self {
+    //     <Self as Identity<Add>>::identity()
+    // }
 
-    #[inline(always)]
-    fn is_zero(&self) -> bool {
-        <Self as Identity<Mul>>::is_identity(self)
-    }
+    // #[inline(always)]
+    // fn is_zero(&self) -> bool {
+    //     <Self as Identity<Mul>>::is_identity(self)
+    // }
 }
 
 impl<Add, Mul, T> UnitalRing<Add, Mul> for T

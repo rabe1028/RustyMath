@@ -26,6 +26,16 @@ where
     fn negation(&self) -> Self {
         <Self as Invertivility<Add>>::inverse(self)
     }
+
+    #[inline(always)]
+    fn zero() -> Self {
+        <Self as Identity<Add>>::identity()
+    }
+
+    #[inline(always)]
+    fn is_zero(&self) -> bool {
+        <Self as Identity<Add>>::is_identity(self)
+    }
 }
 
 impl<Add, Mul, T> Ring<Add, Mul> for T

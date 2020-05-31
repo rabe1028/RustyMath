@@ -8,6 +8,15 @@ where
     Add: InternalBinaryOperator<Self>,
     Mul: InternalBinaryOperator<Self>,
 {
+    #[inline(always)]
+    fn one() -> Self {
+        <Self as Identity<Mul>>::identity()
+    }
+
+    #[inline(always)]
+    fn is_one(&self) -> bool {
+        <Self as Identity<Mul>>::is_identity(self)
+    }
 }
 
 impl<Add, Mul, T> Semiring<Add, Mul> for T

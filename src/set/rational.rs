@@ -53,6 +53,14 @@ macro_rules! forward_one_ref_binop {
 
 macro_rules! forward_inter_binop {
     ($op:ty, ($l:ident, $r:ident) => $x: expr) => {
+        impl<T> InternalBinaryOperator<Rational<T>> for $op
+        where
+            T: UnitalRing<Addition, Multiplication> + Clone,
+            Addition: InternalBinaryOperator<T>,
+            Multiplication: InternalBinaryOperator<T>,
+        {
+        }
+
         impl<'a, T> BinaryOperator<&'a Rational<T>, &'a Rational<T>> for $op
         where
             T: UnitalRing<Addition, Multiplication> + Clone,
@@ -190,14 +198,6 @@ forward_inter_binop! { Addition,
     }
 }
 
-impl<T> InternalBinaryOperator<Rational<T>> for Addition
-where
-    T: UnitalRing<Addition, Multiplication> + Clone,
-    Addition: InternalBinaryOperator<T>,
-    Multiplication: InternalBinaryOperator<T>,
-{
-}
-
 impl_helper! {impl Totality<Addition>}
 
 impl_helper! {impl Associativity<Addition>}
@@ -240,19 +240,8 @@ forward_inter_binop! { Multiplication,
     }
 }
 
-impl<T> InternalBinaryOperator<Rational<T>> for Multiplication
-where
-    T: UnitalRing<Addition, Multiplication> + Clone,
-    Addition: InternalBinaryOperator<T>,
-    Multiplication: InternalBinaryOperator<T>,
-{
-}
-
 impl_helper! {impl Totality<Multiplication>}
 impl_helper! {impl Associativity<Multiplication>}
-
-impl_helper! {impl RightDistributivity<Addition, Multiplication>}
-impl_helper! {impl LeftDistributivity<Addition, Multiplication>}
 
 impl_helper! {impl Commutativity<Multiplication>}
 
@@ -269,6 +258,9 @@ impl_helper! {impl Identity<Multiplication>,
         Rational::new_unchecked(T::one(), T::one())
     }
 }
+
+impl_helper! {impl RightDistributivity<Addition, Multiplication>}
+impl_helper! {impl LeftDistributivity<Addition, Multiplication>}
 
 #[cfg(test)]
 mod tests {

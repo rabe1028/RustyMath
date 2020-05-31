@@ -1,5 +1,7 @@
 use crate::axiom::*;
 use crate::operator::*;
+use crate::property::*;
+use std::cmp::Ordering;
 use std::ops::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -10,6 +12,33 @@ where
     Multiplication: InternalBinaryOperator<Coeff>,
 {
     a: Vec<Coeff>,
+}
+
+impl<T> Polynomial<T>
+where
+    T: Ring<Addition, Multiplication> + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+    #[inline(always)]
+    pub fn fron_vec(a: Vec<T>) -> Self {
+        Self { a }
+    }
+
+    #[inline(always)]
+    pub fn reduce(mut self) -> Self {
+        if self.a[self.degree() - 1] == T::identity() {
+            self.a.pop();
+            self.reduce()
+        } else {
+            self
+        }
+    }
+
+    #[inline(always)]
+    pub fn degree(&self) -> usize {
+        self.a.len()
+    }
 }
 
 macro_rules! forward_one_ref_binop {
@@ -60,6 +89,14 @@ macro_rules! forward_one_ref_binop {
 
 macro_rules! forward_inter_binop {
     ($op:ty, ($l:ident, $r:ident) => $x: expr) => {
+        impl<T> InternalBinaryOperator<Polynomial<T>> for $op
+        where
+            T: Ring<Addition, Multiplication> + Clone,
+            Addition: InternalBinaryOperator<T>,
+            Multiplication: InternalBinaryOperator<T>,
+        {
+        }
+
         impl<'a, T> BinaryOperator<&'a Polynomial<T>, &'a Polynomial<T>> for $op
         where
             T: Ring<Addition, Multiplication> + Clone,
@@ -73,6 +110,30 @@ macro_rules! forward_inter_binop {
         }
 
         forward_one_ref_binop! {$op}
+    };
+}
+
+macro_rules! impl_helper {
+    (impl $type:ident  $(< $( $lt:tt ),+ >)? ) => {
+        impl<T> $type $(< $( $lt ),+ >)? for Polynomial<T>
+        where
+            T: Ring<Addition, Multiplication> + Clone,
+            Addition: InternalBinaryOperator<T>,
+            Multiplication: InternalBinaryOperator<T>,
+        {}
+    };
+    (
+        impl $type:ident $(< $( $lt:tt ),+ >)?,
+        $(#[$attr:meta])* fn $name:ident $args:tt -> $ret:ty $body:block
+    ) => {
+        impl<T> $type $(< $( $lt ),+ >)? for Polynomial<T>
+        where
+            T: Ring<Addition, Multiplication> + Clone,
+            Addition: InternalBinaryOperator<T>,
+            Multiplication: InternalBinaryOperator<T>,
+        {
+            $(#[$attr])* fn $name $args -> $ret $body
+        }
     };
 }
 
@@ -112,11 +173,31 @@ forward_inter_binop! { Addition,
                 Addition::operate(lhs.a[i].clone(),rhs.a[i].clone())
             ).collect();
 
-        Polynomial {a}
+        Polynomial {a}.reduce()
     }
 }
 
 forward_assign! {impl AddAssign, fn add_assign, Addition}
+
+impl_helper! {impl Totality<Addition>}
+impl_helper! {impl Associativity<Addition>}
+impl_helper! {impl Commutativity<Addition>}
+
+impl_helper! {impl Identity<Addition>,
+    #[inline(always)]
+    fn identity() -> Self {
+        Polynomial { a: vec![] }
+    }
+}
+
+impl_helper! {impl Invertivility<Addition>,
+    #[inline(always)]
+    fn inverse(&self) -> Self {
+        Polynomial {
+            a: self.a.iter().map(|i| i.inverse()).collect()
+        }
+    }
+}
 
 //  Convolution like Mul
 forward_inter_binop! { Multiplication,
@@ -135,8 +216,89 @@ forward_inter_binop! { Multiplication,
             }
         }
 
-        Polynomial {a}
+        Polynomial {a}.reduce()
     }
 }
 
 forward_assign! {impl MulAssign, fn mul_assign, Multiplication}
+
+impl_helper! {impl Totality<Multiplication>}
+impl_helper! {impl Associativity<Multiplication>}
+
+// impl_helper! {impl Identity<Multiplication>,
+//     #[inline(always)]
+//     fn identity() -> Self {
+//         Polynomial {
+//             a: vec![ T::one() ]
+//         }
+//     }
+// }
+
+impl<T> Identity<Multiplication> for Polynomial<T>
+where
+    T: Ring<Addition, Multiplication> + Monoid<Multiplication> + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+    #[inline(always)]
+    fn identity() -> Self {
+        Polynomial { a: vec![T::one()] }
+    }
+}
+
+// impl_helper! {impl Commutativity<Multiplication>}
+
+impl<T> Commutativity<Multiplication> for Polynomial<T>
+where
+    T: Ring<Addition, Multiplication> + Commutativity<Multiplication> + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+}
+
+impl_helper! {impl RightDistributivity<Addition, Multiplication>}
+impl_helper! {impl LeftDistributivity<Addition, Multiplication>}
+
+// 多項式に距離を定義
+// 距離は整列順序集合になるから，
+// それを比較する
+
+impl<T> Ord for Polynomial<T>
+where
+    T: Ring<Addition, Multiplication> + Eq + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.degree().cmp(&other.degree())
+    }
+}
+
+impl<T> PartialOrd for Polynomial<T>
+where
+    T: Ring<Addition, Multiplication> + Eq + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl_helper! {impl NoZeroDivisor}
+impl_helper! {impl IntegrallyClosed}
+impl_helper! {impl UniqueFactorizable}
+impl_helper! {impl UniquePrimeFactorizable}
+
+impl<T> EuclidianDomain<Addition, Multiplication> for Polynomial<T>
+where
+    T: EuclidianDomain<Addition, Multiplication>  + Eq + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+    fn div(&self, other: &Self) -> Self {
+        assert!(!other.is_zero());
+
+        unimplemented!()
+    }
+}
