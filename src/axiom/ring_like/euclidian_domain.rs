@@ -1,7 +1,6 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-
 pub trait EuclidianDomain<Add, Mul>: PrincipalIdealDomain<Add, Mul> + std::cmp::PartialOrd
 // + AbelianGroup<GreatestCommonDivisor<Add, Mul>>
 where

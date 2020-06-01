@@ -34,7 +34,7 @@ where
     }
 
     #[inline(always)]
-    pub fn new_monomial_with_degree(deg: usize) -> Self 
+    pub fn new_monomial_with_degree(deg: usize) -> Self
     where
         T: Semiring<Addition, Multiplication>,
     {
@@ -394,7 +394,7 @@ impl<T> std::fmt::Debug for Polynomial<T>
 where
     T: Ring<Addition, Multiplication> + Eq + Clone + std::fmt::Debug,
     Addition: InternalBinaryOperator<T>,
-    Multiplication: InternalBinaryOperator<T>, 
+    Multiplication: InternalBinaryOperator<T>,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "f(x) = ");
@@ -402,7 +402,7 @@ where
             if i == 0 {
                 write!(f, "{:?} ", self.a[i]);
             } else {
-                write!(f, "{:?} x^{:?} + ", self.a[i],i);
+                write!(f, "{:?} x^{:?} + ", self.a[i], i);
             }
         }
         Ok(())
@@ -433,7 +433,7 @@ where
         assert!(!other.is_zero());
 
         let mut r = self.clone();
-        let mut q = Polynomial::from_vec(vec![T::zero();r.degree() - other.degree() + 1]);
+        let mut q = Polynomial::from_vec(vec![T::zero(); r.degree() - other.degree() + 1]);
 
         // println!("degree of q : {:?}", q.degree());
         for i in 0..=q.degree() {
@@ -443,17 +443,18 @@ where
             q.a[q_ind] = r.a[r.degree() - i].clone().div(other.leading_coefficient());
             let t = q.a[q_ind].clone();
 
-            // println!("{:?} / {:?} : Coeff t = {:?} \n 
-            //     lc(r) = {:?}, lc(g) = {:?}", 
+            // println!("{:?} / {:?} : Coeff t = {:?} \n
+            //     lc(r) = {:?}, lc(g) = {:?}",
             //     self, other, t,
             //     r.a[r.degree() - i], other.leading_coefficient()
             // );
-            
+
             // r <- r - q.a[ind]* x^(deg(r) - deg(other)) * other
             for k in 0..=other.degree() {
                 let r_ind = r.degree() - i - k;
-                r.a[r_ind] = r.a[r_ind].clone()
-                    .sub(other.a[other.degree()-k].clone().mul(t.clone()))
+                r.a[r_ind] = r.a[r_ind]
+                    .clone()
+                    .sub(other.a[other.degree() - k].clone().mul(t.clone()))
             }
         }
 
@@ -500,7 +501,7 @@ mod tests {
         assert_eq!(c, Polynomial::from_vec(vec![3, 8, 8, 5, 2]));
 
         let (c1, c2) = c.divrem(&a);
-        assert_eq!((c1.clone(), c2.clone()),(d, b));
+        assert_eq!((c1.clone(), c2.clone()), (d, b));
         assert_eq!(c1 * &a + c2, Polynomial::from_vec(vec![3, 8, 8, 5, 2]));
     }
 }
