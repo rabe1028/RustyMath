@@ -1,18 +1,18 @@
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Magma<T>: Totality<T>
+pub trait Magma<'a, T>: Totality<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
     fn op(self, other: Self) -> Self {
         T::operate(self, other)
     }
 }
 
-impl<Op, T> Magma<Op> for T
+impl<'a, Op, T> Magma<'a, Op> for T
 where
-    T: Totality<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: Totality<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }

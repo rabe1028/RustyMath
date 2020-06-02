@@ -2,15 +2,15 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait CommutativeMonoid<T>: Monoid<T> + Commutativity<T>
+pub trait CommutativeMonoid<'a, T>: Monoid<'a, T> + Commutativity<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> CommutativeMonoid<Op> for T
+impl<'a, Op, T> CommutativeMonoid<'a, Op> for T
 where
-    T: Monoid<Op> + Commutativity<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: Monoid<'a, Op> + Commutativity<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }

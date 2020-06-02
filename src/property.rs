@@ -1,26 +1,26 @@
 use crate::operator::*;
 
-pub trait Totality<T>
+pub trait Totality<'a, T>
 where
     Self: Sized,
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-pub trait Associativity<T>
+pub trait Associativity<'a, T>
 where
     Self: Sized + PartialEq + Clone,
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
     fn check_associativity(x: Self, y: Self, z: Self) -> bool {
         T::operate(x.clone(), T::operate(y.clone(), z.clone())) == T::operate(T::operate(x, y), z)
     }
 }
 
-pub trait Identity<T>
+pub trait Identity<'a, T>
 where
     Self: Sized + PartialEq + Clone,
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
     fn identity() -> Self;
     #[inline(always)]
@@ -35,10 +35,10 @@ where
         (left == x) && (right == x)
     }
 }
-pub trait Invertivility<T>: Identity<T>
+pub trait Invertivility<'a, T>: Identity<'a, T>
 where
     Self: Sized + Clone,
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
     fn inverse(&self) -> Self {
         Self::identity().inv_op(self.clone())
@@ -48,10 +48,10 @@ where
         T::operate(self, other.inverse())
     }
 }
-pub trait Commutativity<T>
+pub trait Commutativity<'a, T>
 where
     Self: Sized + PartialEq + Clone,
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
     #[inline(always)]
     fn check_commutativity(x: Self, y: Self) -> bool {
@@ -59,11 +59,11 @@ where
     }
 }
 
-pub trait RightDistributivity<Add, Mul>
+pub trait RightDistributivity<'a, Add, Mul>
 where
     Self: Sized + PartialEq + Clone,
-    Mul: InternalBinaryOperator<Self>,
-    Add: InternalBinaryOperator<Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
+    Add: InternalBinaryOperator<'a, Self>,
 {
     #[inline(always)]
     fn check_right_distributivity(x: Self, y: Self, z: Self) -> bool {
@@ -75,11 +75,11 @@ where
     }
 }
 
-pub trait LeftDistributivity<Add, Mul>
+pub trait LeftDistributivity<'a, Add, Mul>
 where
     Self: Sized + PartialEq + Clone,
-    Mul: InternalBinaryOperator<Self>,
-    Add: InternalBinaryOperator<Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
+    Add: InternalBinaryOperator<'a, Self>,
 {
     #[inline(always)]
     fn check_left_distributivity(x: Self, y: Self, z: Self) -> bool {
@@ -88,12 +88,12 @@ where
     }
 }
 
-pub trait Distributivity<Add, Mul>:
-    RightDistributivity<Add, Mul> + LeftDistributivity<Add, Mul>
+pub trait Distributivity<'a, Add, Mul>:
+    RightDistributivity<'a, Add, Mul> + LeftDistributivity<'a, Add, Mul>
 where
     Self: Sized + PartialEq + Clone,
-    Mul: InternalBinaryOperator<Self>,
-    Add: InternalBinaryOperator<Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
+    Add: InternalBinaryOperator<'a, Self>,
 {
     #[inline(always)]
     fn check_distributivity(x: Self, y: Self, z: Self) -> bool {
@@ -102,19 +102,19 @@ where
     }
 }
 
-impl<T, Add, Mul> Distributivity<Add, Mul> for T
+impl<'a, T, Add, Mul> Distributivity<'a, Add, Mul> for T
 where
-    T: LeftDistributivity<Add, Mul> + RightDistributivity<Add, Mul>,
-    Add: InternalBinaryOperator<T>,
-    Mul: InternalBinaryOperator<T>,
+    T: LeftDistributivity<'a, Add, Mul> + RightDistributivity<'a, Add, Mul>,
+    Add: InternalBinaryOperator<'a, T>,
+    Mul: InternalBinaryOperator<'a, T>,
 {
 }
 
-pub trait Absorbency<Add, Mul>
+pub trait Absorbency<'a, Add, Mul>
 where
     Self: Sized + PartialEq + Clone,
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a, Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
     #[inline(always)]
     fn check_absorbency(x: Self, y: Self) -> bool {
@@ -125,44 +125,44 @@ where
     }
 }
 
-pub trait Divisibility<Add, Mul>
+pub trait Divisibility<'a, Add, Mul>
 where
     Self: Sized + PartialEq + Copy,
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a, Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
 }
 
-pub trait LeftCancellative<T>
+pub trait LeftCancellative<'a, T>
 where
     Self: Sized + Clone,
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
-pub trait RightCancellative<T>
+pub trait RightCancellative<'a, T>
 where
     Self: Sized + Clone,
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
-pub trait Cancellative<T>: LeftCancellative<T> + RightCancellative<T>
+pub trait Cancellative<'a, T>: LeftCancellative<'a, T> + RightCancellative<'a, T>
 where
     Self: Sized,
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> Cancellative<Op> for T
+impl<'a, Op, T> Cancellative<'a, Op> for T
 where
-    T: LeftCancellative<Op> + RightCancellative<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: LeftCancellative<'a, Op> + RightCancellative<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }
 
-pub trait Mediality<T>
+pub trait Mediality<'a, T>
 where
     Self: Sized + PartialEq + Copy,
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
     #[inline(always)]
     fn check_mediality(a: Self, b: Self, c: Self, d: Self) -> bool {

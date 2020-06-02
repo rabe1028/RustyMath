@@ -1,15 +1,15 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-pub trait Monoid<T>: Semigroup<T> + Category<T> + UnitalMagma<T>
+pub trait Monoid<'a, T>: Semigroup<'a, T> + Category<'a, T> + UnitalMagma<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> Monoid<Op> for T
+impl<'a, Op, T> Monoid<'a, Op> for T
 where
-    T: Semigroup<Op> + Category<Op> + UnitalMagma<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: Semigroup<'a, Op> + Category<'a, Op> + UnitalMagma<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }

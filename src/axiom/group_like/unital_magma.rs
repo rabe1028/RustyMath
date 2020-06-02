@@ -2,15 +2,15 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait UnitalMagma<T>: Magma<T> + Identity<T>
+pub trait UnitalMagma<'a, T>: Magma<'a, T> + Identity<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> UnitalMagma<Op> for T
+impl<'a, Op, T> UnitalMagma<'a, Op> for T
 where
-    T: Magma<Op> + Identity<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: Magma<'a, Op> + Identity<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }

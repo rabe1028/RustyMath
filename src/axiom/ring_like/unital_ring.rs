@@ -2,10 +2,10 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait UnitalRing<Add, Mul>: Ring<Add, Mul> + Monoid<Mul>
+pub trait UnitalRing<'a, Add, Mul>: Ring<'a, Add, Mul> + Monoid<'a, Mul>
 where
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a, Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
     // #[inline(always)]
     // fn one() -> Self {
@@ -28,10 +28,10 @@ where
     // }
 }
 
-impl<Add, Mul, T> UnitalRing<Add, Mul> for T
+impl<'a, Add, Mul, T> UnitalRing<'a, Add, Mul> for T
 where
-    T: Ring<Add, Mul> + Monoid<Mul>,
-    Add: InternalBinaryOperator<T>,
-    Mul: InternalBinaryOperator<T>,
+    T: Ring<'a, Add, Mul> + Monoid<'a, Mul>,
+    Add: InternalBinaryOperator<'a, T>,
+    Mul: InternalBinaryOperator<'a, T>,
 {
 }

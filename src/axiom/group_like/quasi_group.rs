@@ -2,15 +2,15 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait QuasiGroup<T>: Magma<T> + Invertivility<T>
+pub trait QuasiGroup<'a, T>: Magma<'a, T> + Invertivility<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> QuasiGroup<Op> for T
+impl<'a, Op, T> QuasiGroup<'a, Op> for T
 where
-    T: Magma<Op> + Invertivility<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: Magma<'a, Op> + Invertivility<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }

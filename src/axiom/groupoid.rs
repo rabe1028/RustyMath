@@ -2,15 +2,15 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Groupoid<T>: Category<T> + Invertivility<T>
+pub trait Groupoid<'a, T>: Category<'a, T> + Invertivility<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> Groupoid<Op> for T
+impl<'a, Op, T> Groupoid<'a, Op> for T
 where
-    T: Category<Op> + Invertivility<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: Category<'a, Op> + Invertivility<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }

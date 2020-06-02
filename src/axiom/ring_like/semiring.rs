@@ -2,27 +2,27 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Semiring<Add, Mul>:
-    CommutativeMonoid<Add> + Monoid<Mul> + Distributivity<Add, Mul>
+pub trait Semiring<'a, Add, Mul>:
+    CommutativeMonoid<'a, Add> + Monoid<'a, Mul> + Distributivity<'a, Add, Mul>
 where
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a, Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
     #[inline(always)]
     fn one() -> Self {
-        <Self as Identity<Mul>>::identity()
+        <Self as Identity<'a, Mul>>::identity()
     }
 
     #[inline(always)]
     fn is_one(&self) -> bool {
-        <Self as Identity<Mul>>::is_identity(self)
+        <Self as Identity<'a, Mul>>::is_identity(self)
     }
 }
 
-impl<Add, Mul, T> Semiring<Add, Mul> for T
+impl<'a, Add, Mul, T> Semiring<'a, Add, Mul> for T
 where
-    T: CommutativeMonoid<Add> + Monoid<Mul> + Distributivity<Add, Mul>,
-    Add: InternalBinaryOperator<T>,
-    Mul: InternalBinaryOperator<T>,
+    T: CommutativeMonoid<'a, Add> + Monoid<'a, Mul> + Distributivity<'a, Add, Mul>,
+    Add: InternalBinaryOperator<'a, T>,
+    Mul: InternalBinaryOperator<'a, T>,
 {
 }

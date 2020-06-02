@@ -2,17 +2,17 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Nearring<Add, Mul>: Group<Add> + Semigroup<Mul> + Distributivity<Add, Mul>
+pub trait Nearring<'a, Add, Mul>: Group<'a, Add> + Semigroup<'a, Mul> + Distributivity<'a, Add, Mul>
 where
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a, Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Add, Mul, T> Nearring<Add, Mul> for T
+impl<'a, Add, Mul, T> Nearring<'a, Add, Mul> for T
 where
-    T: Group<Add> + Semigroup<Mul> + Distributivity<Add, Mul>,
-    Add: InternalBinaryOperator<T>,
-    Mul: InternalBinaryOperator<T>,
+    T: Group<'a, Add> + Semigroup<'a, Mul> + Distributivity<'a, Add, Mul>,
+    Add: InternalBinaryOperator<'a, T>,
+    Mul: InternalBinaryOperator<'a, T>,
 {
 }

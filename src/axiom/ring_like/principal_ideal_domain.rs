@@ -2,18 +2,18 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait PrincipalIdealDomain<Add, Mul>:
-    UniqueFactorizationDomain<Add, Mul> + UniquePrimeFactorizable
+pub trait PrincipalIdealDomain<'a, Add, Mul>:
+    UniqueFactorizationDomain<'a, Add, Mul> + UniquePrimeFactorizable
 where
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a, Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Add, Mul, T> PrincipalIdealDomain<Add, Mul> for T
+impl<'a, Add, Mul, T> PrincipalIdealDomain<'a, Add, Mul> for T
 where
-    T: UniqueFactorizationDomain<Add, Mul> + UniquePrimeFactorizable,
-    Add: InternalBinaryOperator<T>,
-    Mul: InternalBinaryOperator<T>,
+    T: UniqueFactorizationDomain<'a, Add, Mul> + UniquePrimeFactorizable,
+    Add: InternalBinaryOperator<'a, T>,
+    Mul: InternalBinaryOperator<'a, T>,
 {
 }

@@ -1,15 +1,15 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-pub trait InverseSemigroup<T>: Semigroup<T> + QuasiGroup<T>
+pub trait InverseSemigroup<'a, T>: Semigroup<'a, T> + QuasiGroup<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> InverseSemigroup<Op> for T
+impl<'a, Op, T> InverseSemigroup<'a, Op> for T
 where
-    T: Semigroup<Op> + QuasiGroup<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: Semigroup<'a, Op> + QuasiGroup<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }

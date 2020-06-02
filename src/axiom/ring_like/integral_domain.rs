@@ -2,17 +2,17 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait IntegralDomain<Add, Mul>: CommutativeRing<Add, Mul> + NoZeroDivisor
+pub trait IntegralDomain<'a, Add, Mul>: CommutativeRing<'a, Add, Mul> + NoZeroDivisor
 where
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a,Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Add, Mul, T> IntegralDomain<Add, Mul> for T
+impl<'a,Add, Mul, T> IntegralDomain<'a,Add, Mul> for T
 where
-    T: CommutativeRing<Add, Mul> + NoZeroDivisor,
-    Add: InternalBinaryOperator<T>,
-    Mul: InternalBinaryOperator<T>,
+    T: CommutativeRing<'a, Add, Mul> + NoZeroDivisor,
+    Add: InternalBinaryOperator<'a, T>,
+    Mul: InternalBinaryOperator<'a, T>,
 {
 }

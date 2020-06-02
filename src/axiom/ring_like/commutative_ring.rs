@@ -2,17 +2,17 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait CommutativeRing<Add, Mul>: UnitalRing<Add, Mul> + Commutativity<Mul>
+pub trait CommutativeRing<'a, Add, Mul>: UnitalRing<'a, Add, Mul> + Commutativity<'a, Mul>
 where
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a, Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Add, Mul, T> CommutativeRing<Add, Mul> for T
+impl<'a, Add, Mul, T> CommutativeRing<'a, Add, Mul> for T
 where
-    T: UnitalRing<Add, Mul> + Commutativity<Mul>,
-    Add: InternalBinaryOperator<T>,
-    Mul: InternalBinaryOperator<T>,
+    T: UnitalRing<'a, Add, Mul> + Commutativity<'a, Mul>,
+    Add: InternalBinaryOperator<'a, T>,
+    Mul: InternalBinaryOperator<'a, T>,
 {
 }

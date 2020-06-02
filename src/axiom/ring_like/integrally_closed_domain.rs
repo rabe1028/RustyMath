@@ -2,17 +2,17 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait IntegrallyClosedDomain<Add, Mul>: IntegralDomain<Add, Mul> + IntegrallyClosed
+pub trait IntegrallyClosedDomain<'a, Add, Mul>: IntegralDomain<'a, Add, Mul> + IntegrallyClosed
 where
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a, Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Add, Mul, T> IntegrallyClosedDomain<Add, Mul> for T
+impl<'a, Add, Mul, T> IntegrallyClosedDomain<'a, Add, Mul> for T
 where
-    T: IntegralDomain<Add, Mul> + IntegrallyClosed,
-    Add: InternalBinaryOperator<T>,
-    Mul: InternalBinaryOperator<T>,
+    T: IntegralDomain<'a, Add, Mul> + IntegrallyClosed,
+    Add: InternalBinaryOperator<'a, T>,
+    Mul: InternalBinaryOperator<'a, T>,
 {
 }

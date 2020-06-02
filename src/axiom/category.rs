@@ -2,15 +2,15 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Category<T>: Semigroupoid<T> + Identity<T>
+pub trait Category<'a, T>: Semigroupoid<'a, T> + Identity<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> Category<Op> for T
+impl<'a, Op, T> Category<'a, Op> for T
 where
-    T: Semigroupoid<Op> + Identity<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: Semigroupoid<'a, Op> + Identity<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }

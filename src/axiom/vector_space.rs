@@ -23,11 +23,11 @@ CoefficientTypeを関連型にすると，RealVectorSpaceとComplexVectorSpace�
 Add,Mulの依存が多すぎ
 */
 
-pub trait VectorSpace<Coeff, Add, Mul>: Module<Coeff, Add, Mul>
+pub trait VectorSpace<'a, Coeff, Add, Mul>: Module<'a, Coeff, Add, Mul>
 where
-    Add: InternalBinaryOperator<Self> + InternalBinaryOperator<Coeff>,
-    Mul: ExternalBinaryOperator<Coeff, Self> + InternalBinaryOperator<Coeff>,
-    GreatestCommonDivisor<Add, Mul>: InternalBinaryOperator<Coeff>,
-    Coeff: Field<Add, Mul>,
+    Add: InternalBinaryOperator<'a, Self> + InternalBinaryOperator<'a, Coeff>,
+    Mul: ExternalBinaryOperator<Coeff, Self> + InternalBinaryOperator<'a, Coeff>,
+    GreatestCommonDivisor<Add, Mul>: InternalBinaryOperator<'a, Coeff>,
+    Coeff: Field<'a, Add, Mul>,
 {
 }

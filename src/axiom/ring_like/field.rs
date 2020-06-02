@@ -2,25 +2,25 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Field<Add, Mul>: AbelianGroup<Mul> + EuclidianDomain<Add, Mul>
+pub trait Field<'a, Add, Mul>: AbelianGroup<'a, Mul> + EuclidianDomain<'a, Add, Mul>
 where
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a, Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
     #[inline(always)]
     fn reciprocal(&self) -> Option<Self> {
         if self.is_zero() {
             None
         } else {
-            Some(<Self as Invertivility<Mul>>::inverse(self))
+            Some(<Self as Invertivility<'a, Mul>>::inverse(self))
         }
     }
 }
 
-impl<Add, Mul, T> Field<Add, Mul> for T
+impl<'a, Add, Mul, T> Field<'a, Add, Mul> for T
 where
-    T: AbelianGroup<Mul> + EuclidianDomain<Add, Mul>,
-    Add: InternalBinaryOperator<T>,
-    Mul: InternalBinaryOperator<T>,
+    T: AbelianGroup<'a, Mul> + EuclidianDomain<'a, Add, Mul>,
+    Add: InternalBinaryOperator<'a,T>,
+    Mul: InternalBinaryOperator<'a,T>,
 {
 }

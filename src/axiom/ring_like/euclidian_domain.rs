@@ -1,11 +1,11 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-pub trait EuclidianDomain<Add, Mul>: PrincipalIdealDomain<Add, Mul> + std::cmp::PartialOrd
+pub trait EuclidianDomain<'a, Add, Mul>: PrincipalIdealDomain<'a, Add, Mul> + std::cmp::PartialOrd
 // + AbelianGroup<GreatestCommonDivisor<Add, Mul>>
 where
-    Add: InternalBinaryOperator<Self>,
-    Mul: InternalBinaryOperator<Self>,
+    Add: InternalBinaryOperator<'a, Self>,
+    Mul: InternalBinaryOperator<'a, Self>,
 {
     fn div(&self, other: &Self) -> Self;
     fn rem(&self, other: &Self) -> Self {
@@ -17,11 +17,11 @@ where
     }
 }
 
-impl<Add, Mul, T> BinaryOperator<T, T> for GreatestCommonDivisor<Add, Mul>
+impl<'a, Add, Mul, T> BinaryOperator<T, T> for GreatestCommonDivisor<Add, Mul>
 where
-    T: EuclidianDomain<Add, Mul>,
-    Add: InternalBinaryOperator<T>,
-    Mul: InternalBinaryOperator<T>,
+    T: EuclidianDomain<'a, Add, Mul>,
+    Add: InternalBinaryOperator<'a, T>,
+    Mul: InternalBinaryOperator<'a, T>,
 {
     type Output = T;
     fn operate(lhs: T, rhs: T) -> Self::Output {

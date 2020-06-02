@@ -50,7 +50,9 @@ macro_rules! forward_binop {
     };
 }
 
-pub trait InternalBinaryOperator<T>: BinaryOperator<T, T, Output = T> {}
+pub trait InternalBinaryOperator<'a, T>: 
+    BinaryOperator<T, T, Output = T> + BinaryOperator<&'a T, T, Output = T> 
+    + BinaryOperator<T, &'a T, Output = T> + BinaryOperator<&'a T, &'a T, Output = T>{}
 
 // impl<Op, T> InternalBinaryOperator<T> for Op where Op: BinaryOperator<T, T, Output = T> {}
 

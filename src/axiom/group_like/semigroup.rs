@@ -2,15 +2,15 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Semigroup<T>: Magma<T> + Associativity<T>
+pub trait Semigroup<'a, T>: Magma<'a, T> + Associativity<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> Semigroup<Op> for T
+impl<'a, Op, T> Semigroup<'a, Op> for T
 where
-    T: Magma<Op> + Associativity<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: Magma<'a, Op> + Associativity<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }

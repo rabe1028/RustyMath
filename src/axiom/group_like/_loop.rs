@@ -2,15 +2,15 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Loop<T>: QuasiGroup<T> + Identity<T>
+pub trait Loop<'a, T>: QuasiGroup<'a, T> + Identity<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> Loop<Op> for T
+impl<'a, Op, T> Loop<'a, Op> for T
 where
-    T: QuasiGroup<Op> + Identity<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: QuasiGroup<'a, Op> + Identity<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }

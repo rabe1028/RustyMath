@@ -37,11 +37,11 @@ where
 
     fn from_vec(vec: Vec<ElementType>) -> Self;
 
-    fn zeros() -> Self
+    fn zeros<'a>() -> Self
     where
-        ElementType: UnitalRing<Addition, Multiplication>,
-        Addition: InternalBinaryOperator<ElementType>,
-        Multiplication: InternalBinaryOperator<ElementType>,
+        ElementType: UnitalRing<'a, Addition, Multiplication>,
+        Addition: InternalBinaryOperator<'a, ElementType>,
+        Multiplication: InternalBinaryOperator<'a, ElementType>,
     {
         let cap = Contravariant::get_capacity() * Covariant::get_capacity();
         Self::from_vec(vec![ElementType::zero(); cap])

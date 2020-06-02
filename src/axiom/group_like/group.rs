@@ -1,15 +1,15 @@
 use crate::axiom::*;
 use crate::operator::*;
 
-pub trait Group<T>: Loop<T> + Monoid<T> + InverseSemigroup<T> + Groupoid<T>
+pub trait Group<'a, T>: Loop<'a, T> + Monoid<'a, T> + InverseSemigroup<'a, T> + Groupoid<'a, T>
 where
-    T: InternalBinaryOperator<Self>,
+    T: InternalBinaryOperator<'a, Self>,
 {
 }
 
-impl<Op, T> Group<Op> for T
+impl<'a, Op, T> Group<'a, Op> for T
 where
-    T: Loop<Op> + Monoid<Op> + InverseSemigroup<Op> + Groupoid<Op>,
-    Op: InternalBinaryOperator<T>,
+    T: Loop<'a, Op> + Monoid<'a, Op> + InverseSemigroup<'a, Op> + Groupoid<'a, Op>,
+    Op: InternalBinaryOperator<'a, T>,
 {
 }
