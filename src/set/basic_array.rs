@@ -116,11 +116,11 @@ where
     }
 }
 
-impl<ElementType> Scalar<ElementType> for BasicScalar<ElementType>
+impl<'a, ElementType> Scalar<ElementType> for BasicScalar<ElementType>
 where
     ElementType: Scalar<ElementType> + Copy,
-    Multiplication: InternalBinaryOperator<ElementType>,
-    Addition: InternalBinaryOperator<ElementType>,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
+    Addition: InternalBinaryOperator<'a, ElementType>,
 {
     fn new(elem: ElementType) -> Self {
         BasicArray::from_vec(vec![elem])
@@ -308,8 +308,8 @@ where
     }
 }
 
-impl<ElementType, Contravariant, Covariant>
-    InternalBinaryOperator<BasicArray<ElementType, Contravariant, Covariant>> for Addition
+impl<'a, ElementType, Contravariant, Covariant>
+    InternalBinaryOperator<'a, BasicArray<ElementType, Contravariant, Covariant>> for Addition
 where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     Contravariant: HList + IndexShape + Add<Covariant>,
@@ -317,7 +317,7 @@ where
 {
 }
 
-impl<ElementType, Contravariant, Covariant> Totality<Addition>
+impl<'a, ElementType, Contravariant, Covariant> Totality<'a, Addition>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
@@ -326,7 +326,7 @@ where
 {
 }
 
-impl<ElementType, Contravariant, Covariant> Associativity<Addition>
+impl<'a, ElementType, Contravariant, Covariant> Associativity<'a, Addition>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
     ElementType: std::ops::Add<Output = ElementType> + PartialEq + Copy,
@@ -335,18 +335,18 @@ where
 {
 }
 
-impl<ElementType, Contravariant, Covariant> Identity<Addition>
+impl<'a, ElementType, Contravariant, Covariant> Identity<'a, Addition>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
     Self: Tensor<ElementType, Contravariant, Covariant>,
-    ElementType: UnitalRing<Addition, Multiplication>
+    ElementType: UnitalRing<'a, Addition, Multiplication>
         + std::ops::Add<Output = ElementType>
         + PartialEq
         + Copy,
     Contravariant: HList + IndexShape + PartialEq + Add<Covariant> + Clone,
     Covariant: HList + IndexShape + PartialEq + Clone,
-    Addition: InternalBinaryOperator<ElementType>,
-    Multiplication: InternalBinaryOperator<ElementType>,
+    Addition: InternalBinaryOperator<'a, ElementType>,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
 {
     #[inline(always)]
     fn identity() -> Self {
@@ -355,16 +355,16 @@ where
     }
 }
 
-impl<ElementType, Contravariant, Covariant>
+impl<'a, ElementType, Contravariant, Covariant>
     BinaryOperator<
         BasicArray<ElementType, Contravariant, Covariant>,
         BasicArray<ElementType, Contravariant, Covariant>,
     > for HadamardProduct
 where
-    ElementType: Copy,
-    Multiplication: InternalBinaryOperator<ElementType>,
-    Contravariant: HList + IndexShape,
-    Covariant: HList + IndexShape,
+    ElementType: Copy + 'a,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
+    Contravariant: HList + IndexShape + 'a,
+    Covariant: HList + IndexShape + 'a,
 {
     type Output = BasicArray<ElementType, Contravariant, Covariant>;
     fn operate(
@@ -372,8 +372,8 @@ where
         rhs: BasicArray<ElementType, Contravariant, Covariant>,
     ) -> BasicArray<ElementType, Contravariant, Covariant> {
         <Self as BinaryOperator<
-            &BasicArray<ElementType, Contravariant, Covariant>,
-            &BasicArray<ElementType, Contravariant, Covariant>,
+            &'a BasicArray<ElementType, Contravariant, Covariant>,
+            &'a BasicArray<ElementType, Contravariant, Covariant>,
         >>::operate(&lhs, &rhs)
     }
 }
@@ -386,7 +386,7 @@ impl<'a, ElementType, Contravariant, Covariant>
     > for HadamardProduct
 where
     ElementType: Copy,
-    Multiplication: InternalBinaryOperator<ElementType>,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
@@ -409,7 +409,7 @@ impl<'a, ElementType, Contravariant, Covariant>
     > for HadamardProduct
 where
     ElementType: Copy,
-    Multiplication: InternalBinaryOperator<ElementType>,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
@@ -432,7 +432,7 @@ impl<'a, ElementType, Contravariant, Covariant>
     > for HadamardProduct
 where
     ElementType: Copy,
-    Multiplication: InternalBinaryOperator<ElementType>,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
@@ -457,47 +457,47 @@ where
     }
 }
 
-impl<ElementType, Contravariant, Covariant>
-    InternalBinaryOperator<BasicArray<ElementType, Contravariant, Covariant>> for HadamardProduct
+impl<'a, ElementType, Contravariant, Covariant>
+    InternalBinaryOperator<'a, BasicArray<ElementType, Contravariant, Covariant>> for HadamardProduct
 where
     ElementType: Copy,
-    Multiplication: InternalBinaryOperator<ElementType>,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
 {
 }
 
-impl<ElementType, Contravariant, Covariant> Totality<HadamardProduct>
+impl<'a, ElementType, Contravariant, Covariant> Totality<'a, HadamardProduct>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
     ElementType: Copy,
-    Multiplication: InternalBinaryOperator<ElementType>,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
 {
 }
 
-impl<ElementType, Contravariant, Covariant> Associativity<HadamardProduct>
+impl<'a, ElementType, Contravariant, Covariant> Associativity<'a, HadamardProduct>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
     ElementType: PartialEq + Copy,
-    Multiplication: InternalBinaryOperator<ElementType>,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
     Contravariant: HList + IndexShape + PartialEq + Add<Covariant> + Clone,
     Covariant: HList + IndexShape + PartialEq + Clone,
 {
 }
 
-impl<ElementType, _1, _2, _3>
+impl<'a, ElementType, _1, _2, _3>
     BinaryOperator<BasicMatrix<ElementType, _1, _2>, BasicMatrix<ElementType, _2, _3>>
     for Multiplication
 where
     ElementType: std::ops::Mul<Output = ElementType> + std::ops::Add<Output = ElementType> + Copy,
-    ElementType: UnitalRing<Addition, Multiplication>,
-    Multiplication: InternalBinaryOperator<ElementType>,
-    Addition: InternalBinaryOperator<ElementType>,
-    _1: Unsigned,
-    _2: Unsigned,
-    _3: Unsigned,
+    ElementType: UnitalRing<'a, Addition, Multiplication> + 'a,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
+    Addition: InternalBinaryOperator<'a, ElementType>,
+    _1: Unsigned + 'a,
+    _2: Unsigned + 'a,
+    _3: Unsigned + 'a,
 {
     type Output = BasicMatrix<ElementType, _1, _3>;
     #[inline(always)]
@@ -506,8 +506,8 @@ where
         rhs: BasicMatrix<ElementType, _2, _3>,
     ) -> BasicMatrix<ElementType, _1, _3> {
         <Multiplication as BinaryOperator<
-            &BasicMatrix<ElementType, _1, _2>,
-            &BasicMatrix<ElementType, _2, _3>,
+            &'a BasicMatrix<ElementType, _1, _2>,
+            &'a BasicMatrix<ElementType, _2, _3>,
         >>::operate(&lhs, &rhs)
     }
 }
@@ -517,9 +517,9 @@ impl<'a, ElementType, _1, _2, _3>
     for Multiplication
 where
     ElementType: std::ops::Mul<Output = ElementType> + std::ops::Add<Output = ElementType> + Copy,
-    ElementType: UnitalRing<Addition, Multiplication>,
-    Multiplication: InternalBinaryOperator<ElementType>,
-    Addition: InternalBinaryOperator<ElementType>,
+    ElementType: UnitalRing<'a, Addition, Multiplication>,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
+    Addition: InternalBinaryOperator<'a, ElementType>,
     _1: Unsigned,
     _2: Unsigned,
     _3: Unsigned,
@@ -531,8 +531,8 @@ where
         rhs: BasicMatrix<ElementType, _2, _3>,
     ) -> BasicMatrix<ElementType, _1, _3> {
         <Multiplication as BinaryOperator<
-            &BasicMatrix<ElementType, _1, _2>,
-            &BasicMatrix<ElementType, _2, _3>,
+            &'a BasicMatrix<ElementType, _1, _2>,
+            &'a BasicMatrix<ElementType, _2, _3>,
         >>::operate(lhs, &rhs)
     }
 }
@@ -542,9 +542,9 @@ impl<'a, ElementType, _1, _2, _3>
     for Multiplication
 where
     ElementType: std::ops::Mul<Output = ElementType> + std::ops::Add<Output = ElementType> + Copy,
-    ElementType: UnitalRing<Addition, Multiplication>,
-    Multiplication: InternalBinaryOperator<ElementType>,
-    Addition: InternalBinaryOperator<ElementType>,
+    ElementType: UnitalRing<'a, Addition, Multiplication>,
+    Multiplication: InternalBinaryOperator<'a, ElementType>,
+    Addition: InternalBinaryOperator<'a, ElementType>,
     _1: Unsigned,
     _2: Unsigned,
     _3: Unsigned,

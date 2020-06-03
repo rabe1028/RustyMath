@@ -18,7 +18,7 @@ macro_rules! impl_field {
         $(
             impl_euclidean_domain! { $ty }
 
-            impl Invertivility<Multiplication> for $ty {
+            impl<'a> Invertivility<'a, Multiplication> for $ty {
                 #[inline(always)]
                 fn inverse(&self) -> Self {
                     1 as $ty / *self
@@ -38,7 +38,7 @@ macro_rules! impl_euclidean_domain {
             impl UniqueFactorizable for $ty {}
             impl UniquePrimeFactorizable for $ty {}
 
-            impl EuclidianDomain<Addition, Multiplication> for $ty {
+            impl<'a> EuclidianDomain<'a, Addition, Multiplication> for $ty {
                 #[inline(always)]
                 fn div(&self, other: &Self) -> Self {
                     self / other
@@ -57,7 +57,7 @@ macro_rules! impl_unital_ring {
         $(
             impl_unital_ring_unsigned! { $ty }
 
-            impl Invertivility<Addition> for $ty {
+            impl<'a> Invertivility<'a, Addition> for $ty {
                 #[inline(always)]
                 fn inverse(&self) -> Self {
                     -self
@@ -75,39 +75,39 @@ macro_rules! impl_unital_ring_unsigned {
                 lhs + rhs
             }}
 
-            impl InternalBinaryOperator<$ty> for Addition {}
+            impl<'a> InternalBinaryOperator<'a, $ty> for Addition {}
 
-            impl Totality<Addition> for $ty {}
-            impl Associativity<Addition> for $ty {}
-            impl Identity<Addition> for $ty {
+            impl<'a> Totality<'a, Addition> for $ty {}
+            impl<'a> Associativity<'a, Addition> for $ty {}
+            impl<'a> Identity<'a, Addition> for $ty {
                 #[inline(always)]
                 fn identity() -> Self {
                     0 as $ty
                 }
             }
 
-            impl Commutativity<Addition> for $ty {}
+            impl<'a> Commutativity<'a, Addition> for $ty {}
 
             forward_internal_binop! {Multiplication, $ty, (lhs, rhs) => {
                 lhs * rhs
             }}
 
-            impl InternalBinaryOperator<$ty> for Multiplication {}
+            impl<'a>  InternalBinaryOperator<'a, $ty> for Multiplication {}
 
-            impl Totality<Multiplication> for $ty {}
-            impl Associativity<Multiplication> for $ty {}
+            impl<'a>  Totality<'a, Multiplication> for $ty {}
+            impl<'a>  Associativity<'a, Multiplication> for $ty {}
 
-            impl Commutativity<Multiplication> for $ty {}
+            impl<'a>  Commutativity<'a, Multiplication> for $ty {}
 
-            impl Identity<Multiplication> for $ty {
+            impl<'a>  Identity<'a, Multiplication> for $ty {
                 #[inline(always)]
                 fn identity() -> Self {
                     1 as $ty
                 }
             }
 
-            impl RightDistributivity<Addition, Multiplication> for $ty {}
-            impl LeftDistributivity<Addition, Multiplication> for $ty {}
+            impl<'a>  RightDistributivity<'a, Addition, Multiplication> for $ty {}
+            impl<'a>  LeftDistributivity<'a, Addition, Multiplication> for $ty {}
         )*
     }
 }
