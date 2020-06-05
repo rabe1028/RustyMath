@@ -7,11 +7,13 @@ use crate::util::IndexShape;
 use crate::axiom::*;
 use crate::operator::*;
 
+use std::marker::Sized;
+
 pub trait Tensor<ElementType, Contravariant, Covariant>
 where
-    Contravariant: HList + IndexShape,
-    Covariant: HList + IndexShape,
-    Self: std::marker::Sized,
+    Contravariant: IndexShape,
+    Covariant: IndexShape,
+    Self: Sized,
 {
     type Joined; // = Join<Contravariant, Covariant>;
                  // const capacity: usize = Contravariant::cap * Covariant::cap;

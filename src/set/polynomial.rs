@@ -4,8 +4,9 @@ use crate::property::*;
 use std::cmp::*;
 use std::ops::*;
 
+#[repr(C)]
 #[derive(Clone, Eq, PartialEq)]
-struct Polynomial<Coeff>
+pub struct Polynomial<Coeff>
 where
     Coeff: Ring<Addition, Multiplication>,
     Addition: InternalBinaryOperator<Coeff>,

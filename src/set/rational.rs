@@ -111,7 +111,7 @@ macro_rules! impl_helper {
 
 #[repr(C)]
 #[derive(Debug, Clone)]
-struct Rational<T>
+pub struct Rational<T>
 where
     T: UnitalRing<Addition, Multiplication> + Clone,
     Addition: InternalBinaryOperator<T>,

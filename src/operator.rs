@@ -86,6 +86,27 @@ pub trait ExternalBinaryOperator<S, T>: BinaryOperator<S, T, Output = T> {}
 
 impl<Op, S, T> ExternalBinaryOperator<S, T> for Op where Op: BinaryOperator<S, T, Output = T> {}
 
+// for ref
+pub trait ApproxInternalBinaryOperator<T>:
+    BinaryOperator<T, T::Target, Output = T::Target>
+    + BinaryOperator<T::Target, T, Output = T::Target>
+    + BinaryOperator<T, T, Output = T::Target>
+where
+    T: std::ops::DerefMut,
+    T::Target: Sized,
+{
+}
+
+impl<Op, T> ApproxInternalBinaryOperator<T> for Op
+where
+    Op: BinaryOperator<T, T::Target, Output = T::Target>
+        + BinaryOperator<T::Target, T, Output = T::Target>
+        + BinaryOperator<T, T, Output = T::Target>,
+    T: std::ops::DerefMut,
+    T::Target: Sized,
+{
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Addition {}
 

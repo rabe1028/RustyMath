@@ -21,6 +21,7 @@ pub use lazy::*;
 
 pub type Join<A, B> = <A as Add<B>>::Output;
 
+// for tensor elem index
 pub trait IndexShape: HList {
     // all usize hlist
     type Shape: HList;
