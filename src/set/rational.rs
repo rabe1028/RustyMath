@@ -121,6 +121,15 @@ where
     denom: T,
 }
 
+impl<T> Morphism for Rational<T> {
+    type Domain = ();
+    type Codomain = ();
+}
+
+impl<T> Endomorphism for Rational<T> {
+    type Object = ();
+}
+
 type Rational32 = Rational<i32>;
 type Rational64 = Rational<i64>;
 type RationalNum = Rational<isize>;
@@ -200,7 +209,7 @@ forward_inter_binop! { Addition,
 
 impl_helper! {impl Totality<Addition>}
 
-impl_helper! {impl Associativity<Addition>}
+impl_helper! {impl Associativity<Addition, Self, Self>}
 
 impl<T> Identity<Addition> for Rational<T>
 where
@@ -241,7 +250,7 @@ forward_inter_binop! { Multiplication,
 }
 
 impl_helper! {impl Totality<Multiplication>}
-impl_helper! {impl Associativity<Multiplication>}
+impl_helper! {impl Associativity<Multiplication, Self, Self>}
 
 impl_helper! {impl Commutativity<Multiplication>}
 

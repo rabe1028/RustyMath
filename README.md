@@ -77,13 +77,10 @@
     - Functor同士の結合（Composition）を作成しようとしたが，BinaryOperatorの定義に沿わない(BinaryOperatorはAxA->Aであるため)
     - Semigroupoidの定義では，f: A->B, g: B->Cがあった時にf . gが結合律を満たすため，BinaryOperatorを拡張する必要がある
     - しかし，FnはTraitであるため，ライフタイムが絡み，実装しにくい
-    - trait genericsが実装され次第，始める
+    - BinaryOperatorを射に対し定義することで解決を試みる  
 
 - TODO
   - Functor etc
   - Blas対応
   - Vector Spaceの作成
   - 基底を保持する機構の設計
-  - 整域の実装
-    - 否定実装を用いるべきか？
-      - nightlyでしかコンパイルできなくなる

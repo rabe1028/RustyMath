@@ -70,6 +70,15 @@ macro_rules! impl_unital_ring {
 macro_rules! impl_unital_ring_unsigned {
     ($($ty: ty),*) => {
         $(
+            impl Morphism for $ty {
+                type Domain = ();
+                type Codomain = ();
+            }
+
+            impl Endomorphism for $ty {
+                type Object = ();
+            }
+
             // No invertivility for addition op
             forward_internal_binop! {Addition, $ty, (lhs, rhs) => {
                 lhs + rhs
@@ -78,7 +87,7 @@ macro_rules! impl_unital_ring_unsigned {
             impl InternalBinaryOperator<$ty> for Addition {}
 
             impl Totality<Addition> for $ty {}
-            impl Associativity<Addition> for $ty {}
+            impl Associativity<Addition, $ty, $ty> for $ty {}
             impl Identity<Addition> for $ty {
                 #[inline(always)]
                 fn identity() -> Self {
@@ -95,7 +104,7 @@ macro_rules! impl_unital_ring_unsigned {
             impl InternalBinaryOperator<$ty> for Multiplication {}
 
             impl Totality<Multiplication> for $ty {}
-            impl Associativity<Multiplication> for $ty {}
+            impl Associativity<Multiplication, $ty, $ty> for $ty {}
 
             impl Commutativity<Multiplication> for $ty {}
 
@@ -108,6 +117,13 @@ macro_rules! impl_unital_ring_unsigned {
 
             impl RightDistributivity<Addition, Multiplication> for $ty {}
             impl LeftDistributivity<Addition, Multiplication> for $ty {}
+
+            impl Ring<Addition, Multiplication> for $ty {
+                #[inline(always)]
+                fn sub(self, other: Self) -> Self {
+                    self - other
+                }
+            }
         )*
     }
 }

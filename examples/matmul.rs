@@ -11,5 +11,5 @@ fn main() {
     ]);
     println!("a = {:?}", a);
     println!("b = {:?}", b);
-    println!("c = {:?}", b * a);
+    // println!("c = {:?}", b * a);
 }

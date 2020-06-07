@@ -15,6 +15,15 @@ where
     a: Vec<Coeff>,
 }
 
+impl<T> Morphism for Polynomial<T> {
+    type Domain = ();
+    type Codomain = ();
+}
+
+impl<T> Endomorphism for Polynomial<T> {
+    type Object = ();
+}
+
 impl<T> Polynomial<T>
 where
     T: Ring<Addition, Multiplication> + Clone,
@@ -284,7 +293,7 @@ forward_binop_impl! {impl Add, fn add, Addition}
 forward_assign! {impl AddAssign, fn add_assign, Addition}
 
 impl_helper! {impl Totality<Addition>}
-impl_helper! {impl Associativity<Addition>}
+impl_helper! {impl Associativity<Addition, Self, Self>}
 impl_helper! {impl Commutativity<Addition>}
 
 impl_helper! {impl Identity<Addition>,
@@ -329,7 +338,7 @@ forward_binop_impl! {impl Mul, fn mul, Multiplication}
 forward_assign! {impl MulAssign, fn mul_assign, Multiplication}
 
 impl_helper! {impl Totality<Multiplication>}
-impl_helper! {impl Associativity<Multiplication>}
+impl_helper! {impl Associativity<Multiplication, Self, Self>}
 
 // impl_helper! {impl Identity<Multiplication>,
 //     #[inline(always)]
@@ -414,6 +423,17 @@ impl_helper! {impl NoZeroDivisor}
 impl_helper! {impl IntegrallyClosed}
 impl_helper! {impl UniqueFactorizable}
 impl_helper! {impl UniquePrimeFactorizable}
+
+impl<T> Ring<Addition, Multiplication> for Polynomial<T> 
+where
+    T: EuclidianDomain<Addition, Multiplication> + Eq + Clone + std::fmt::Debug,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+    fn sub(self, other: Self) -> Self {
+        Addition::operate(self, other.inverse())
+    }
+}
 
 impl<T> EuclidianDomain<Addition, Multiplication> for Polynomial<T>
 where

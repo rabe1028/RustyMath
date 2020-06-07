@@ -7,20 +7,89 @@ where
 {
 }
 
-pub trait Associativity<T>
+pub trait Morphism {
+    // Self : Domain -> Codomain
+    // Ex, Int : () -> ()
+    type Domain; // Source
+    type Codomain; // Target
+}
+
+pub trait Endomorphism
 where
-    Self: Sized + PartialEq + Clone,
-    T: InternalBinaryOperator<Self>,
+    Self: Morphism<
+        Domain = <Self as Endomorphism>::Object,
+        Codomain = <Self as Endomorphism>::Object,
+    >,
 {
-    fn check_associativity(x: Self, y: Self, z: Self) -> bool {
-        T::operate(x.clone(), T::operate(y.clone(), z.clone())) == T::operate(T::operate(x, y), z)
+    type Object;
+}
+
+pub type Domain<A> = <A as Morphism>::Domain;
+pub type Codomain<A> = <A as Morphism>::Codomain;
+
+// f : a -> b, g : b -> c, h : c -> d
+// f = Self
+pub trait Associativity<Op, G, H>
+where
+    Self: Sized + PartialEq + Clone + Morphism,
+    G: Clone + Morphism<Domain = Codomain<Self>>,
+    H: Clone + Morphism<Domain = Codomain<G>>,
+    Target<Op, G, Self>: Morphism<Domain = Domain<Self>, Codomain = Codomain<G>>,
+    Target<Op, H, G>: Morphism<Domain = Domain<G>, Codomain = Codomain<H>>,
+    Target<Op, H, Target<Op, G, Self>>: Morphism<Domain = Domain<Self>, Codomain = Codomain<H>>,
+    Target<Op, H, Target<Op, G, Self>>: Sized + PartialEq + Clone,
+    Op: BinaryOperator<G, Self>
+        + BinaryOperator<H, G>
+        + BinaryOperator<H, Target<Op, G, Self>>
+        + BinaryOperator<Target<Op, H, G>, Self, Output = Target<Op, H, Target<Op, G, Self>>>,
+{
+    fn check_associativity(x: Self, y: G, z: H) -> bool {
+        Op::operate(z.clone(), Op::operate(y.clone(), x.clone()))
+            == Op::operate(Op::operate(z, y), x)
     }
 }
 
-pub trait Identity<T>
+pub trait LeftIdentity<Op, Rhs = Self>
 where
-    Self: Sized + PartialEq + Clone,
-    T: InternalBinaryOperator<Self>,
+    Self: Sized + PartialEq + Clone + Morphism,
+    Rhs: Sized
+        + PartialEq
+        + Clone
+        + Morphism<Domain = <Self as Morphism>::Codomain, Codomain = <Self as Morphism>::Domain>,
+    Op: BinaryOperator<Self, Rhs, Output = Self>,
+{
+    fn left_identity() -> Rhs;
+    #[inline(always)]
+    fn is_left_identity(other: &Rhs) -> bool {
+        *other == Self::left_identity()
+    }
+}
+
+pub trait RightIdentity<Op, Lhs = Self>
+where
+    Self: Sized + PartialEq + Clone + Morphism,
+    Lhs: Sized
+        + PartialEq
+        + Clone
+        + Morphism<Domain = <Self as Morphism>::Domain, Codomain = <Self as Morphism>::Domain>,
+    Op: BinaryOperator<Lhs, Self, Output = Self>,
+{
+    fn right_identity() -> Lhs;
+    #[inline(always)]
+    fn is_right_identity(other: &Lhs) -> bool {
+        *other == Self::right_identity()
+    }
+}
+
+// Identityの制約
+// InternalBinaryOperatorが定義されているはず．
+// Ex
+// f(Self) * id_x = f
+// id_y * f(Self) = f
+pub trait Identity<Op>: LeftIdentity<Op, Self> + RightIdentity<Op, Self>
+where
+    Self: Sized + PartialEq + Clone + Endomorphism,
+    Op: InternalBinaryOperator<Self>,
 {
     fn identity() -> Self;
     #[inline(always)]
@@ -30,24 +99,30 @@ where
     #[inline(always)]
     fn check_identity(x: Self) -> bool {
         let id = Self::identity();
-        let left = T::operate(x.clone(), id.clone());
-        let right = T::operate(id.clone(), x.clone());
+        let left = Op::operate(x.clone(), id.clone());
+        let right = Op::operate(id.clone(), x.clone());
         (left == x) && (right == x)
     }
 }
-pub trait Invertivility<T>: Identity<T>
+pub trait Invertivility<T>
 where
-    Self: Sized + Clone,
-    T: InternalBinaryOperator<Self>,
+    Self: Sized + Clone + Morphism,
 {
-    fn inverse(&self) -> Self {
-        Self::identity().inv_op(self.clone())
-    }
-
-    fn inv_op(self, other: Self) -> Self {
-        T::operate(self, other.inverse())
-    }
+    type Inverse: Morphism<
+        Domain = <Self as Morphism>::Codomain,
+        Codomain = <Self as Morphism>::Domain,
+    >;
+    fn inverse(&self) -> Self::Inverse;
+    // fn inverse(&self) -> Self {
+    //     Self::identity().inv_op(self.clone())
+    // }
+    // fn inv_op(self, other: Self) -> Self {
+    //     T::operate(self, other.inverse())
+    // }
 }
+
+pub type Inverse<Op, A> = <A as Invertivility<Op>>::Inverse;
+
 pub trait Commutativity<T>
 where
     Self: Sized + PartialEq + Clone,

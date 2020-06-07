@@ -3,6 +3,8 @@ pub trait BinaryOperator<A, B> {
     fn operate(lhs: A, rhs: B) -> Self::Output;
 }
 
+pub type Target<Op, A, B> = <Op as BinaryOperator<A, B>>::Output;
+
 // for copyable element(primitive types)
 #[macro_export]
 macro_rules! forward_ref_binop {
