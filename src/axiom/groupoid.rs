@@ -6,22 +6,31 @@ type ComposeTriple<Op, A, B, C> = Target<Op, A, Target<Op, B, C>>;
 
 pub trait Groupoid<Op, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD>:
     Category<Op, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD> + Invertivility<Op>
-// ab
 where
-    Mhs: Clone + Morphism<Codomain = Domain<Self>> + Invertivility<Op>,
-    Rhs: Clone + Morphism<Codomain = Domain<Mhs>> + Invertivility<Op>,
+    Mhs: Sized + Morphism<Codomain = Domain<Self>> + Invertivility<Op>,
+    Rhs: Sized + Morphism<Codomain = Domain<Mhs>> + Invertivility<Op>,
     Target<Op, Self, Mhs>:
-        Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>> + Invertivility<Op>,
+        Sized + Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>> + Invertivility<Op>,
     Target<Op, Mhs, Rhs>:
-        Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>> + Invertivility<Op>,
+        Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>> + Invertivility<Op>,
     ComposeTriple<Op, Self, Mhs, Rhs>:
-        Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>> + Invertivility<Op>,
-    ComposeTriple<Op, Self, Mhs, Rhs>: Sized + PartialEq + Clone,
-    HomAA: Endomorphism<Object = Domain<Rhs>> + Identity<Op> + Invertivility<Op, Inverse = HomAA>,
-    HomBB: Endomorphism<Object = Domain<Mhs>> + Identity<Op> + Invertivility<Op, Inverse = HomBB>,
-    HomCC: Endomorphism<Object = Domain<Self>> + Identity<Op> + Invertivility<Op, Inverse = HomCC>,
-    HomDD:
-        Endomorphism<Object = Codomain<Self>> + Identity<Op> + Invertivility<Op, Inverse = HomDD>,
+        Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>> + Invertivility<Op>,
+    HomAA: Sized
+        + Endomorphism<Object = Domain<Rhs>>
+        + Identity<Op>
+        + Invertivility<Op, Inverse = HomAA>,
+    HomBB: Sized
+        + Endomorphism<Object = Domain<Mhs>>
+        + Identity<Op>
+        + Invertivility<Op, Inverse = HomBB>,
+    HomCC: Sized
+        + Endomorphism<Object = Domain<Self>>
+        + Identity<Op>
+        + Invertivility<Op, Inverse = HomCC>,
+    HomDD: Sized
+        + Endomorphism<Object = Codomain<Self>>
+        + Identity<Op>
+        + Invertivility<Op, Inverse = HomDD>,
     // from Associativity
     Op: BinaryOperator<Self, Mhs>
         + BinaryOperator<Mhs, Rhs>
@@ -77,20 +86,30 @@ impl<Op, Lhs, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD>
     Groupoid<Op, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD> for Lhs
 where
     Lhs: Category<Op, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD> + Invertivility<Op>,
-    Mhs: Clone + Morphism<Codomain = Domain<Self>> + Invertivility<Op>,
-    Rhs: Clone + Morphism<Codomain = Domain<Mhs>> + Invertivility<Op>,
+    Mhs: Sized + Morphism<Codomain = Domain<Self>> + Invertivility<Op>,
+    Rhs: Sized + Morphism<Codomain = Domain<Mhs>> + Invertivility<Op>,
     Target<Op, Self, Mhs>:
-        Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>> + Invertivility<Op>,
+        Sized + Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>> + Invertivility<Op>,
     Target<Op, Mhs, Rhs>:
-        Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>> + Invertivility<Op>,
+        Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>> + Invertivility<Op>,
     ComposeTriple<Op, Self, Mhs, Rhs>:
-        Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>> + Invertivility<Op>,
-    ComposeTriple<Op, Self, Mhs, Rhs>: Sized + PartialEq + Clone,
-    HomAA: Endomorphism<Object = Domain<Rhs>> + Identity<Op> + Invertivility<Op, Inverse = HomAA>,
-    HomBB: Endomorphism<Object = Domain<Mhs>> + Identity<Op> + Invertivility<Op, Inverse = HomBB>,
-    HomCC: Endomorphism<Object = Domain<Self>> + Identity<Op> + Invertivility<Op, Inverse = HomCC>,
-    HomDD:
-        Endomorphism<Object = Codomain<Self>> + Identity<Op> + Invertivility<Op, Inverse = HomDD>,
+        Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>> + Invertivility<Op>,
+    HomAA: Sized
+        + Endomorphism<Object = Domain<Rhs>>
+        + Identity<Op>
+        + Invertivility<Op, Inverse = HomAA>,
+    HomBB: Sized
+        + Endomorphism<Object = Domain<Mhs>>
+        + Identity<Op>
+        + Invertivility<Op, Inverse = HomBB>,
+    HomCC: Sized
+        + Endomorphism<Object = Domain<Self>>
+        + Identity<Op>
+        + Invertivility<Op, Inverse = HomCC>,
+    HomDD: Sized
+        + Endomorphism<Object = Codomain<Self>>
+        + Identity<Op>
+        + Invertivility<Op, Inverse = HomDD>,
     // from Associativity
     Op: BinaryOperator<Self, Mhs>
         + BinaryOperator<Mhs, Rhs>

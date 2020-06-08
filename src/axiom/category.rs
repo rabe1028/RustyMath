@@ -8,16 +8,16 @@ type ComposeTriple<Op, A, B, C> = Target<Op, A, Target<Op, B, C>>;
 pub trait Category<Op, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD>: Semigroupoid<Op, Mhs, Rhs>
 // + Identity<Op>
 where
-    Mhs: Clone + Morphism<Codomain = Domain<Self>>,
-    Rhs: Clone + Morphism<Codomain = Domain<Mhs>>,
-    Target<Op, Self, Mhs>: Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
-    Target<Op, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
-    ComposeTriple<Op, Self, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
-    ComposeTriple<Op, Self, Mhs, Rhs>: Sized + PartialEq + Clone,
-    HomAA: Endomorphism<Object = Domain<Rhs>> + Identity<Op>,
-    HomBB: Endomorphism<Object = Domain<Mhs>> + Identity<Op>,
-    HomCC: Endomorphism<Object = Domain<Self>> + Identity<Op>,
-    HomDD: Endomorphism<Object = Codomain<Self>> + Identity<Op>,
+    Mhs: Sized + Morphism<Codomain = Domain<Self>>,
+    Rhs: Sized + Morphism<Codomain = Domain<Mhs>>,
+    Target<Op, Self, Mhs>: Sized + Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
+    Target<Op, Mhs, Rhs>: Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
+    ComposeTriple<Op, Self, Mhs, Rhs>:
+        Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
+    HomAA: Sized + Endomorphism<Object = Domain<Rhs>> + Identity<Op>,
+    HomBB: Sized + Endomorphism<Object = Domain<Mhs>> + Identity<Op>,
+    HomCC: Sized + Endomorphism<Object = Domain<Self>> + Identity<Op>,
+    HomDD: Sized + Endomorphism<Object = Codomain<Self>> + Identity<Op>,
     // from Associativity
     Op: BinaryOperator<Self, Mhs>
         + BinaryOperator<Mhs, Rhs>
@@ -53,16 +53,16 @@ impl<Op, Lhs, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD>
     Category<Op, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD> for Lhs
 where
     Lhs: Semigroupoid<Op, Mhs, Rhs>,
-    Mhs: Clone + Morphism<Codomain = Domain<Self>>,
-    Rhs: Clone + Morphism<Codomain = Domain<Mhs>>,
-    Target<Op, Self, Mhs>: Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
-    Target<Op, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
-    ComposeTriple<Op, Self, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
-    ComposeTriple<Op, Self, Mhs, Rhs>: Sized + PartialEq + Clone,
-    HomAA: Endomorphism<Object = Domain<Rhs>> + Identity<Op>,
-    HomBB: Endomorphism<Object = Domain<Mhs>> + Identity<Op>,
-    HomCC: Endomorphism<Object = Domain<Self>> + Identity<Op>,
-    HomDD: Endomorphism<Object = Codomain<Self>> + Identity<Op>,
+    Mhs: Sized + Morphism<Codomain = Domain<Self>>,
+    Rhs: Sized + Morphism<Codomain = Domain<Mhs>>,
+    Target<Op, Self, Mhs>: Sized + Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
+    Target<Op, Mhs, Rhs>: Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
+    ComposeTriple<Op, Self, Mhs, Rhs>:
+        Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
+    HomAA: Sized + Endomorphism<Object = Domain<Rhs>> + Identity<Op>,
+    HomBB: Sized + Endomorphism<Object = Domain<Mhs>> + Identity<Op>,
+    HomCC: Sized + Endomorphism<Object = Domain<Self>> + Identity<Op>,
+    HomDD: Sized + Endomorphism<Object = Codomain<Self>> + Identity<Op>,
     // from Associativity
     Op: BinaryOperator<Self, Mhs>
         + BinaryOperator<Mhs, Rhs>
@@ -90,6 +90,5 @@ where
         > + InternalBinaryOperator<HomAA>
         + InternalBinaryOperator<HomBB>
         + InternalBinaryOperator<HomCC>
-        + InternalBinaryOperator<HomDD>,
-{
+        + InternalBinaryOperator<HomDD>,{
 }

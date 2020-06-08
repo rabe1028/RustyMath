@@ -34,20 +34,25 @@ pub type Codomain<A> = <A as Morphism>::Codomain;
 // Rhs = Right Hand Side
 pub trait Associativity<Op, Mhs, Rhs>
 where
-    Self: Sized + PartialEq + Clone + Morphism,
-    Mhs: Clone + Morphism<Codomain = Domain<Self>>,
-    Rhs: Clone + Morphism<Codomain = Domain<Mhs>>,
-    Target<Op, Self, Mhs>: Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
-    Target<Op, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
+    Self: Sized + Morphism,
+    Mhs: Sized + Morphism<Codomain = Domain<Self>>,
+    Rhs: Sized + Morphism<Codomain = Domain<Mhs>>,
+    Target<Op, Self, Mhs>: Sized + Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
+    Target<Op, Mhs, Rhs>: Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
     Target<Op, Self, Target<Op, Mhs, Rhs>>:
-        Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
-    Target<Op, Self, Target<Op, Mhs, Rhs>>: Sized + PartialEq + Clone,
+        Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
     Op: BinaryOperator<Self, Mhs>
         + BinaryOperator<Mhs, Rhs>
         + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
         + BinaryOperator<Target<Op, Self, Mhs>, Rhs, Output = Target<Op, Self, Target<Op, Mhs, Rhs>>>,
 {
-    fn check_associativity(x: Self, y: Mhs, z: Rhs) -> bool {
+    fn check_associativity(x: Self, y: Mhs, z: Rhs) -> bool
+    where
+        Self: PartialEq + Clone,
+        Mhs: PartialEq + Clone,
+        Rhs: PartialEq + Clone,
+        Target<Op, Self, Target<Op, Mhs, Rhs>>: Sized + PartialEq + Clone,
+    {
         Op::operate(x.clone(), Op::operate(y.clone(), z.clone()))
             == Op::operate(Op::operate(x, y), z)
     }
