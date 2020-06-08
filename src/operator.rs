@@ -128,3 +128,7 @@ pub enum GreatestCommonDivisor<Add, Mul> {
     Add(std::marker::PhantomData<Add>),
     Mul(std::marker::PhantomData<Mul>),
 }
+
+// for function compose
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Compose {}

@@ -7,6 +7,9 @@ pub use basic_array::*;
 pub mod polynomial;
 pub use polynomial::*;
 
+pub mod function;
+pub use function::*;
+
 use crate::axiom::*;
 use frunk::*;
 
