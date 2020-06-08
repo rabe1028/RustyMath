@@ -47,6 +47,9 @@ where
         + InternalBinaryOperator<HomCC>
         + InternalBinaryOperator<HomDD>,
 {
+    fn _category(&self) {
+        println!("Category");
+    }
 }
 
 impl<Op, Lhs, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD>

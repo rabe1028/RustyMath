@@ -60,16 +60,17 @@ where
 
 pub trait LeftIdentity<Op, Rhs = Self>
 where
-    Self: Sized + PartialEq + Clone + Morphism,
-    Rhs: Sized
-        + PartialEq
-        + Clone
-        + Morphism<Domain = <Self as Morphism>::Codomain, Codomain = <Self as Morphism>::Domain>,
+    Self: Sized + Morphism,
+    Rhs: Sized + Endomorphism<Object = Domain<Self>>,
     Op: BinaryOperator<Self, Rhs, Output = Self>,
 {
     fn left_identity() -> Rhs;
     #[inline(always)]
-    fn is_left_identity(other: &Rhs) -> bool {
+    fn is_left_identity(other: &Rhs) -> bool
+    where
+        Self: PartialEq + Clone,
+        Rhs: PartialEq + Clone,
+    {
         *other == Self::left_identity()
     }
 }
@@ -87,16 +88,17 @@ where
 
 pub trait RightIdentity<Op, Lhs = Self>
 where
-    Self: Sized + PartialEq + Clone + Morphism,
-    Lhs: Sized
-        + PartialEq
-        + Clone
-        + Morphism<Domain = <Self as Morphism>::Domain, Codomain = <Self as Morphism>::Domain>,
+    Self: Sized + Morphism,
+    Lhs: Sized + Endomorphism<Object = Codomain<Self>>,
     Op: BinaryOperator<Lhs, Self, Output = Self>,
 {
     fn right_identity() -> Lhs;
     #[inline(always)]
-    fn is_right_identity(other: &Lhs) -> bool {
+    fn is_right_identity(other: &Lhs) -> bool
+    where
+        Self: PartialEq + Clone,
+        Lhs: PartialEq + Clone,
+    {
         *other == Self::right_identity()
     }
 }
@@ -119,16 +121,22 @@ where
 // id_y * f(Self) = f
 pub trait Identity<Op>: LeftIdentity<Op, Self> + RightIdentity<Op, Self>
 where
-    Self: Sized + PartialEq + Clone + Endomorphism,
+    Self: Sized + Endomorphism,
     Op: InternalBinaryOperator<Self>,
 {
     fn identity() -> Self;
     #[inline(always)]
-    fn is_identity(&self) -> bool {
+    fn is_identity(&self) -> bool 
+    where
+        Self: PartialEq + Clone,
+    {
         *self == Self::identity()
     }
     #[inline(always)]
-    fn check_identity(x: Self) -> bool {
+    fn check_identity(x: Self) -> bool 
+    where
+        Self: PartialEq + Clone,
+    {
         let id = Self::identity();
         let left = Op::operate(x.clone(), id.clone());
         let right = Op::operate(id.clone(), x.clone());

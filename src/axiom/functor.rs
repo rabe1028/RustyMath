@@ -51,8 +51,6 @@ pub trait Apply<A>: Functor<A> {
         F: FnOnce(&Self::Source) -> Self::MappedTarget;
 }
 
-pub trait 
-
 pub trait Pure<A>: HigherKind<A> {
     fn pure(value: A) -> <Self as HigherKind<A>>::MappedTarget;
 }
