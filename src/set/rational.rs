@@ -1,4 +1,3 @@
-#[macro_use(forward_internal_binop)]
 use crate::operator::*;
 use crate::property::*;
 use crate::set::*;
@@ -140,9 +139,9 @@ where
     type Object = ();
 }
 
-type Rational32 = Rational<i32>;
-type Rational64 = Rational<i64>;
-type RationalNum = Rational<isize>;
+pub type Rational32 = Rational<i32>;
+pub type Rational64 = Rational<i64>;
+pub type RationalNum = Rational<isize>;
 
 macro_rules! maybe_const {
     ($( $(#[$attr:meta])* pub fn $name:ident $args:tt -> $ret:ty $body:block )*) => {$(

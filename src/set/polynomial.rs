@@ -1,8 +1,12 @@
+// #![feature(unboxed_closures)]
+// #![feature(fn_traits)]
+
 use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 use std::cmp::*;
 use std::ops::*;
+
 
 #[repr(C)]
 #[derive(Clone, Eq, PartialEq)]
@@ -21,8 +25,8 @@ where
     Addition: InternalBinaryOperator<T>,
     Multiplication: InternalBinaryOperator<T>,
 {
-    type Domain = ();
-    type Codomain = ();
+    type Domain = T;
+    type Codomain = T;
 }
 
 impl<T> Endomorphism for Polynomial<T>
@@ -31,7 +35,7 @@ where
     Addition: InternalBinaryOperator<T>,
     Multiplication: InternalBinaryOperator<T>,
 {
-    type Object = ();
+    type Object = T;
 }
 
 impl<T> Polynomial<T>
@@ -95,6 +99,19 @@ where
         T: Monoid<Multiplication>,
     {
         self.a[self.degree() - 1] == T::one()
+    }
+
+    pub fn call(&self, other: T) -> T 
+    where
+        T: AddAssign + std::fmt::Debug,
+    {
+        // Horner method
+        let mut ans = T::zero();
+        for coeff in self.a.iter().rev() {
+            let tmp = Multiplication::operate(ans.clone(), other.clone());
+            ans = Addition::operate(coeff.clone(), tmp); 
+        }
+        ans
     }
 }
 
@@ -337,7 +354,7 @@ where
     #[inline(always)]
     fn inverse(&self) -> Self {
         Polynomial {
-            a: self.a.iter().map(|i| i.inverse()).collect()
+            a: self.a.iter().map(|i| i.inverse()).collect(),
         }
     }
 }
@@ -470,12 +487,12 @@ where
     Multiplication: InternalBinaryOperator<T>,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "f(x) = ");
+        write!(f, "f(x) = ")?;
         for i in (0..=self.degree()).rev() {
             if i == 0 {
-                write!(f, "{:?} ", self.a[i]);
+                write!(f, "{:?} ", self.a[i])?;
             } else {
-                write!(f, "{:?} x^{:?} + ", self.a[i], i);
+                write!(f, "{:?} x^{:?} + ", self.a[i], i)?;
             }
         }
         Ok(())
@@ -547,6 +564,20 @@ where
     }
 }
 
+
+
+// impl<T> FnOnce<T> for Polynomial<T>
+// where
+//     T: Ring<Addition, Multiplication> + Clone,
+//     Addition: InternalBinaryOperator<T>,
+//     Multiplication: InternalBinaryOperator<T>,
+// {
+//     type Output = T;
+//     extern "rust-call" fn call_once(self, args: T) -> Self::Output {
+//         unimplemented()
+//     }
+// }
+
 #[cfg(test)]
 mod tests {
     use crate::set::polynomial::*;
@@ -588,5 +619,11 @@ mod tests {
         let (c1, c2) = c.divrem(&a);
         assert_eq!((c1.clone(), c2.clone()), (d, b));
         assert_eq!(c1 * &a + c2, Polynomial::from_vec(vec![3, 8, 8, 5, 2]));
+    }
+
+    #[test]
+    fn callable() {
+        let a = Polynomial::from_vec(vec![1, 1, 0]);
+        assert_eq!(a.call(10), 110);
     }
 }
