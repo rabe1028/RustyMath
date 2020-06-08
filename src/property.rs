@@ -27,25 +27,29 @@ where
 pub type Domain<A> = <A as Morphism>::Domain;
 pub type Codomain<A> = <A as Morphism>::Codomain;
 
-// f : a -> b, g : b -> c, h : c -> d
-// f = Self
-pub trait Associativity<Op, G, H>
+// f : c -> d, g : b -> c, h : c -> a
+// f . g . h
+// f = Self, g = MHs, h = Rhs
+// Mhs = Middle Hand Side
+// Rhs = Right Hand Side
+pub trait Associativity<Op, Mhs, Rhs>
 where
     Self: Sized + PartialEq + Clone + Morphism,
-    G: Clone + Morphism<Domain = Codomain<Self>>,
-    H: Clone + Morphism<Domain = Codomain<G>>,
-    Target<Op, G, Self>: Morphism<Domain = Domain<Self>, Codomain = Codomain<G>>,
-    Target<Op, H, G>: Morphism<Domain = Domain<G>, Codomain = Codomain<H>>,
-    Target<Op, H, Target<Op, G, Self>>: Morphism<Domain = Domain<Self>, Codomain = Codomain<H>>,
-    Target<Op, H, Target<Op, G, Self>>: Sized + PartialEq + Clone,
-    Op: BinaryOperator<G, Self>
-        + BinaryOperator<H, G>
-        + BinaryOperator<H, Target<Op, G, Self>>
-        + BinaryOperator<Target<Op, H, G>, Self, Output = Target<Op, H, Target<Op, G, Self>>>,
+    Mhs: Clone + Morphism<Codomain = Domain<Self>>,
+    Rhs: Clone + Morphism<Codomain = Domain<Mhs>>,
+    Target<Op, Self, Mhs>: Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
+    Target<Op, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
+    Target<Op, Self, Target<Op, Mhs, Rhs>>:
+        Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
+    Target<Op, Self, Target<Op, Mhs, Rhs>>: Sized + PartialEq + Clone,
+    Op: BinaryOperator<Self, Mhs>
+        + BinaryOperator<Mhs, Rhs>
+        + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
+        + BinaryOperator<Target<Op, Self, Mhs>, Rhs, Output = Target<Op, Self, Target<Op, Mhs, Rhs>>>,
 {
-    fn check_associativity(x: Self, y: G, z: H) -> bool {
-        Op::operate(z.clone(), Op::operate(y.clone(), x.clone()))
-            == Op::operate(Op::operate(z, y), x)
+    fn check_associativity(x: Self, y: Mhs, z: Rhs) -> bool {
+        Op::operate(x.clone(), Op::operate(y.clone(), z.clone()))
+            == Op::operate(Op::operate(x, y), z)
     }
 }
 
@@ -65,6 +69,17 @@ where
     }
 }
 
+impl<Op, T> LeftIdentity<Op> for T
+where
+    T: Identity<Op>,
+    Op: InternalBinaryOperator<T>,
+{
+    #[inline(always)]
+    fn left_identity() -> Self {
+        T::identity()
+    }
+}
+
 pub trait RightIdentity<Op, Lhs = Self>
 where
     Self: Sized + PartialEq + Clone + Morphism,
@@ -78,6 +93,17 @@ where
     #[inline(always)]
     fn is_right_identity(other: &Lhs) -> bool {
         *other == Self::right_identity()
+    }
+}
+
+impl<Op, T> RightIdentity<Op> for T
+where
+    T: Identity<Op>,
+    Op: InternalBinaryOperator<T>,
+{
+    #[inline(always)]
+    fn right_identity() -> T {
+        T::identity()
     }
 }
 

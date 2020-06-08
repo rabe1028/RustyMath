@@ -208,7 +208,7 @@ where
 {
 }
 
-impl<ElementType, Contravariant, Covariant> Associativity<Addition>
+impl<ElementType, Contravariant, Covariant> Associativity<Addition, Self, Self>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
     ElementType: std::ops::Add<Output = ElementType> + PartialEq + Copy,
@@ -362,7 +362,7 @@ where
 {
 }
 
-impl<ElementType, Contravariant, Covariant> Associativity<HadamardProduct>
+impl<ElementType, Contravariant, Covariant> Associativity<HadamardProduct, Self, Self>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
     ElementType: PartialEq + Copy,

@@ -37,6 +37,24 @@ where
     _covariant: PhantomData<Covariant>,
 }
 
+impl<ElementType, Contravariant, Covariant> Morphism for BasicArray<ElementType, Contravariant, Covariant>
+where
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
+    type Domain = ();
+    type Codomain = ();
+}
+
+impl<ElementType, Contravariant, Covariant> Endomorphism for BasicArray<ElementType, Contravariant, Covariant>
+where
+    Contravariant: HList + IndexShape,
+    Covariant: HList + IndexShape,
+{
+    type Object = ();
+}
+
+
 impl<ElementType, Contravariant, Covariant> Tensor<ElementType, Contravariant, Covariant>
     for BasicArray<ElementType, Contravariant, Covariant>
 where

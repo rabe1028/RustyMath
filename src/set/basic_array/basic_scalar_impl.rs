@@ -92,7 +92,7 @@ Addition: InternalBinaryOperator<ElementType>,
 {
 }
 
-impl<ElementType> Associativity<Multiplication> for BasicScalar<ElementType>
+impl<ElementType> Associativity<Multiplication, Self, Self> for BasicScalar<ElementType>
 where
 ElementType: Scalar<ElementType> + Copy + PartialEq,
 Multiplication: InternalBinaryOperator<ElementType>,

@@ -5,78 +5,91 @@ use crate::property::*;
 type ComposeTriple<Op, A, B, C> = Target<Op, A, Target<Op, B, C>>;
 
 // Hom(x, x) : x is Object  has identity
-pub trait Category<Op, G, H, HomAA, HomBB, HomCC, HomDD>: Semigroupoid<Op, G, H>
+pub trait Category<Op, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD>: Semigroupoid<Op, Mhs, Rhs>
 // + Identity<Op>
 where
-    G: Clone + Morphism<Domain = Codomain<Self>>,
-    H: Clone + Morphism<Domain = Codomain<G>>,
-    Target<Op, G, Self>: Morphism<Domain = Domain<Self>, Codomain = Codomain<G>>,
-    Target<Op, H, G>: Morphism<Domain = Domain<G>, Codomain = Codomain<H>>,
-    ComposeTriple<Op, H, G, Self>: Morphism<Domain = Domain<Self>, Codomain = Codomain<H>>,
-    ComposeTriple<Op, H, G, Self>: Sized + PartialEq + Clone,
-    HomAA: Endomorphism<Object = Domain<Self>> + Identity<Op>,
-    HomBB: Endomorphism<Object = Domain<G>> + Identity<Op>,
-    HomCC: Endomorphism<Object = Domain<H>> + Identity<Op>,
-    HomDD: Endomorphism<Object = Codomain<H>> + Identity<Op>,
+    Mhs: Clone + Morphism<Codomain = Domain<Self>>,
+    Rhs: Clone + Morphism<Codomain = Domain<Mhs>>,
+    Target<Op, Self, Mhs>: Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
+    Target<Op, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
+    ComposeTriple<Op, Self, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
+    ComposeTriple<Op, Self, Mhs, Rhs>: Sized + PartialEq + Clone,
+    HomAA: Endomorphism<Object = Domain<Rhs>> + Identity<Op>,
+    HomBB: Endomorphism<Object = Domain<Mhs>> + Identity<Op>,
+    HomCC: Endomorphism<Object = Domain<Self>> + Identity<Op>,
+    HomDD: Endomorphism<Object = Codomain<Self>> + Identity<Op>,
     // from Associativity
-    Op: BinaryOperator<G, Self>
-        + BinaryOperator<H, G>
-        + BinaryOperator<H, Target<Op, G, Self>>
-        + BinaryOperator<Target<Op, H, G>, Self, Output = ComposeTriple<Op, H, G, Self>>,
+    Op: BinaryOperator<Self, Mhs>
+        + BinaryOperator<Mhs, Rhs>
+        + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
+        + BinaryOperator<Target<Op, Self, Mhs>, Rhs, Output = Target<Op, Self, Target<Op, Mhs, Rhs>>>,
     // from Category
-    Op: BinaryOperator<Self, HomAA, Output = Self>
-        + BinaryOperator<HomBB, Self, Output = Self>
-        + BinaryOperator<G, HomBB, Output = G>
-        + BinaryOperator<HomCC, G, Output = G>
-        + BinaryOperator<H, HomCC, Output = H>
-        + BinaryOperator<HomDD, H, Output = H>
-        + BinaryOperator<Target<Op, G, Self>, HomAA, Output = Target<Op, G, Self>>
-        + BinaryOperator<HomCC, Target<Op, G, Self>, Output = Target<Op, G, Self>>
-        + BinaryOperator<Target<Op, H, G>, HomBB, Output = Target<Op, H, G>>
-        + BinaryOperator<HomDD, Target<Op, H, G>, Output = Target<Op, H, G>>
-        + BinaryOperator<ComposeTriple<Op, H, G, Self>, HomAA, Output = ComposeTriple<Op, H, G, Self>>
-        + BinaryOperator<HomDD, ComposeTriple<Op, H, G, Self>, Output = ComposeTriple<Op, H, G, Self>>
-        + InternalBinaryOperator<HomAA>
+    Op: BinaryOperator<Rhs, HomAA, Output = Rhs>
+        + BinaryOperator<HomBB, Rhs, Output = Rhs>
+        + BinaryOperator<Mhs, HomBB, Output = Mhs>
+        + BinaryOperator<HomCC, Mhs, Output = Mhs>
+        + BinaryOperator<Self, HomCC, Output = Self>
+        + BinaryOperator<HomDD, Self, Output = Self>
+        + BinaryOperator<Target<Op, Mhs, Rhs>, HomAA, Output = Target<Op, Mhs, Rhs>>
+        + BinaryOperator<HomCC, Target<Op, Mhs, Rhs>, Output = Target<Op, Mhs, Rhs>>
+        + BinaryOperator<Target<Op, Self, Mhs>, HomBB, Output = Target<Op, Self, Mhs>>
+        + BinaryOperator<HomDD, Target<Op, Self, Mhs>, Output = Target<Op, Self, Mhs>>
+        + BinaryOperator<
+            ComposeTriple<Op, Self, Mhs, Rhs>,
+            HomAA,
+            Output = ComposeTriple<Op, Self, Mhs, Rhs>,
+        > + BinaryOperator<
+            HomDD,
+            ComposeTriple<Op, Self, Mhs, Rhs>,
+            Output = ComposeTriple<Op, Self, Mhs, Rhs>,
+        > + InternalBinaryOperator<HomAA>
         + InternalBinaryOperator<HomBB>
         + InternalBinaryOperator<HomCC>
-        + InternalBinaryOperator<HomDD>
+        + InternalBinaryOperator<HomDD>,
 {
 }
 
-impl<Op, F, G, H, HomAA, HomBB, HomCC, HomDD> Category<Op, G, H, HomAA, HomBB, HomCC, HomDD> for F
+impl<Op, Lhs, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD>
+    Category<Op, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD> for Lhs
 where
-    F: Semigroupoid<Op, G, H>,
-    G: Clone + Morphism<Domain = Codomain<Self>>,
-    H: Clone + Morphism<Domain = Codomain<G>>,
-    Target<Op, G, Self>: Morphism<Domain = Domain<Self>, Codomain = Codomain<G>>,
-    Target<Op, H, G>: Morphism<Domain = Domain<G>, Codomain = Codomain<H>>,
-    ComposeTriple<Op, H, G, Self>: Morphism<Domain = Domain<Self>, Codomain = Codomain<H>>,
-    ComposeTriple<Op, H, G, Self>: Sized + PartialEq + Clone,
-    HomAA: Endomorphism<Object = Domain<Self>> + Identity<Op>,
-    HomBB: Endomorphism<Object = Domain<G>> + Identity<Op>,
-    HomCC: Endomorphism<Object = Domain<H>> + Identity<Op>,
-    HomDD: Endomorphism<Object = Codomain<H>> + Identity<Op>,
+    Lhs: Semigroupoid<Op, Mhs, Rhs>,
+    Mhs: Clone + Morphism<Codomain = Domain<Self>>,
+    Rhs: Clone + Morphism<Codomain = Domain<Mhs>>,
+    Target<Op, Self, Mhs>: Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
+    Target<Op, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
+    ComposeTriple<Op, Self, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
+    ComposeTriple<Op, Self, Mhs, Rhs>: Sized + PartialEq + Clone,
+    HomAA: Endomorphism<Object = Domain<Rhs>> + Identity<Op>,
+    HomBB: Endomorphism<Object = Domain<Mhs>> + Identity<Op>,
+    HomCC: Endomorphism<Object = Domain<Self>> + Identity<Op>,
+    HomDD: Endomorphism<Object = Codomain<Self>> + Identity<Op>,
     // from Associativity
-    Op: BinaryOperator<G, Self>
-        + BinaryOperator<H, G>
-        + BinaryOperator<H, Target<Op, G, Self>>
-        + BinaryOperator<Target<Op, H, G>, Self, Output = ComposeTriple<Op, H, G, Self>>,
+    Op: BinaryOperator<Self, Mhs>
+        + BinaryOperator<Mhs, Rhs>
+        + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
+        + BinaryOperator<Target<Op, Self, Mhs>, Rhs, Output = Target<Op, Self, Target<Op, Mhs, Rhs>>>,
     // from Category
-    Op: BinaryOperator<Self, HomAA, Output = Self>
-        + BinaryOperator<HomBB, Self, Output = Self>
-        + BinaryOperator<G, HomBB, Output = G>
-        + BinaryOperator<HomCC, G, Output = G>
-        + BinaryOperator<H, HomCC, Output = H>
-        + BinaryOperator<HomDD, H, Output = H>
-        + BinaryOperator<Target<Op, G, Self>, HomAA, Output = Target<Op, G, Self>>
-        + BinaryOperator<HomCC, Target<Op, G, Self>, Output = Target<Op, G, Self>>
-        + BinaryOperator<Target<Op, H, G>, HomBB, Output = Target<Op, H, G>>
-        + BinaryOperator<HomDD, Target<Op, H, G>, Output = Target<Op, H, G>>
-        + BinaryOperator<ComposeTriple<Op, H, G, Self>, HomAA, Output = ComposeTriple<Op, H, G, Self>>
-        + BinaryOperator<HomDD, ComposeTriple<Op, H, G, Self>, Output = ComposeTriple<Op, H, G, Self>>
-        + InternalBinaryOperator<HomAA>
+    Op: BinaryOperator<Rhs, HomAA, Output = Rhs>
+        + BinaryOperator<HomBB, Rhs, Output = Rhs>
+        + BinaryOperator<Mhs, HomBB, Output = Mhs>
+        + BinaryOperator<HomCC, Mhs, Output = Mhs>
+        + BinaryOperator<Self, HomCC, Output = Self>
+        + BinaryOperator<HomDD, Self, Output = Self>
+        + BinaryOperator<Target<Op, Mhs, Rhs>, HomAA, Output = Target<Op, Mhs, Rhs>>
+        + BinaryOperator<HomCC, Target<Op, Mhs, Rhs>, Output = Target<Op, Mhs, Rhs>>
+        + BinaryOperator<Target<Op, Self, Mhs>, HomBB, Output = Target<Op, Self, Mhs>>
+        + BinaryOperator<HomDD, Target<Op, Self, Mhs>, Output = Target<Op, Self, Mhs>>
+        + BinaryOperator<
+            ComposeTriple<Op, Self, Mhs, Rhs>,
+            HomAA,
+            Output = ComposeTriple<Op, Self, Mhs, Rhs>,
+        > + BinaryOperator<
+            HomDD,
+            ComposeTriple<Op, Self, Mhs, Rhs>,
+            Output = ComposeTriple<Op, Self, Mhs, Rhs>,
+        > + InternalBinaryOperator<HomAA>
         + InternalBinaryOperator<HomBB>
         + InternalBinaryOperator<HomCC>
-        + InternalBinaryOperator<HomDD>
+        + InternalBinaryOperator<HomDD>,
 {
 }

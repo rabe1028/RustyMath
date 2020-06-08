@@ -19,6 +19,8 @@ macro_rules! impl_field {
             impl_euclidean_domain! { $ty }
 
             impl Invertivility<Multiplication> for $ty {
+                type Inverse = $ty;
+
                 #[inline(always)]
                 fn inverse(&self) -> Self {
                     1 as $ty / *self
@@ -55,19 +57,28 @@ macro_rules! impl_euclidean_domain {
 macro_rules! impl_unital_ring {
     ($($ty: ty),*) => {
         $(
-            impl_unital_ring_unsigned! { $ty }
+            impl_group! { $ty }
 
             impl Invertivility<Addition> for $ty {
+                type Inverse = $ty;
+
                 #[inline(always)]
                 fn inverse(&self) -> Self {
                     -self
+                }
+            }
+
+            impl Ring<Addition, Multiplication> for $ty {
+                #[inline(always)]
+                fn sub(self, other: Self) -> Self {
+                    self - other
                 }
             }
         )*
     }
 }
 
-macro_rules! impl_unital_ring_unsigned {
+macro_rules! impl_group {
     ($($ty: ty),*) => {
         $(
             impl Morphism for $ty {
@@ -88,6 +99,21 @@ macro_rules! impl_unital_ring_unsigned {
 
             impl Totality<Addition> for $ty {}
             impl Associativity<Addition, $ty, $ty> for $ty {}
+
+            // impl LeftIdentity<Addition> for $ty {
+            //     #[inline(always)]
+            //     fn left_identity() -> Self {
+            //         0 as $ty
+            //     }
+            // }
+
+            // impl RightIdentity<Addition> for $ty {
+            //     #[inline(always)]
+            //     fn right_identity() -> Self {
+            //         0 as $ty
+            //     }
+            // }
+
             impl Identity<Addition> for $ty {
                 #[inline(always)]
                 fn identity() -> Self {
@@ -108,6 +134,20 @@ macro_rules! impl_unital_ring_unsigned {
 
             impl Commutativity<Multiplication> for $ty {}
 
+            // impl LeftIdentity<Multiplication> for $ty {
+            //     #[inline(always)]
+            //     fn left_identity() -> Self {
+            //         1 as $ty
+            //     }
+            // }
+
+            // impl RightIdentity<Multiplication> for $ty {
+            //     #[inline(always)]
+            //     fn right_identity() -> Self {
+            //         1 as $ty
+            //     }
+            // }           
+
             impl Identity<Multiplication> for $ty {
                 #[inline(always)]
                 fn identity() -> Self {
@@ -117,13 +157,6 @@ macro_rules! impl_unital_ring_unsigned {
 
             impl RightDistributivity<Addition, Multiplication> for $ty {}
             impl LeftDistributivity<Addition, Multiplication> for $ty {}
-
-            impl Ring<Addition, Multiplication> for $ty {
-                #[inline(always)]
-                fn sub(self, other: Self) -> Self {
-                    self - other
-                }
-            }
         )*
     }
 }
@@ -160,7 +193,7 @@ macro_rules! impl_scalar {
     }
 }
 
-impl_unital_ring_unsigned! {
+impl_group! {
     usize, u8, u16, u32, u64
 }
 

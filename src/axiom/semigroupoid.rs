@@ -1,33 +1,35 @@
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Semigroupoid<Op, G, H>: Associativity<Op, G, H>
+pub trait Semigroupoid<Op, Mhs, Rhs>: Associativity<Op, Mhs, Rhs>
 where
-    G: Clone + Morphism<Domain = Codomain<Self>>,
-    H: Clone + Morphism<Domain = Codomain<G>>,
-    Target<Op, G, Self>: Morphism<Domain = Domain<Self>, Codomain = Codomain<G>>,
-    Target<Op, H, G>: Morphism<Domain = Domain<G>, Codomain = Codomain<H>>,
-    Target<Op, H, Target<Op, G, Self>>: Morphism<Domain = Domain<Self>, Codomain = Codomain<H>>,
-    Target<Op, H, Target<Op, G, Self>>: Sized + PartialEq + Clone,
-    Op: BinaryOperator<G, Self>
-        + BinaryOperator<H, G>
-        + BinaryOperator<H, Target<Op, G, Self>>
-        + BinaryOperator<Target<Op, H, G>, Self, Output = Target<Op, H, Target<Op, G, Self>>>,
+    Mhs: Clone + Morphism<Codomain = Domain<Self>>,
+    Rhs: Clone + Morphism<Codomain = Domain<Mhs>>,
+    Target<Op, Self, Mhs>: Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
+    Target<Op, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
+    Target<Op, Self, Target<Op, Mhs, Rhs>>:
+        Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
+    Target<Op, Self, Target<Op, Mhs, Rhs>>: Sized + PartialEq + Clone,
+    Op: BinaryOperator<Self, Mhs>
+        + BinaryOperator<Mhs, Rhs>
+        + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
+        + BinaryOperator<Target<Op, Self, Mhs>, Rhs, Output = Target<Op, Self, Target<Op, Mhs, Rhs>>>,
 {
 }
 
-impl<Op, F, G, H> Semigroupoid<Op, G, H> for F
+impl<Op, Lhs, Mhs, Rhs> Semigroupoid<Op, Mhs, Rhs> for Lhs
 where
-    F: Associativity<Op, G, H>,
-    G: Clone + Morphism<Domain = Codomain<Self>>,
-    H: Clone + Morphism<Domain = Codomain<G>>,
-    Target<Op, G, Self>: Morphism<Domain = Domain<Self>, Codomain = Codomain<G>>,
-    Target<Op, H, G>: Morphism<Domain = Domain<G>, Codomain = Codomain<H>>,
-    Target<Op, H, Target<Op, G, Self>>: Morphism<Domain = Domain<Self>, Codomain = Codomain<H>>,
-    Target<Op, H, Target<Op, G, Self>>: Sized + PartialEq + Clone,
-    Op: BinaryOperator<G, Self>
-        + BinaryOperator<H, G>
-        + BinaryOperator<H, Target<Op, G, Self>>
-        + BinaryOperator<Target<Op, H, G>, Self, Output = Target<Op, H, Target<Op, G, Self>>>,
+    Lhs: Associativity<Op, Mhs, Rhs>,
+    Mhs: Clone + Morphism<Codomain = Domain<Self>>,
+    Rhs: Clone + Morphism<Codomain = Domain<Mhs>>,
+    Target<Op, Self, Mhs>: Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
+    Target<Op, Mhs, Rhs>: Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
+    Target<Op, Self, Target<Op, Mhs, Rhs>>:
+        Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
+    Target<Op, Self, Target<Op, Mhs, Rhs>>: Sized + PartialEq + Clone,
+    Op: BinaryOperator<Self, Mhs>
+        + BinaryOperator<Mhs, Rhs>
+        + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
+        + BinaryOperator<Target<Op, Self, Mhs>, Rhs, Output = Target<Op, Self, Target<Op, Mhs, Rhs>>>,
 {
 }
