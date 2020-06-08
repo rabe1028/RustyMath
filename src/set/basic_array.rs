@@ -77,7 +77,8 @@ where
     ) -> &ElementType {
         let cont = cont.into();
         let cov = cov.into();
-        self.index(cont, cov)
+        let (offset, _) = <Self as Tensor<_, _, _>>::Joined::get_index(cont + cov);
+        &self._inner[offset]
     }
 
     fn index_mut<
@@ -90,7 +91,8 @@ where
     ) -> &mut ElementType {
         let cont = cont.into();
         let cov = cov.into();
-        self.index_mut(cont, cov)
+        let (offset, _) = <Self as Tensor<_, _, _>>::Joined::get_index(cont + cov);
+        &mut self._inner[offset]
     }
 
     fn from_vec(vec: Vec<ElementType>) -> Self {
@@ -300,6 +302,7 @@ mod tests {
     #[test]
     fn test_index_0d() {
         let a: BasicScalar<isize> = BasicScalar::new(3);
+        println!("{:?}", a);
         assert_eq!(*a.get(), 3);
     }
 
