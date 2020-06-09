@@ -11,9 +11,24 @@ impl<'a, A, B> Morphism for Box<dyn FnOnce(A) -> B + 'a> {
     type Codomain = B;
 }
 
+// impl<A, B, F> Morphism<(A, B)> for F where F: FnOnce(A) -> B {
+//     type Domain = A;
+//     type Codomain = B;
+// }
+
 impl<'a, A> Endomorphism for Box<dyn FnOnce(A) -> A + 'a> {
     type Object = A;
 }
+
+// Endomorphism<A> == Endomorphism<(A)> == Endomorphism<()> ???
+// Endomorphism<A>だと，Morphism<A>がないからエラー <(A)>も同じ
+// -> エラーメッセージがComflicting Implementationなのが謎
+// -> A == ()の時，上記全て()に変換されるみたい
+// 　　コンパイル時にいらない括弧はないものにされるみたい
+// Endomorphism<(A,A)>だと，Morphism<(A,A)>に接続されるからOKみたい
+// impl<A, F> Endomorphism<(A, A)> for F where F: FnOnce(A) -> A {
+//     type Object = A;
+// }
 
 impl<'a, A, B, C> BinaryOperator<Box<dyn FnOnce(B) -> C + 'a>, Box<dyn FnOnce(A) -> B + 'a>>
     for Compose
@@ -30,6 +45,8 @@ where
         Box::new(|x: A| lhs(rhs(x)))
     }
 }
+
+impl<'a, A> InternalBinaryOperator<Box<dyn FnOnce(A) -> A + 'a>> for Compose where A: 'a {}
 
 impl<'a, A> Identity<Compose> for Box<dyn FnOnce(A) -> A + 'a>
 where
@@ -60,92 +77,6 @@ where
 {
 }
 
-impl<'a, A, B, C, D>
-    Category<
-        Compose,
-        Box<dyn FnOnce(B) -> C + 'a>,
-        Box<dyn FnOnce(A) -> B + 'a>,
-        Box<dyn FnOnce(A) -> A + 'a>,
-        Box<dyn FnOnce(B) -> B + 'a>,
-        Box<dyn FnOnce(C) -> C + 'a>,
-        Box<dyn FnOnce(D) -> D + 'a>,
-    > for Box<dyn FnOnce(C) -> D + 'a>
-where
-    Self: Semigroupoid<Compose, Box<dyn FnOnce(B) -> C + 'a>, Box<dyn FnOnce(A) -> B + 'a>>,
-    Box<dyn FnOnce(A) -> B + 'a>: Morphism<Domain = A, Codomain = B>,
-    Box<dyn FnOnce(B) -> C + 'a>: Morphism<Domain = B, Codomain = C>,
-    Box<dyn FnOnce(C) -> D + 'a>: Morphism<Domain = C, Codomain = D>,
-    Box<dyn FnOnce(A) -> A + 'a>: Endomorphism<Object = A> + Identity<Compose>,
-    Box<dyn FnOnce(B) -> B + 'a>: Endomorphism<Object = B> + Identity<Compose>,
-    Box<dyn FnOnce(C) -> C + 'a>: Endomorphism<Object = C> + Identity<Compose>,
-    Box<dyn FnOnce(D) -> D + 'a>: Endomorphism<Object = D> + Identity<Compose>,
-    Compose: BinaryOperator<Self, Box<dyn FnOnce(B) -> C + 'a>, Output = Box<dyn FnOnce(B) -> D + 'a>>
-        + BinaryOperator<
-            Box<dyn FnOnce(B) -> C + 'a>,
-            Box<dyn FnOnce(A) -> B + 'a>,
-            Output = Box<dyn FnOnce(A) -> C + 'a>,
-        > + BinaryOperator<Self, Box<dyn FnOnce(A) -> C + 'a>, Output = Box<dyn FnOnce(A) -> D + 'a>>
-        + BinaryOperator<
-            Box<dyn FnOnce(B) -> D + 'a>,
-            Box<dyn FnOnce(A) -> B + 'a>,
-            Output = Box<dyn FnOnce(A) -> D + 'a>,
-        >,
-    Compose: BinaryOperator<
-            Box<dyn FnOnce(A) -> B + 'a>,
-            Box<dyn FnOnce(A) -> A + 'a>,
-            Output = Box<dyn FnOnce(A) -> B + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(B) -> B + 'a>,
-            Box<dyn FnOnce(A) -> B + 'a>,
-            Output = Box<dyn FnOnce(A) -> B + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(B) -> C + 'a>,
-            Box<dyn FnOnce(B) -> B + 'a>,
-            Output = Box<dyn FnOnce(B) -> C + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(C) -> C + 'a>,
-            Box<dyn FnOnce(B) -> C + 'a>,
-            Output = Box<dyn FnOnce(B) -> C + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(C) -> D + 'a>,
-            Box<dyn FnOnce(C) -> C + 'a>,
-            Output = Box<dyn FnOnce(C) -> D + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(D) -> D + 'a>,
-            Box<dyn FnOnce(C) -> D + 'a>,
-            Output = Box<dyn FnOnce(C) -> D + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(A) -> C + 'a>,
-            Box<dyn FnOnce(A) -> A + 'a>,
-            Output = Box<dyn FnOnce(A) -> C + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(C) -> C + 'a>,
-            Box<dyn FnOnce(A) -> C + 'a>,
-            Output = Box<dyn FnOnce(A) -> C + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(B) -> D + 'a>,
-            Box<dyn FnOnce(B) -> B + 'a>,
-            Output = Box<dyn FnOnce(B) -> D + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(D) -> D + 'a>,
-            Box<dyn FnOnce(B) -> D + 'a>,
-            Output = Box<dyn FnOnce(B) -> D + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(A) -> D + 'a>,
-            Box<dyn FnOnce(A) -> A + 'a>,
-            Output = Box<dyn FnOnce(A) -> D + 'a>,
-        > + BinaryOperator<
-            Box<dyn FnOnce(D) -> D + 'a>,
-            Box<dyn FnOnce(A) -> D + 'a>,
-            Output = Box<dyn FnOnce(A) -> D + 'a>,
-        >,
-    Compose: InternalBinaryOperator<Box<dyn FnOnce(A) -> A + 'a>>
-        + InternalBinaryOperator<Box<dyn FnOnce(B) -> B + 'a>>
-        + InternalBinaryOperator<Box<dyn FnOnce(C) -> C + 'a>>
-        + InternalBinaryOperator<Box<dyn FnOnce(D) -> D + 'a>>,
-{
-}
-
 #[cfg(test)]
 mod tests {
     use crate::set::function::*;
@@ -163,13 +94,30 @@ mod tests {
     fn compose_other() {
         let a = Box::new(|x: i32| x as i64);
         let b = Box::new(|x: usize| x as i32);
+        // 何故かここでimpl Traitと型推測できているみたい
         let c = Compose::operate(a, b);
         assert_eq!(c(1), 1);
     }
 
     #[test]
-    fn category_test() {
+    fn trait_impl_test() {
+        type FnObj<A, B> = Box<dyn FnOnce(A) -> B>;
+        // You Need To Add Type Annotation
+        // Because if you remove type annotation,
+        // variable type is become concrete type, not to become trait object
         let a = Box::new(|x: usize| identity(x));
-        a._category()
+        let a: FnObj<usize, usize> = a;
+        Morphism::_morphism(&a);
+        // Semigroupoid::<Compose, _, _>::_semigroupoid(&a);
+        // Cannot use this type args
+        //a._semigroupoid::<Compose, >();
+        Semigroupoid::<Compose, FnObj<usize, usize>, FnObj<usize, usize>>::_semigroupoid(&a);
+        //Category::_category(&a);
+        fn test(x: usize) -> usize {
+            x
+        }
+        let a = Box::new(test);
+        let a: FnObj<usize, usize> = a;
+        Morphism::_morphism(&a);
     }
 }

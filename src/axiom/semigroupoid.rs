@@ -14,6 +14,7 @@ where
         + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
         + BinaryOperator<Target<Op, Self, Mhs>, Rhs, Output = Target<Op, Self, Target<Op, Mhs, Rhs>>>,
 {
+    fn _semigroupoid(&self) {}
 }
 
 impl<Op, Lhs, Mhs, Rhs> Semigroupoid<Op, Mhs, Rhs> for Lhs

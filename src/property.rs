@@ -7,21 +7,24 @@ where
 {
 }
 
-pub trait Morphism {
+pub trait Morphism<Phantom=()> {
     // Self : Domain -> Codomain
     // Ex, Int : () -> ()
     type Domain; // Source
     type Codomain; // Target
+    fn _morphism(&self) {}
 }
 
-pub trait Endomorphism
+pub trait Endomorphism<Phantom=()>
 where
     Self: Morphism<
-        Domain = <Self as Endomorphism>::Object,
-        Codomain = <Self as Endomorphism>::Object,
+        Phantom,
+        Domain = <Self as Endomorphism<Phantom>>::Object,
+        Codomain = <Self as Endomorphism<Phantom>>::Object,
     >,
 {
     type Object;
+    fn _endomorphism(&self) {}
 }
 
 pub type Domain<A> = <A as Morphism>::Domain;
@@ -126,14 +129,14 @@ where
 {
     fn identity() -> Self;
     #[inline(always)]
-    fn is_identity(&self) -> bool 
+    fn is_identity(&self) -> bool
     where
         Self: PartialEq + Clone,
     {
         *self == Self::identity()
     }
     #[inline(always)]
-    fn check_identity(x: Self) -> bool 
+    fn check_identity(x: Self) -> bool
     where
         Self: PartialEq + Clone,
     {
