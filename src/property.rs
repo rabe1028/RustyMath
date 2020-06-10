@@ -7,7 +7,7 @@ where
 {
 }
 
-pub trait Morphism<Phantom = ()> {
+pub trait Morphism {
     // Self : Domain -> Codomain
     // Ex, Int : () -> ()
     type Domain; // Source
@@ -15,12 +15,11 @@ pub trait Morphism<Phantom = ()> {
     fn _morphism(&self) {}
 }
 
-pub trait Endomorphism<Phantom = ()>
+pub trait Endomorphism
 where
     Self: Morphism<
-        Phantom,
-        Domain = <Self as Endomorphism<Phantom>>::Object,
-        Codomain = <Self as Endomorphism<Phantom>>::Object,
+        Domain = <Self as Endomorphism>::Object,
+        Codomain = <Self as Endomorphism>::Object,
     >,
 {
     type Object;
