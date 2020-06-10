@@ -14,7 +14,6 @@ use typenum::*;
 
 use std::ops::Add;
 
-
 impl<ElementType, _1, _2> std::ops::Index<[usize; 2]> for BasicMatrix<ElementType, _1, _2>
 where
     _1: Unsigned,

@@ -7,7 +7,7 @@ where
 {
 }
 
-pub trait Morphism<Phantom=()> {
+pub trait Morphism<Phantom = ()> {
     // Self : Domain -> Codomain
     // Ex, Int : () -> ()
     type Domain; // Source
@@ -15,7 +15,7 @@ pub trait Morphism<Phantom=()> {
     fn _morphism(&self) {}
 }
 
-pub trait Endomorphism<Phantom=()>
+pub trait Endomorphism<Phantom = ()>
 where
     Self: Morphism<
         Phantom,
@@ -78,16 +78,16 @@ where
     }
 }
 
-impl<Op, T> LeftIdentity<Op> for T
-where
-    T: Identity<Op>,
-    Op: InternalBinaryOperator<T>,
-{
-    #[inline(always)]
-    fn left_identity() -> Self {
-        T::identity()
-    }
-}
+// impl<Op, T> LeftIdentity<Op> for T
+// where
+//     T: Identity<Op>,
+//     Op: InternalBinaryOperator<T>,
+// {
+//     #[inline(always)]
+//     fn left_identity() -> Self {
+//         T::identity()
+//     }
+// }
 
 pub trait RightIdentity<Op, Lhs = Self>
 where
@@ -106,16 +106,16 @@ where
     }
 }
 
-impl<Op, T> RightIdentity<Op> for T
-where
-    T: Identity<Op>,
-    Op: InternalBinaryOperator<T>,
-{
-    #[inline(always)]
-    fn right_identity() -> T {
-        T::identity()
-    }
-}
+// impl<Op, T> RightIdentity<Op> for T
+// where
+//     T: Identity<Op>,
+//     Op: InternalBinaryOperator<T>,
+// {
+//     #[inline(always)]
+//     fn right_identity() -> T {
+//         T::identity()
+//     }
+// }
 
 // Identityの制約
 // InternalBinaryOperatorが定義されているはず．

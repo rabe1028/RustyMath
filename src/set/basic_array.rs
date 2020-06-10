@@ -37,7 +37,8 @@ where
     _covariant: PhantomData<Covariant>,
 }
 
-impl<ElementType, Contravariant, Covariant> Morphism for BasicArray<ElementType, Contravariant, Covariant>
+impl<ElementType, Contravariant, Covariant> Morphism
+    for BasicArray<ElementType, Contravariant, Covariant>
 where
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
@@ -46,14 +47,14 @@ where
     type Codomain = ();
 }
 
-impl<ElementType, Contravariant, Covariant> Endomorphism for BasicArray<ElementType, Contravariant, Covariant>
+impl<ElementType, Contravariant, Covariant> Endomorphism
+    for BasicArray<ElementType, Contravariant, Covariant>
 where
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
     type Object = ();
 }
-
 
 impl<ElementType, Contravariant, Covariant> Tensor<ElementType, Contravariant, Covariant>
     for BasicArray<ElementType, Contravariant, Covariant>
@@ -143,10 +144,6 @@ pub type BasicScalar<ElementType> = BasicArray<ElementType, HNil, HNil>;
 pub type BasicVector<ElementType, _1> = BasicArray<ElementType, Hlist!(_1), HNil>;
 
 pub type BasicMatrix<ElementType, _1, _2> = BasicArray<ElementType, Hlist!(_1), Hlist!(_2)>;
-
-
-
-
 
 // impl<ElementType, _1, _2> Totality<Multiplication> for BasicMatrix<ElementType, _1, _2>
 // where

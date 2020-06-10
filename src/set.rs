@@ -103,19 +103,19 @@ macro_rules! impl_group {
             impl Totality<Addition> for $ty {}
             impl Associativity<Addition, $ty, $ty> for $ty {}
 
-            // impl LeftIdentity<Addition> for $ty {
-            //     #[inline(always)]
-            //     fn left_identity() -> Self {
-            //         0 as $ty
-            //     }
-            // }
+            impl LeftIdentity<Addition> for $ty {
+                #[inline(always)]
+                fn left_identity() -> Self {
+                    0 as $ty
+                }
+            }
 
-            // impl RightIdentity<Addition> for $ty {
-            //     #[inline(always)]
-            //     fn right_identity() -> Self {
-            //         0 as $ty
-            //     }
-            // }
+            impl RightIdentity<Addition> for $ty {
+                #[inline(always)]
+                fn right_identity() -> Self {
+                    0 as $ty
+                }
+            }
 
             impl Identity<Addition> for $ty {
                 #[inline(always)]
@@ -137,19 +137,19 @@ macro_rules! impl_group {
 
             impl Commutativity<Multiplication> for $ty {}
 
-            // impl LeftIdentity<Multiplication> for $ty {
-            //     #[inline(always)]
-            //     fn left_identity() -> Self {
-            //         1 as $ty
-            //     }
-            // }
+            impl LeftIdentity<Multiplication> for $ty {
+                #[inline(always)]
+                fn left_identity() -> Self {
+                    1 as $ty
+                }
+            }
 
-            // impl RightIdentity<Multiplication> for $ty {
-            //     #[inline(always)]
-            //     fn right_identity() -> Self {
-            //         1 as $ty
-            //     }
-            // }           
+            impl RightIdentity<Multiplication> for $ty {
+                #[inline(always)]
+                fn right_identity() -> Self {
+                    1 as $ty
+                }
+            }
 
             impl Identity<Multiplication> for $ty {
                 #[inline(always)]

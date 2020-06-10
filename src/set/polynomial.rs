@@ -7,7 +7,6 @@ use crate::property::*;
 use std::cmp::*;
 use std::ops::*;
 
-
 #[repr(C)]
 #[derive(Clone, Eq, PartialEq)]
 pub struct Polynomial<Coeff>
@@ -101,7 +100,7 @@ where
         self.a[self.degree() - 1] == T::one()
     }
 
-    pub fn call(&self, other: T) -> T 
+    pub fn call(&self, other: T) -> T
     where
         T: AddAssign + std::fmt::Debug,
     {
@@ -109,7 +108,7 @@ where
         let mut ans = T::zero();
         for coeff in self.a.iter().rev() {
             let tmp = Multiplication::operate(ans.clone(), other.clone());
-            ans = Addition::operate(coeff.clone(), tmp); 
+            ans = Addition::operate(coeff.clone(), tmp);
         }
         ans
     }
@@ -323,19 +322,19 @@ impl_helper! {impl Totality<Addition>}
 impl_helper! {impl Associativity<Addition, Self, Self>}
 impl_helper! {impl Commutativity<Addition>}
 
-// impl_helper! {impl LeftIdentity<Addition>,
-//     #[inline(always)]
-//     fn left_identity() -> Self {
-//         Self::identity()
-//     }
-// }
+impl_helper! {impl LeftIdentity<Addition>,
+    #[inline(always)]
+    fn left_identity() -> Self {
+        Self::identity()
+    }
+}
 
-// impl_helper! {impl RightIdentity<Addition>,
-//     #[inline(always)]
-//     fn right_identity() -> Self {
-//         Self::identity()
-//     }
-// }
+impl_helper! {impl RightIdentity<Addition>,
+    #[inline(always)]
+    fn right_identity() -> Self {
+        Self::identity()
+    }
+}
 
 impl_helper! {impl Identity<Addition>,
     #[inline(always)]
@@ -405,29 +404,29 @@ impl_helper! {impl Associativity<Multiplication, Self, Self>}
 //     }
 // }
 
-// impl<T> LeftIdentity<Multiplication> for Polynomial<T>
-// where
-//     T: Ring<Addition, Multiplication> + Monoid<Multiplication> + Clone,
-//     Addition: InternalBinaryOperator<T>,
-//     Multiplication: InternalBinaryOperator<T>,
-// {
-//     #[inline(always)]
-//     fn left_identity() -> Self {
-//         Polynomial { a: vec![T::one()] }
-//     }
-// }
+impl<T> LeftIdentity<Multiplication> for Polynomial<T>
+where
+    T: Ring<Addition, Multiplication> + Monoid<Multiplication> + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+    #[inline(always)]
+    fn left_identity() -> Self {
+        Polynomial { a: vec![T::one()] }
+    }
+}
 
-// impl<T> RightIdentity<Multiplication> for Polynomial<T>
-// where
-//     T: Ring<Addition, Multiplication> + Monoid<Multiplication> + Clone,
-//     Addition: InternalBinaryOperator<T>,
-//     Multiplication: InternalBinaryOperator<T>,
-// {
-//     #[inline(always)]
-//     fn right_identity() -> Self {
-//         Polynomial { a: vec![T::one()] }
-//     }
-// }
+impl<T> RightIdentity<Multiplication> for Polynomial<T>
+where
+    T: Ring<Addition, Multiplication> + Monoid<Multiplication> + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+    #[inline(always)]
+    fn right_identity() -> Self {
+        Polynomial { a: vec![T::one()] }
+    }
+}
 
 impl<T> Identity<Multiplication> for Polynomial<T>
 where
@@ -563,8 +562,6 @@ where
         (q.reduce(), r.reduce())
     }
 }
-
-
 
 // impl<T> FnOnce<T> for Polynomial<T>
 // where

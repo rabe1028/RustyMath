@@ -48,6 +48,28 @@ where
 
 impl<'a, A> InternalBinaryOperator<Box<dyn FnOnce(A) -> A + 'a>> for Compose where A: 'a {}
 
+impl<'a, A, B> LeftIdentity<Compose, Box<dyn FnOnce(A) -> A + 'a>> for Box<dyn FnOnce(A) -> B + 'a>
+where
+    Compose: BinaryOperator<Self, Box<dyn FnOnce(A) -> A + 'a>, Output = Self>,
+{
+    #[inline(always)]
+    fn left_identity() -> Box<dyn FnOnce(A) -> A + 'a> {
+        use std::convert::identity;
+        Box::new(|x| identity(x))
+    }
+}
+
+impl<'a, A, B> RightIdentity<Compose, Box<dyn FnOnce(B) -> B + 'a>> for Box<dyn FnOnce(A) -> B + 'a>
+where
+    Compose: BinaryOperator<Box<dyn FnOnce(B) -> B + 'a>, Self, Output = Self>,
+{
+    #[inline(always)]
+    fn right_identity() -> Box<dyn FnOnce(B) -> B + 'a> {
+        use std::convert::identity;
+        Box::new(|x| identity(x))
+    }
+}
+
 impl<'a, A> Identity<Compose> for Box<dyn FnOnce(A) -> A + 'a>
 where
     Compose: InternalBinaryOperator<Self>,

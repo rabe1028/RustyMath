@@ -217,6 +217,44 @@ where
 {
 }
 
+impl<ElementType, Contravariant, Covariant> LeftIdentity<Addition>
+    for BasicArray<ElementType, Contravariant, Covariant>
+where
+    Self: Tensor<ElementType, Contravariant, Covariant>,
+    ElementType: UnitalRing<Addition, Multiplication>
+        + std::ops::Add<Output = ElementType>
+        + PartialEq
+        + Copy,
+    Contravariant: HList + IndexShape + PartialEq + Add<Covariant> + Clone,
+    Covariant: HList + IndexShape + PartialEq + Clone,
+    Addition: InternalBinaryOperator<ElementType>,
+    Multiplication: InternalBinaryOperator<ElementType>,
+{
+    #[inline(always)]
+    fn left_identity() -> Self {
+        Self::identity()
+    }
+}
+
+impl<ElementType, Contravariant, Covariant> RightIdentity<Addition>
+    for BasicArray<ElementType, Contravariant, Covariant>
+where
+    Self: Tensor<ElementType, Contravariant, Covariant>,
+    ElementType: UnitalRing<Addition, Multiplication>
+        + std::ops::Add<Output = ElementType>
+        + PartialEq
+        + Copy,
+    Contravariant: HList + IndexShape + PartialEq + Add<Covariant> + Clone,
+    Covariant: HList + IndexShape + PartialEq + Clone,
+    Addition: InternalBinaryOperator<ElementType>,
+    Multiplication: InternalBinaryOperator<ElementType>,
+{
+    #[inline(always)]
+    fn right_identity() -> Self {
+        Self::identity()
+    }
+}
+
 impl<ElementType, Contravariant, Covariant> Identity<Addition>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
@@ -238,7 +276,6 @@ where
 }
 
 // Hadamard Product(Elementwise)
-
 
 impl<ElementType, Contravariant, Covariant>
     BinaryOperator<

@@ -91,5 +91,6 @@ where
         > + InternalBinaryOperator<HomAA>
         + InternalBinaryOperator<HomBB>
         + InternalBinaryOperator<HomCC>
-        + InternalBinaryOperator<HomDD>,{
+        + InternalBinaryOperator<HomDD>,
+{
 }

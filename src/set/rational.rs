@@ -220,33 +220,33 @@ impl_helper! {impl Totality<Addition>}
 
 impl_helper! {impl Associativity<Addition, Self, Self>}
 
-// impl<T> LeftIdentity<Addition> for Rational<T>
-// where
-//     T: UnitalRing<Addition, Multiplication> + Clone,
-//     Addition: InternalBinaryOperator<T>,
-//     Multiplication: InternalBinaryOperator<T>,
-// {
-//     maybe_const! {
-//         #[inline(always)]
-//         fn left_identity() -> Self {
-//             Rational::new_unchecked(T::zero(), T::one())
-//         }
-//     }
-// }
+impl<T> LeftIdentity<Addition> for Rational<T>
+where
+    T: UnitalRing<Addition, Multiplication> + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+    maybe_const! {
+        #[inline(always)]
+        fn left_identity() -> Self {
+            Rational::new_unchecked(T::zero(), T::one())
+        }
+    }
+}
 
-// impl<T> RightIdentity<Addition> for Rational<T>
-// where
-//     T: UnitalRing<Addition, Multiplication> + Clone,
-//     Addition: InternalBinaryOperator<T>,
-//     Multiplication: InternalBinaryOperator<T>,
-// {
-//     maybe_const! {
-//         #[inline(always)]
-//         fn right_identity() -> Self {
-//             Rational::new_unchecked(T::zero(), T::one())
-//         }
-//     }
-// }
+impl<T> RightIdentity<Addition> for Rational<T>
+where
+    T: UnitalRing<Addition, Multiplication> + Clone,
+    Addition: InternalBinaryOperator<T>,
+    Multiplication: InternalBinaryOperator<T>,
+{
+    maybe_const! {
+        #[inline(always)]
+        fn right_identity() -> Self {
+            Rational::new_unchecked(T::zero(), T::one())
+        }
+    }
+}
 
 impl<T> Identity<Addition> for Rational<T>
 where
@@ -324,19 +324,19 @@ where
     }
 }
 
-// impl_helper! {impl LeftIdentity<Multiplication>,
-//     #[inline(always)]
-//     fn left_identity() -> Self {
-//         Rational::new_unchecked(T::one(), T::one())
-//     }
-// }
+impl_helper! {impl LeftIdentity<Multiplication>,
+    #[inline(always)]
+    fn left_identity() -> Self {
+        Rational::new_unchecked(T::one(), T::one())
+    }
+}
 
-// impl_helper! {impl RightIdentity<Multiplication>,
-//     #[inline(always)]
-//     fn right_identity() -> Self {
-//         Rational::new_unchecked(T::one(), T::one())
-//     }
-// }
+impl_helper! {impl RightIdentity<Multiplication>,
+    #[inline(always)]
+    fn right_identity() -> Self {
+        Rational::new_unchecked(T::one(), T::one())
+    }
+}
 
 impl_helper! {impl Identity<Multiplication>,
     #[inline(always)]
