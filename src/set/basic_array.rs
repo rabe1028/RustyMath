@@ -29,6 +29,7 @@ Test Array Struct Implementation
 #[derive(Debug, Clone, PartialEq)]
 pub struct BasicArray<ElementType, Contravariant, Covariant>
 where
+    ElementType: Copy,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
@@ -40,6 +41,7 @@ where
 impl<ElementType, Contravariant, Covariant> Morphism
     for BasicArray<ElementType, Contravariant, Covariant>
 where
+    ElementType: Copy,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
@@ -50,6 +52,7 @@ where
 impl<ElementType, Contravariant, Covariant> Endomorphism
     for BasicArray<ElementType, Contravariant, Covariant>
 where
+    ElementType: Copy,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
@@ -59,6 +62,7 @@ where
 impl<ElementType, Contravariant, Covariant> Tensor<ElementType, Contravariant, Covariant>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
+    ElementType: Copy,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
     Join<Contravariant, Covariant>: IndexShape,
@@ -121,19 +125,24 @@ where
     }
 }
 
-impl<ElementType, _1> Vector<ElementType, _1> for BasicArray<ElementType, Hlist!(_1), HNil> where
-    _1: Unsigned
+impl<ElementType, _1> Vector<ElementType, _1> for BasicArray<ElementType, Hlist!(_1), HNil>
+where
+    ElementType: Copy,
+    _1: Unsigned,
 {
 }
 
-impl<ElementType, _1> Covector<ElementType, _1> for BasicArray<ElementType, HNil, Hlist!(_1)> where
-    _1: Unsigned
+impl<ElementType, _1> Covector<ElementType, _1> for BasicArray<ElementType, HNil, Hlist!(_1)>
+where
+    ElementType: Copy,
+    _1: Unsigned,
 {
 }
 
 impl<ElementType, _1, _2> Matrix<ElementType, _1, _2>
     for BasicArray<ElementType, Hlist!(_1), Hlist!(_2)>
 where
+    ElementType: Copy,
     _1: Unsigned,
     _2: Unsigned,
 {
@@ -199,7 +208,7 @@ pub type BasicMatrix<ElementType, _1, _2> = BasicArray<ElementType, Hlist!(_1), 
 impl<ElementType, Contravariant, Covariant> InputSanitizer
     for BasicArray<ElementType, Contravariant, Covariant>
 where
-    ElementType: std::ops::Add<Output = ElementType>,
+    ElementType: Copy,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
 {
@@ -212,7 +221,7 @@ where
 impl<ElementType, Contravariant, Covariant> InputSanitizer
     for &'_ BasicArray<ElementType, Contravariant, Covariant>
 where
-    ElementType: std::ops::Add<Output = ElementType>,
+    ElementType: Copy,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
 {

@@ -18,6 +18,7 @@ impl<'a, ElementType, Contravariant, Covariant>
     From<BasicArray<ElementType, Contravariant, Covariant>>
     for Cow<'a, BasicArray<ElementType, Contravariant, Covariant>>
 where
+    ElementType: Copy,
     Contravariant: HList + IndexShape + std::clone::Clone,
     Covariant: HList + IndexShape + std::clone::Clone,
     ElementType: std::clone::Clone,
@@ -33,6 +34,7 @@ impl<'a, ElementType, Contravariant, Covariant>
     From<&'a BasicArray<ElementType, Contravariant, Covariant>>
     for Cow<'a, BasicArray<ElementType, Contravariant, Covariant>>
 where
+    ElementType: Copy,
     Contravariant: HList + IndexShape + std::clone::Clone,
     Covariant: HList + IndexShape + std::clone::Clone,
     ElementType: std::clone::Clone,
@@ -47,7 +49,7 @@ where
 impl<ElementType, Contravariant, Covariant, I, J> std::ops::Index<(I, J)>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
-    ElementType: std::ops::Add<Output = ElementType> + Copy,
+    ElementType: Copy,
     Contravariant: IndexShape + Add<Covariant>,
     Covariant: IndexShape,
     Join<Contravariant, Covariant>: IndexShape,
@@ -70,7 +72,7 @@ where
 impl<ElementType, Contravariant, Covariant, I, J> std::ops::IndexMut<(I, J)>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
-    ElementType: std::ops::Add<Output = ElementType> + Copy,
+    ElementType: Copy,
     Contravariant: IndexShape + Add<Covariant>,
     Covariant: IndexShape,
     Join<Contravariant, Covariant>: IndexShape,
@@ -98,6 +100,7 @@ impl<ElementType, Contravariant, Covariant>
     > for Addition
 where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
+    Addition: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
@@ -121,6 +124,7 @@ impl<'a, ElementType, Contravariant, Covariant>
     > for Addition
 where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
+    Addition: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
@@ -143,6 +147,7 @@ impl<'a, ElementType, Contravariant, Covariant>
     > for Addition
 where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
+    Addition: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
@@ -165,7 +170,12 @@ impl<'a, ElementType, Contravariant, Covariant>
     > for Addition
 where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
-    // &'a ElementType: std::ops::Add<Output = ElementType>,
+    // &'a ElementType: std::ops::Add<Output = ElementType> + Copy,
+    Addition: InternalBinaryOperator<ElementType>,
+    // 何故か，ApproxInternalBinaryOperatorを入れると，再起的に型展開されて，
+    // 再帰限界を迎える
+    // InternalBinaryOperatorが動いて，こっちが動作しないのがわからん．
+    // Addition: ApproxInternalBinaryOperator<&'a ElementType>,
     Contravariant: HList + IndexShape,
     Covariant: HList + IndexShape,
 {
@@ -194,15 +204,32 @@ impl<ElementType, Contravariant, Covariant>
     InternalBinaryOperator<BasicArray<ElementType, Contravariant, Covariant>> for Addition
 where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
+    Addition: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
 {
 }
 
+// impl<'a, ElementType, Contravariant, Covariant>
+//     ApproxInternalBinaryOperator<&'a BasicArray<ElementType, Contravariant, Covariant>> for Addition
+// where
+//     ElementType: std::ops::Add<Output = ElementType>
+//         + std::ops::Add<&'a ElementType, Output = ElementType>
+//         + Copy,
+//     &'a ElementType:
+//         std::ops::Add<ElementType, Output = ElementType> + std::ops::Add<Output = ElementType>,
+//     Addition: InternalBinaryOperator<ElementType>,
+//     Addition: ApproxInternalBinaryOperator<&'a ElementType>,
+//     Contravariant: HList + IndexShape + Add<Covariant>,
+//     Covariant: HList + IndexShape,
+// {
+// }
+
 impl<ElementType, Contravariant, Covariant> Totality<Addition>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
+    Addition: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape + Add<Covariant>,
     Covariant: HList + IndexShape,
 {
@@ -212,6 +239,7 @@ impl<ElementType, Contravariant, Covariant> Associativity<Addition, Self, Self>
     for BasicArray<ElementType, Contravariant, Covariant>
 where
     ElementType: std::ops::Add<Output = ElementType> + PartialEq + Copy,
+    Addition: InternalBinaryOperator<ElementType>,
     Contravariant: HList + IndexShape + PartialEq + Add<Covariant> + Clone,
     Covariant: HList + IndexShape + PartialEq + Clone,
 {

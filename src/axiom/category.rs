@@ -2,6 +2,9 @@ use crate::axiom::*;
 use crate::operator::*;
 use crate::property::*;
 
+pub mod functor;
+pub use functor::*;
+
 type ComposeTriple<Op, A, B, C> = Target<Op, A, Target<Op, B, C>>;
 
 // Hom(x, x) : x is Object  has identity

@@ -94,7 +94,7 @@ pub trait ApproxInternalBinaryOperator<T>:
     + BinaryOperator<T::Target, T, Output = T::Target>
     + BinaryOperator<T, T, Output = T::Target>
 where
-    T: std::ops::DerefMut,
+    T: std::ops::Deref,
     T::Target: Sized,
 {
 }
@@ -103,8 +103,9 @@ impl<Op, T> ApproxInternalBinaryOperator<T> for Op
 where
     Op: BinaryOperator<T, T::Target, Output = T::Target>
         + BinaryOperator<T::Target, T, Output = T::Target>
-        + BinaryOperator<T, T, Output = T::Target>,
-    T: std::ops::DerefMut,
+        + BinaryOperator<T, T, Output = T::Target>
+        + BinaryOperator<T::Target, T::Target, Output = T::Target>,
+    T: std::ops::Deref,
     T::Target: Sized,
 {
 }
@@ -112,8 +113,22 @@ where
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Addition {}
 
+pub fn add<A, B, C>(lhs: A, rhs: B) -> C 
+where
+    Addition: BinaryOperator<A, B, Output = C>,
+{
+    Addition::operate(lhs, rhs)
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Multiplication {}
+
+pub fn mul<A, B, C>(lhs: A, rhs: B) -> C 
+where
+    Multiplication: BinaryOperator<A, B, Output = C>,
+{
+    Multiplication::operate(lhs, rhs)
+}
 
 // for vector operation
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -131,4 +146,11 @@ pub enum GreatestCommonDivisor<Add, Mul> {
 
 // for function compose
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Compose {}
+pub enum Composition {}
+
+pub fn compose<A, B, C>(lhs: A, rhs: B) -> C 
+where
+    Composition: BinaryOperator<A, B, Output = C>,
+{
+    Composition::operate(lhs, rhs)
+}

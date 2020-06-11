@@ -31,7 +31,7 @@ impl<'a, A> Endomorphism for Box<dyn FnOnce(A) -> A + 'a> {
 // }
 
 impl<'a, A, B, C> BinaryOperator<Box<dyn FnOnce(B) -> C + 'a>, Box<dyn FnOnce(A) -> B + 'a>>
-    for Compose
+    for Composition
 where
     A: 'a,
     B: 'a,
@@ -46,11 +46,11 @@ where
     }
 }
 
-impl<'a, A> InternalBinaryOperator<Box<dyn FnOnce(A) -> A + 'a>> for Compose where A: 'a {}
+impl<'a, A> InternalBinaryOperator<Box<dyn FnOnce(A) -> A + 'a>> for Composition where A: 'a {}
 
-impl<'a, A, B> LeftIdentity<Compose, Box<dyn FnOnce(A) -> A + 'a>> for Box<dyn FnOnce(A) -> B + 'a>
+impl<'a, A, B> LeftIdentity<Composition, Box<dyn FnOnce(A) -> A + 'a>> for Box<dyn FnOnce(A) -> B + 'a>
 where
-    Compose: BinaryOperator<Self, Box<dyn FnOnce(A) -> A + 'a>, Output = Self>,
+    Composition: BinaryOperator<Self, Box<dyn FnOnce(A) -> A + 'a>, Output = Self>,
 {
     #[inline(always)]
     fn left_identity() -> Box<dyn FnOnce(A) -> A + 'a> {
@@ -59,9 +59,9 @@ where
     }
 }
 
-impl<'a, A, B> RightIdentity<Compose, Box<dyn FnOnce(B) -> B + 'a>> for Box<dyn FnOnce(A) -> B + 'a>
+impl<'a, A, B> RightIdentity<Composition, Box<dyn FnOnce(B) -> B + 'a>> for Box<dyn FnOnce(A) -> B + 'a>
 where
-    Compose: BinaryOperator<Box<dyn FnOnce(B) -> B + 'a>, Self, Output = Self>,
+    Composition: BinaryOperator<Box<dyn FnOnce(B) -> B + 'a>, Self, Output = Self>,
 {
     #[inline(always)]
     fn right_identity() -> Box<dyn FnOnce(B) -> B + 'a> {
@@ -70,9 +70,9 @@ where
     }
 }
 
-impl<'a, A> Identity<Compose> for Box<dyn FnOnce(A) -> A + 'a>
+impl<'a, A> Identity<Composition> for Box<dyn FnOnce(A) -> A + 'a>
 where
-    Compose: InternalBinaryOperator<Self>,
+    Composition: InternalBinaryOperator<Self>,
 {
     #[inline(always)]
     fn identity() -> Self {
@@ -82,10 +82,10 @@ where
 }
 
 impl<'a, A, B, C, D>
-    Associativity<Compose, Box<dyn FnOnce(B) -> C + 'a>, Box<dyn FnOnce(A) -> B + 'a>>
+    Associativity<Composition, Box<dyn FnOnce(B) -> C + 'a>, Box<dyn FnOnce(A) -> B + 'a>>
     for Box<dyn FnOnce(C) -> D + 'a>
 where
-    Compose: BinaryOperator<Self, Box<dyn FnOnce(B) -> C + 'a>, Output = Box<dyn FnOnce(B) -> D + 'a>>
+    Composition: BinaryOperator<Self, Box<dyn FnOnce(B) -> C + 'a>, Output = Box<dyn FnOnce(B) -> D + 'a>>
         + BinaryOperator<
             Box<dyn FnOnce(B) -> C + 'a>,
             Box<dyn FnOnce(A) -> B + 'a>,
@@ -105,10 +105,10 @@ mod tests {
     use std::convert::identity;
 
     #[test]
-    fn compose() {
+    fn compose_test() {
         let a = Box::new(|x: i32| identity(x));
         let b = Box::new(|x: i32| identity(x) + 1);
-        let c = Compose::operate(a, b);
+        let c = compose(a, b);
         assert_eq!(c(1), 2);
     }
 
@@ -117,7 +117,7 @@ mod tests {
         let a = Box::new(|x: i32| x as i64);
         let b = Box::new(|x: usize| x as i32);
         // 何故かここでimpl Traitと型推測できているみたい
-        let c = Compose::operate(a, b);
+        let c = Composition::operate(a, b);
         assert_eq!(c(1), 1);
     }
 
@@ -133,7 +133,7 @@ mod tests {
         // Semigroupoid::<Compose, _, _>::_semigroupoid(&a);
         // Cannot use this type args
         //a._semigroupoid::<Compose, >();
-        Semigroupoid::<Compose, FnObj<usize, usize>, FnObj<usize, usize>>::_semigroupoid(&a);
+        Semigroupoid::<Composition, FnObj<usize, usize>, FnObj<usize, usize>>::_semigroupoid(&a);
         //Category::_category(&a);
         fn test(x: usize) -> usize {
             x
