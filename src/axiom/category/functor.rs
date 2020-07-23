@@ -21,7 +21,7 @@ impl<T, U> HigherKind<U> for Option<T> {
     // type MappedArrow = Option<Self::Arrow>;
 }
 
-pub trait Functor<U>: HigherKind<U> {
+pub trait Functor<Cod>: HigherKind<Cod> {
     // U is Codomain
     // X , Y: Object
     // f: X -> Y
@@ -31,51 +31,21 @@ pub trait Functor<U>: HigherKind<U> {
     where
         F: FnOnce(Self::Source) -> Self::Target + 'a;
 
-    // pure: X -> F(X)
-    fn pure(value: Self::Source) -> Self;
-
-    // apply: F(X) -> X -> Y -> F(Y)
-    // fn apply<F>(
-    //     &self,
-    //     f: <Self as HigherKind<F>>::MappedTarget,
-    // ) -> <Self as HigherKind<U>>::MappedTarget
-    // where
-    //     F: Fn(&<Self as HigherKind<U>>::Source) -> <Self as HigherKind<U>>::Target,
-    //     Self: HigherKind<F>;
-
     fn map<F>(self, f: F) -> Self::MappedTarget
     where
         F: FnOnce(Self::Source) -> Self::Target;
 }
 
-impl<T, U> Functor<U> for Option<T> {
+// Option<Dom> is F(X)
+// F is Option?
+impl<Dom, Cod> Functor<Cod> for Option<Dom> 
+{
     fn fmap<'a, F>(f: F) -> Box<dyn FnOnce(Self::MappedSource) -> Self::MappedTarget + 'a>
     where
-        F: FnOnce(T) -> U + 'a,
+        F: FnOnce(Dom) -> Cod + 'a,
     {
         Box::new(|x: Self::MappedSource| x.map(f))
     }
-
-    fn pure(value: T) -> Self {
-        Option::Some(value)
-    }
-
-    // fn apply<F>(
-    //     &self,
-    //     f: <Self as HigherKind<F>>::MappedTarget,
-    // ) -> <Self as HigherKind<U>>::MappedTarget
-    // where
-    //     F: Fn(&<Self as HigherKind<U>>::Source) -> <Self as HigherKind<U>>::Target,
-    //     Self: HigherKind<F>,
-    // {
-    //     match self {
-    //         &Some(ref value) => match f {
-    //             Some(fs) => Some(fs(value)),
-    //             None => None,
-    //         },
-    //         &None => None,
-    //     }
-    // }
 
     fn map<F>(self, f: F) -> Self::MappedTarget
     where
@@ -85,45 +55,35 @@ impl<T, U> Functor<U> for Option<T> {
     }
 }
 
-// pub trait Apply<A>: Functor<A> {
-//     // fs = F(A -> B)
-//     // Apply : F(A) -> F(A -> B) -> F(B)
-//     fn apply<F>(
-//         &self,
-//         fs: <Self as HigherKind<F>>::MappedTarget,
-//     ) -> <Self as HigherKind<A>>::MappedTarget
-//     where
-//         F: FnOnce(&<Self as HigherKind<A>>::Source) -> <Self as HigherKind<A>>::MappedTarget,
-//         Self: HigherKind<F>;
-// }
-
-// pub trait Pure<A>: HigherKind<A> {
-//     // x is Object,
-//     // Pure : x -> F(x)
-//     fn pure(value: A) -> <Self as HigherKind<A>>::MappedTarget;
-// }
-
 // ApplicativeFunctor = lax monoidal functor
 
 
 pub trait Apply<A>: HigherKind<A> {
-    fn ap<F>(&self, fs: <Self as HigherKind<F>>::MappedTarget) -> <Self as HigherKind<A>>::MappedTarget
+    // fs = F(A -> B)
+    // Apply : F(A) -> F(A -> B) -> F(B)
+    fn ap<F>(self, fs: <Self as HigherKind<F>>::MappedTarget) -> <Self as HigherKind<A>>::MappedTarget
     where
-        F: Fn(&<Self as HigherKind<A>>::Source) -> <Self as HigherKind<A>>::Target,
+        F: Fn(<Self as HigherKind<A>>::Source) -> <Self as HigherKind<A>>::Target,
         Self: HigherKind<F>;
 }
 
 impl<A, B> Apply<B> for Option<A> {
-    fn ap<F>(&self, fs: <Self as HigherKind<F>>::MappedTarget) -> <Self as HigherKind<B>>::MappedTarget
+    fn ap<F>(self, fs: <Self as HigherKind<F>>::MappedTarget) -> <Self as HigherKind<B>>::MappedTarget
     where
-        F: Fn(&A) -> B,
+        F: Fn(A) -> B,
     {
-        match self {
-            &Some(ref value) => match fs {
-                Some(f) => Some(f(value)),
-                None => None,
-            },
-            &None => None,
-        }
+        fs.and_then(|ref f| self.map(f))
+    }
+}
+
+pub trait Pure<A>: HigherKind<A> {
+    // x is Object,
+    // Pure : x -> F(x)
+    fn pure(value: A) -> <Self as HigherKind<A>>::MappedTarget;
+}
+
+impl<A> Pure<A> for Option<A> {
+    fn pure(value: A) -> Self {
+        Option::Some(value)
     }
 }

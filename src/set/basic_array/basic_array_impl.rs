@@ -172,8 +172,7 @@ where
     ElementType: std::ops::Add<Output = ElementType> + Copy,
     // &'a ElementType: std::ops::Add<Output = ElementType> + Copy,
     Addition: InternalBinaryOperator<ElementType>,
-    // 何故か，ApproxInternalBinaryOperatorを入れると，再起的に型展開されて，
-    // 再帰限界を迎える
+    // 何故か，ApproxInternalBinaryOperatorを入れると，再起的に型展開されて，再帰限界を迎える
     // InternalBinaryOperatorが動いて，こっちが動作しないのがわからん．
     // Addition: ApproxInternalBinaryOperator<&'a ElementType>,
     Contravariant: HList + IndexShape,
