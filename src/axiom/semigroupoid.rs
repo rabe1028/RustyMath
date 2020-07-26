@@ -1,34 +1,20 @@
 use crate::operator::*;
 use crate::property::*;
 
-pub trait Semigroupoid<Op, Mhs, Rhs>: Associativity<Op, Mhs, Rhs>
+pub trait Semigroupoid<Op>: Associativity<Op>
 where
-    Mhs: Sized + Morphism<Codomain = Domain<Self>>,
-    Rhs: Sized + Morphism<Codomain = Domain<Mhs>>,
-    Target<Op, Self, Mhs>: Sized + Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
-    Target<Op, Mhs, Rhs>: Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
-    Target<Op, Self, Target<Op, Mhs, Rhs>>:
-        Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
-    Op: BinaryOperator<Self, Mhs>
-        + BinaryOperator<Mhs, Rhs>
-        + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
-        + BinaryOperator<Target<Op, Self, Mhs>, Rhs, Output = Target<Op, Self, Target<Op, Mhs, Rhs>>>,
+    Rhs: Sized + Morphism<Codomain = Domain<Self>>,
+    for <Rhs> Target<Op, Self, Rhs>: Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
+    Op: BinaryOperator<Self, Rhs>
 {
     fn _semigroupoid(&self) {}
 }
 
-impl<Op, Lhs, Mhs, Rhs> Semigroupoid<Op, Mhs, Rhs> for Lhs
+impl<Op, Lhs, Rhs> Semigroupoid<Op, Rhs> for Lhs
 where
-    Lhs: Associativity<Op, Mhs, Rhs>,
-    Mhs: Sized + Morphism<Codomain = Domain<Self>>,
-    Rhs: Sized + Morphism<Codomain = Domain<Mhs>>,
-    Target<Op, Self, Mhs>: Sized + Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
-    Target<Op, Mhs, Rhs>: Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
-    Target<Op, Self, Target<Op, Mhs, Rhs>>:
-        Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
-    Op: BinaryOperator<Self, Mhs>
-        + BinaryOperator<Mhs, Rhs>
-        + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
-        + BinaryOperator<Target<Op, Self, Mhs>, Rhs, Output = Target<Op, Self, Target<Op, Mhs, Rhs>>>,
+    Lhs: Associativity<Op>,
+    Rhs: Sized + Morphism<Codomain = Domain<Self>>,
+    Target<Op, Self, Rhs>: Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
+    Op: BinaryOperator<Self, Rhs>
 {
 }

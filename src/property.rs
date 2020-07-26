@@ -34,22 +34,26 @@ pub type Codomain<A> = <A as Morphism>::Codomain;
 // f = Self, g = MHs, h = Rhs
 // Mhs = Middle Hand Side
 // Rhs = Right Hand Side
-pub trait Associativity<Op, Mhs, Rhs>
+pub trait Associativity<Op>
 where
     Self: Sized + Morphism,
-    Mhs: Sized + Morphism<Codomain = Domain<Self>>,
-    Rhs: Sized + Morphism<Codomain = Domain<Mhs>>,
-    Target<Op, Self, Mhs>: Sized + Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
-    Target<Op, Mhs, Rhs>: Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
-    Target<Op, Self, Target<Op, Mhs, Rhs>>:
-        Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
-    Op: BinaryOperator<Self, Mhs>
-        + BinaryOperator<Mhs, Rhs>
-        + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
-        + BinaryOperator<Target<Op, Self, Mhs>, Rhs, Output = Target<Op, Self, Target<Op, Mhs, Rhs>>>,
 {
-    fn check_associativity(x: Self, y: Mhs, z: Rhs) -> bool
+    fn check_associativity<Mhs, Rhs>(x: Self, y: Mhs, z: Rhs) -> bool
     where
+        Mhs: Sized + Morphism<Codomain = Domain<Self>>,
+        Rhs: Sized + Morphism<Codomain = Domain<Mhs>>,
+        Target<Op, Self, Mhs>: Sized + Morphism<Domain = Domain<Mhs>, Codomain = Codomain<Self>>,
+        Target<Op, Mhs, Rhs>: Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Mhs>>,
+        Target<Op, Self, Target<Op, Mhs, Rhs>>:
+            Sized + Morphism<Domain = Domain<Rhs>, Codomain = Codomain<Self>>,
+        Op: BinaryOperator<Self, Mhs>
+            + BinaryOperator<Mhs, Rhs>
+            + BinaryOperator<Self, Target<Op, Mhs, Rhs>>
+            + BinaryOperator<
+                Target<Op, Self, Mhs>,
+                Rhs,
+                Output = Target<Op, Self, Target<Op, Mhs, Rhs>>,
+            >,
         Self: PartialEq + Clone,
         Mhs: PartialEq + Clone,
         Rhs: PartialEq + Clone,

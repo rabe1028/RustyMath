@@ -38,8 +38,7 @@ pub trait Functor<Cod>: HigherKind<Cod> {
 
 // Option<Dom> is F(X)
 // F is Option?
-impl<Dom, Cod> Functor<Cod> for Option<Dom> 
-{
+impl<Dom, Cod> Functor<Cod> for Option<Dom> {
     fn fmap<'a, F>(f: F) -> Box<dyn FnOnce(Self::MappedSource) -> Self::MappedTarget + 'a>
     where
         F: FnOnce(Dom) -> Cod + 'a,
@@ -57,18 +56,23 @@ impl<Dom, Cod> Functor<Cod> for Option<Dom>
 
 // ApplicativeFunctor = lax monoidal functor
 
-
 pub trait Apply<A>: HigherKind<A> {
     // fs = F(A -> B)
     // Apply : F(A) -> F(A -> B) -> F(B)
-    fn ap<F>(self, fs: <Self as HigherKind<F>>::MappedTarget) -> <Self as HigherKind<A>>::MappedTarget
+    fn ap<F>(
+        self,
+        fs: <Self as HigherKind<F>>::MappedTarget,
+    ) -> <Self as HigherKind<A>>::MappedTarget
     where
         F: Fn(<Self as HigherKind<A>>::Source) -> <Self as HigherKind<A>>::Target,
         Self: HigherKind<F>;
 }
 
 impl<A, B> Apply<B> for Option<A> {
-    fn ap<F>(self, fs: <Self as HigherKind<F>>::MappedTarget) -> <Self as HigherKind<B>>::MappedTarget
+    fn ap<F>(
+        self,
+        fs: <Self as HigherKind<F>>::MappedTarget,
+    ) -> <Self as HigherKind<B>>::MappedTarget
     where
         F: Fn(A) -> B,
     {

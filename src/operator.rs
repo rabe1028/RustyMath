@@ -93,6 +93,7 @@ pub trait ApproxInternalBinaryOperator<T>:
     BinaryOperator<T, T::Target, Output = T::Target>
     + BinaryOperator<T::Target, T, Output = T::Target>
     + BinaryOperator<T, T, Output = T::Target>
+    + BinaryOperator<T::Target, T::Target, Output = T::Target>
 where
     T: std::ops::Deref,
     T::Target: Sized,

@@ -8,7 +8,7 @@ pub use functor::*;
 type ComposeTriple<Op, A, B, C> = Target<Op, A, Target<Op, B, C>>;
 
 // Hom(x, x) : x is Object  has identity
-pub trait Category<Op, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD>: Semigroupoid<Op, Mhs, Rhs>
+pub trait Category<Op, Mhs, Rhs, HomAA, HomBB, HomCC, HomDD>: Semigroupoid<Op, Mhs>
 // + Identity<Op>
 where
     Mhs: Sized + Morphism<Codomain = Domain<Self>>,
